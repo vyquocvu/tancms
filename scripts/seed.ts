@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client'
+import { PrismaClient, Role, PostStatus } from '@prisma/client'
 import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -66,6 +66,8 @@ async function main() {
     create: {
       id: 'welcome-post',
       title: 'Welcome to TanCMS',
+      slug: 'welcome-to-tancms',
+      excerpt: 'A modern, type-safe Content Management System built with cutting-edge technologies.',
       content: `# Welcome to TanCMS
 
 TanCMS is a modern, type-safe Content Management System built with cutting-edge technologies:
@@ -98,7 +100,7 @@ Default admin credentials:
 **Important:** Change these credentials in production!
 
 Happy blogging! 🚀`,
-      published: true,
+      status: PostStatus.PUBLISHED,
       authorId: admin.id,
       tags: {
         connect: [
@@ -115,6 +117,8 @@ Happy blogging! 🚀`,
     create: {
       id: 'getting-started',
       title: 'Getting Started with TanCMS',
+      slug: 'getting-started-with-tancms',
+      excerpt: 'This guide will help you get up and running with TanCMS quickly.',
       content: `# Getting Started with TanCMS
 
 This guide will help you get up and running with TanCMS quickly.
@@ -165,7 +169,7 @@ Your CMS will be available at \`http://localhost:3000\`.
 Access the admin dashboard at \`/admin\` with your credentials.
 
 Happy coding! 💻`,
-      published: true,
+      status: PostStatus.PUBLISHED,
       authorId: editor.id,
       tags: {
         connect: [
