@@ -76,11 +76,13 @@ Visit `http://localhost:3000` to see your CMS in action!
 
 ## 📚 Documentation
 
-- [Architecture Overview](#architecture)
-- [API Reference](./docs/API.md)
-- [Contributing Guide](./CONTRIBUTING.md)
-- [Deployment Guide](./docs/DEPLOYMENT.md)
+- **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
+- [Architecture Overview](./docs/ARCHITECTURE.md) - Technical deep dive
+- [API Reference](./docs/API.md) - Complete API documentation
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Deploy to any platform
+- [Contributing Guide](./CONTRIBUTING.md) - Development workflow
 - [Development Playbook](./Agents.md) - For AI agents and detailed development
+- [Security Policy](./SECURITY.md) - Security guidelines and reporting
 
 ## 🏗 Architecture
 
