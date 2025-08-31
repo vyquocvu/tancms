@@ -1,0 +1,525 @@
+# API Reference
+
+TanCMS provides a comprehensive API for managing content, users, and media. All API endpoints are built using TanStack Start server functions with full type safety.
+
+## Authentication
+
+All admin API endpoints require authentication. Users must be logged in with appropriate role permissions.
+
+### Session Management
+
+TanCMS uses session-based authentication with secure cookies.
+
+```typescript
+// Login
+POST /api/auth/login
+{
+  "email": "user@example.com",
+  "password": "password"
+}
+
+// Logout
+POST /api/auth/logout
+
+// Get current user
+GET /api/auth/me
+```
+
+## Posts API
+
+### List Posts
+
+```typescript
+GET /api/posts
+Query Parameters:
+- page?: number (default: 1)
+- limit?: number (default: 10)
+- status?: 'draft' | 'published' | 'archived'
+- author?: string (user ID)
+- tag?: string (tag name)
+
+Response:
+{
+  "posts": Post[],
+  "pagination": {
+    "page": number,
+    "limit": number,
+    "total": number,
+    "totalPages": number
+  }
+}
+```
+
+### Get Single Post
+
+```typescript
+GET /api/posts/:id
+
+Response:
+{
+  "id": string,
+  "title": string,
+  "content": string,
+  "slug": string,
+  "published": boolean,
+  "excerpt": string | null,
+  "author": User,
+  "tags": Tag[],
+  "media": Media | null,
+  "createdAt": string,
+  "updatedAt": string
+}
+```
+
+### Create Post
+
+```typescript
+POST /api/posts
+Requires: AUTHOR role or higher
+
+{
+  "title": string,
+  "content": string,
+  "slug": string,
+  "published": boolean,
+  "excerpt"?: string,
+  "tagIds"?: string[],
+  "mediaId"?: string
+}
+
+Response: Post
+```
+
+### Update Post
+
+```typescript
+PUT /api/posts/:id
+Requires: EDITOR role or post author
+
+{
+  "title"?: string,
+  "content"?: string,
+  "slug"?: string,
+  "published"?: boolean,
+  "excerpt"?: string,
+  "tagIds"?: string[],
+  "mediaId"?: string
+}
+
+Response: Post
+```
+
+### Delete Post
+
+```typescript
+DELETE /api/posts/:id
+Requires: EDITOR role or post author
+
+Response: { "success": true }
+```
+
+## Tags API
+
+### List Tags
+
+```typescript
+GET /api/tags
+
+Response:
+{
+  "id": string,
+  "name": string,
+  "postCount": number
+}[]
+```
+
+### Create Tag
+
+```typescript
+POST /api/tags
+Requires: EDITOR role or higher
+
+{
+  "name": string
+}
+
+Response: Tag
+```
+
+### Update Tag
+
+```typescript
+PUT /api/tags/:id
+Requires: EDITOR role or higher
+
+{
+  "name": string
+}
+
+Response: Tag
+```
+
+### Delete Tag
+
+```typescript
+DELETE /api/tags/:id
+Requires: ADMIN role
+
+Response: { "success": true }
+```
+
+## Media API
+
+### List Media
+
+```typescript
+GET /api/media
+Query Parameters:
+- page?: number (default: 1)
+- limit?: number (default: 20)
+
+Response:
+{
+  "media": Media[],
+  "pagination": PaginationInfo
+}
+```
+
+### Upload Media
+
+```typescript
+POST /api/media/upload
+Requires: AUTHOR role or higher
+Content-Type: multipart/form-data
+
+{
+  "file": File,
+  "altText"?: string
+}
+
+Response: Media
+```
+
+### Get Upload URL (S3 Signed URL)
+
+```typescript
+POST /api/media/upload-url
+Requires: AUTHOR role or higher
+
+{
+  "filename": string,
+  "contentType": string,
+  "size": number
+}
+
+Response:
+{
+  "uploadUrl": string,
+  "mediaId": string,
+  "fields": Record<string, string>
+}
+```
+
+### Delete Media
+
+```typescript
+DELETE /api/media/:id
+Requires: EDITOR role or higher
+
+Response: { "success": true }
+```
+
+## Users API
+
+### List Users
+
+```typescript
+GET /api/users
+Requires: ADMIN role
+
+Query Parameters:
+- page?: number
+- limit?: number
+- role?: Role
+
+Response: User[]
+```
+
+### Create User
+
+```typescript
+POST /api/users
+Requires: ADMIN role
+
+{
+  "email": string,
+  "name": string,
+  "password": string,
+  "role": Role
+}
+
+Response: User
+```
+
+### Update User
+
+```typescript
+PUT /api/users/:id
+Requires: ADMIN role or self
+
+{
+  "email"?: string,
+  "name"?: string,
+  "role"?: Role  // ADMIN only
+}
+
+Response: User
+```
+
+### Delete User
+
+```typescript
+DELETE /api/users/:id
+Requires: ADMIN role
+
+Response: { "success": true }
+```
+
+## Data Types
+
+### User
+
+```typescript
+interface User {
+  id: string
+  email: string
+  name: string | null
+  role: Role
+  createdAt: string
+  updatedAt: string
+}
+
+enum Role {
+  ADMIN = "ADMIN",
+  EDITOR = "EDITOR", 
+  AUTHOR = "AUTHOR",
+  VIEWER = "VIEWER"
+}
+```
+
+### Post
+
+```typescript
+interface Post {
+  id: string
+  title: string
+  content: string
+  slug: string
+  published: boolean
+  excerpt: string | null
+  author: User | null
+  authorId: string | null
+  tags: Tag[]
+  media: Media | null
+  mediaId: string | null
+  createdAt: string
+  updatedAt: string
+}
+```
+
+### Tag
+
+```typescript
+interface Tag {
+  id: string
+  name: string
+  posts?: Post[]
+}
+```
+
+### Media
+
+```typescript
+interface Media {
+  id: string
+  url: string
+  altText: string | null
+  createdAt: string
+  updatedAt: string
+}
+```
+
+## Error Handling
+
+All API endpoints return structured error responses:
+
+```typescript
+// Validation Error (400)
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "title",
+      "message": "Title is required"
+    }
+  ]
+}
+
+// Authentication Error (401)
+{
+  "error": "Authentication required"
+}
+
+// Authorization Error (403)
+{
+  "error": "Insufficient permissions"
+}
+
+// Not Found Error (404)
+{
+  "error": "Resource not found"
+}
+
+// Server Error (500)
+{
+  "error": "Internal server error"
+}
+```
+
+## Rate Limiting
+
+API endpoints are rate limited to prevent abuse:
+
+- **General endpoints**: 100 requests per minute
+- **Upload endpoints**: 10 requests per minute
+- **Authentication endpoints**: 5 requests per minute
+
+Rate limit headers are included in responses:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+```
+
+## Pagination
+
+List endpoints support cursor-based pagination:
+
+```typescript
+{
+  "data": T[],
+  "pagination": {
+    "page": number,
+    "limit": number,
+    "total": number,
+    "totalPages": number,
+    "hasNext": boolean,
+    "hasPrev": boolean
+  }
+}
+```
+
+## Filtering and Sorting
+
+### Posts Filtering
+
+```typescript
+GET /api/posts?status=published&author=user123&tag=technology
+```
+
+### Sorting
+
+```typescript
+GET /api/posts?sort=createdAt&order=desc
+```
+
+Available sort fields:
+- `createdAt`
+- `updatedAt`
+- `title`
+- `publishedAt`
+
+## Webhooks
+
+TanCMS supports webhooks for real-time integrations:
+
+### Event Types
+
+- `post.created`
+- `post.updated`
+- `post.published`
+- `post.deleted`
+- `media.uploaded`
+- `user.created`
+
+### Webhook Payload
+
+```typescript
+{
+  "event": string,
+  "data": T,
+  "timestamp": string,
+  "id": string
+}
+```
+
+### Configuration
+
+Webhooks are configured through environment variables:
+
+```bash
+WEBHOOK_URL=https://your-service.com/webhook
+WEBHOOK_SECRET=your-secret-key
+```
+
+## SDK / Client Libraries
+
+### JavaScript/TypeScript
+
+```bash
+npm install @tancms/client
+```
+
+```typescript
+import { TanCMSClient } from '@tancms/client'
+
+const client = new TanCMSClient({
+  baseUrl: 'https://your-cms.vercel.app',
+  apiKey: 'your-api-key'
+})
+
+// Get posts
+const posts = await client.posts.list({
+  status: 'published',
+  limit: 10
+})
+
+// Create post
+const newPost = await client.posts.create({
+  title: 'Hello World',
+  content: 'This is my first post',
+  slug: 'hello-world'
+})
+```
+
+## GraphQL (Coming Soon)
+
+TanCMS will support GraphQL in addition to REST:
+
+```graphql
+query GetPosts($limit: Int, $status: PostStatus) {
+  posts(limit: $limit, status: $status) {
+    id
+    title
+    content
+    author {
+      name
+      email
+    }
+    tags {
+      name
+    }
+  }
+}
+```
