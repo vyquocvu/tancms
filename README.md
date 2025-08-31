@@ -77,6 +77,7 @@ Visit `http://localhost:3000` to see your CMS in action!
 ## 📚 Documentation
 
 - **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
+- **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and usage
 - [Architecture Overview](./docs/ARCHITECTURE.md) - Technical deep dive
 - [API Reference](./docs/API.md) - Complete API documentation
 - [Deployment Guide](./docs/DEPLOYMENT.md) - Deploy to any platform
