@@ -134,9 +134,47 @@ dist
 !.yarn/sdks
 !.yarn/versions
 
-# Prisma SQLite database
+# Prisma
 prisma/dev.db
+prisma/dev.db-journal
 
-# Vite logs files
+# Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.vite
+
+# TanStack Start
+.tanstack
+
+# Vercel
+.vercel
+
+# Build outputs
+dist/
+.output/
+
+# Testing
+test-results/
+playwright-report/
+playwright/.cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
