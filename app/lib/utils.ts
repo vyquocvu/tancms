@@ -1,6 +1,13 @@
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
 /**
  * Utility functions for TanCMS
  */
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 /**
  * Generate a URL-friendly slug from a title

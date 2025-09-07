@@ -1,5 +1,9 @@
 import AdminLayout from './layout'
 import { useState } from 'react'
+import { Card, CardContent } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Plus, Search, Edit, Trash2, Upload, Image as ImageIcon, Video, FileText } from 'lucide-react'
 
 interface MediaFile {
   id: string
@@ -27,73 +31,65 @@ function MediaCard({ media, onEdit, onDelete }: {
   const getFileIcon = (type: string) => {
     switch (type) {
       case 'image':
-        return (
-          <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v16z" />
-          </svg>
-        )
+        return <ImageIcon className="h-6 w-6 text-green-500" />
       case 'video':
-        return (
-          <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-        )
+        return <Video className="h-6 w-6 text-blue-500" />
       default:
-        return (
-          <svg className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        )
+        return <FileText className="h-6 w-6 text-gray-500" />
     }
   }
 
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
-      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-        {media.type === 'image' ? (
-          <img
-            src={media.url}
-            alt={media.altText || media.name}
-            className="w-full h-48 object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-48">
-            {getFileIcon(media.type)}
-          </div>
-        )}
-      </div>
-      <div className="px-4 py-4">
-        <div className="flex items-start justify-between">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-medium text-gray-900 truncate">
-              {media.name}
-            </h3>
-            <p className="text-xs text-gray-500 mt-1">
-              {formatFileSize(media.size)} • {media.createdAt}
-            </p>
-            {media.altText && (
-              <p className="text-xs text-gray-400 mt-1 truncate">
-                Alt: {media.altText}
+    <Card>
+      <CardContent className="p-0">
+        <div className="aspect-w-16 aspect-h-9 bg-muted">
+          {media.type === 'image' ? (
+            <img
+              src={media.url}
+              alt={media.altText || media.name}
+              className="w-full h-48 object-cover rounded-t-lg"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-48 rounded-t-lg">
+              {getFileIcon(media.type)}
+            </div>
+          )}
+        </div>
+        <div className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-medium truncate">
+                {media.name}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatFileSize(media.size)} • {media.createdAt}
               </p>
-            )}
-          </div>
-          <div className="flex space-x-2 ml-2">
-            <button
-              onClick={() => onEdit(media)}
-              className="text-indigo-600 hover:text-indigo-900 text-xs"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => onDelete(media)}
-              className="text-red-600 hover:text-red-900 text-xs"
-            >
-              Delete
-            </button>
+              {media.altText && (
+                <p className="text-xs text-muted-foreground mt-1 truncate">
+                  Alt: {media.altText}
+                </p>
+              )}
+            </div>
+            <div className="flex space-x-1 ml-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(media)}
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(media)}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -129,27 +125,25 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Upload Media</h3>
+          <h3 className="text-lg font-medium mb-4">Upload Media</h3>
           
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center ${
-              dragActive ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300'
+              dragActive ? 'border-primary bg-primary/10' : 'border-border'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
             <div className="mt-2">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Drop files here or{' '}
-                <label className="text-indigo-600 hover:text-indigo-500 cursor-pointer">
+                <label className="text-primary hover:text-primary/80 cursor-pointer">
                   browse
                   <input
                     type="file"
@@ -160,19 +154,16 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
                   />
                 </label>
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Supports images, videos, and documents up to 10MB
               </p>
             </div>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-            >
+            <Button variant="outline" onClick={onClose}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -273,26 +264,21 @@ export default function MediaPage() {
         {/* Page Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Media Library</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-3xl font-bold">Media Library</h1>
+            <p className="text-muted-foreground">
               Manage your images, videos, and documents
             </p>
           </div>
-          <button
-            onClick={() => setIsUploadModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+          <Button onClick={() => setIsUploadModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
             Upload Media
-          </button>
+          </Button>
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -301,16 +287,16 @@ export default function MediaPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Files</dt>
-                    <dd className="text-lg font-medium text-gray-900">{mediaFiles.length}</dd>
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Total Files</dt>
+                    <dd className="text-lg font-medium">{mediaFiles.length}</dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -321,18 +307,18 @@ export default function MediaPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Images</dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Images</dt>
+                    <dd className="text-lg font-medium">
                       {mediaFiles.filter(f => f.type === 'image').length}
                     </dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
@@ -343,18 +329,18 @@ export default function MediaPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Videos</dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Videos</dt>
+                    <dd className="text-lg font-medium">
                       {mediaFiles.filter(f => f.type === 'video').length}
                     </dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
@@ -365,58 +351,56 @@ export default function MediaPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Storage Used</dt>
-                    <dd className="text-lg font-medium text-gray-900">{formatFileSize(totalSize)}</dd>
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Storage Used</dt>
+                    <dd className="text-lg font-medium">{formatFileSize(totalSize)}</dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex space-x-4">
-              <div>
-                <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 mb-1">
-                  Filter by Type
-                </label>
-                <select
-                  id="type-filter"
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value as 'all' | 'image' | 'video' | 'document')}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2 border"
-                >
-                  <option value="all">All Files</option>
-                  <option value="image">Images</option>
-                  <option value="video">Videos</option>
-                  <option value="document">Documents</option>
-                </select>
-              </div>
-            </div>
-            <div className="max-w-xs w-full">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Search Files
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+              <div className="flex space-x-4">
+                <div>
+                  <label htmlFor="type-filter" className="block text-sm font-medium mb-1">
+                    Filter by Type
+                  </label>
+                  <select
+                    id="type-filter"
+                    value={selectedType}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedType(e.target.value as 'all' | 'image' | 'video' | 'document')}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="all">All Files</option>
+                    <option value="image">Images</option>
+                    <option value="video">Videos</option>
+                    <option value="document">Documents</option>
+                  </select>
                 </div>
-                <input
-                  type="text"
-                  id="search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  placeholder="Search files..."
-                />
+              </div>
+              <div className="max-w-xs w-full">
+                <label htmlFor="search" className="block text-sm font-medium mb-1">
+                  Search Files
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    id="search"
+                    value={searchTerm}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                    placeholder="Search files..."
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Media Grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -432,11 +416,9 @@ export default function MediaPage() {
 
         {filteredMedia.length === 0 && (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v16z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No media files found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-medium">No media files found</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               {searchTerm || selectedType !== 'all' 
                 ? 'Try adjusting your search or filter criteria.' 
                 : 'Get started by uploading your first file.'}

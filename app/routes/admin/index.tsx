@@ -1,34 +1,38 @@
 import AdminLayout from './layout'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { FileText, CheckCircle, Tag, Image, TrendingUp } from 'lucide-react'
 
 interface DashboardStatsProps {
   title: string
   value: number
-  icon: string
+  icon: React.ReactNode
   trend?: string
 }
 
 function DashboardStats({ title, value, icon, trend }: DashboardStatsProps) {
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
-      <div className="p-5">
+    <Card>
+      <CardContent className="p-6">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            <span dangerouslySetInnerHTML={{ __html: icon }} />
+            {icon}
           </div>
           <div className="ml-5 w-0 flex-1">
             <dl>
-              <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
-              <dd className="text-lg font-medium text-gray-900">{value}</dd>
+              <dt className="text-sm font-medium text-muted-foreground truncate">{title}</dt>
+              <dd className="text-lg font-medium">{value}</dd>
             </dl>
           </div>
         </div>
         {trend && (
-          <div className="mt-2">
+          <div className="mt-2 flex items-center">
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
             <span className="text-sm text-green-600">{trend}</span>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -69,35 +73,35 @@ function RecentActivity() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'post':
-        return '📝'
+        return <FileText className="h-5 w-5 text-blue-500" />
       case 'tag':
-        return '🏷️'
+        return <Tag className="h-5 w-5 text-green-500" />
       case 'media':
-        return '📷'
+        return <Image className="h-5 w-5 text-purple-500" />
       default:
-        return '📄'
+        return <FileText className="h-5 w-5 text-gray-500" />
     }
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          Recent Activity
-        </h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div className="flow-root">
-          <ul className="-my-5 divide-y divide-gray-200">
+          <ul className="-my-5 divide-y divide-border">
             {activities.map((activity) => (
               <li key={activity.id} className="py-4">
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
-                    <span className="text-lg">{getActivityIcon(activity.type)}</span>
+                    {getActivityIcon(activity.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium truncate">
                       {activity.title}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       by {activity.user} • {activity.time}
                     </p>
                   </div>
@@ -106,8 +110,8 @@ function RecentActivity() {
             ))}
           </ul>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -117,36 +121,36 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
             Welcome to your TanCMS admin dashboard
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <DashboardStats
             title="Total Posts"
             value={12}
-            icon='<svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>'
+            icon={<FileText className="h-6 w-6 text-blue-400" />}
             trend="+2 this week"
           />
           <DashboardStats
             title="Published Posts"
             value={8}
-            icon='<svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>'
+            icon={<CheckCircle className="h-6 w-6 text-green-400" />}
             trend="+1 this week"
           />
           <DashboardStats
             title="Total Tags"
             value={15}
-            icon='<svg class="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>'
+            icon={<Tag className="h-6 w-6 text-yellow-400" />}
             trend="+3 this week"
           />
           <DashboardStats
             title="Media Files"
             value={24}
-            icon='<svg class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v16z" /></svg>'
+            icon={<Image className="h-6 w-6 text-purple-400" />}
             trend="+5 this week"
           />
         </div>
@@ -156,33 +160,30 @@ export default function AdminDashboard() {
           <RecentActivity />
 
           {/* Quick Actions */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                Quick Actions
-              </h3>
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-3">
-                <a
-                  href="/admin/posts/new"
-                  className="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Create New Post
-                </a>
-                <a
-                  href="/admin/tags"
-                  className="block w-full bg-green-600 text-white text-center py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Manage Tags
-                </a>
-                <a
-                  href="/admin/media"
-                  className="block w-full bg-purple-600 text-white text-center py-2 px-4 rounded-md hover:bg-purple-700 transition-colors"
-                >
-                  Upload Media
-                </a>
+                <Button asChild className="w-full">
+                  <a href="/admin/posts/new">
+                    Create New Post
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <a href="/admin/tags">
+                    Manage Tags
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
+                  <a href="/admin/media">
+                    Upload Media
+                  </a>
+                </Button>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AdminLayout>

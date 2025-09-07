@@ -1,5 +1,9 @@
 import AdminLayout from './layout'
 import { useState } from 'react'
+import { Card, CardContent } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Plus, Search, Edit, Trash2, Tag as TagIcon } from 'lucide-react'
 
 interface Tag {
   id: string
@@ -10,35 +14,37 @@ interface Tag {
 
 function TagCard({ tag, onEdit, onDelete }: { tag: Tag; onEdit: (tag: Tag) => void; onDelete: (tag: Tag) => void }) {
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
+    <Card>
+      <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{tag.name}</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="text-lg font-medium">{tag.name}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               {tag.postCount} {tag.postCount === 1 ? 'post' : 'posts'}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Created {tag.createdAt}
             </p>
           </div>
           <div className="flex space-x-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onEdit(tag)}
-              className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
             >
-              Edit
-            </button>
-            <button
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onDelete(tag)}
-              className="text-red-600 hover:text-red-900 text-sm font-medium"
             >
-              Delete
-            </button>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -61,40 +67,38 @@ function CreateTagModal({ isOpen, onClose, onSave }: {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-card">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Tag</h3>
+          <h3 className="text-lg font-medium mb-4">Create New Tag</h3>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="tagName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="tagName" className="block text-sm font-medium mb-2">
                 Tag Name
               </label>
-              <input
+              <Input
                 type="text"
                 id="tagName"
                 value={tagName}
-                onChange={(e) => setTagName(e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2 border"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTagName(e.target.value)}
                 placeholder="Enter tag name..."
                 autoFocus
               />
             </div>
             <div className="flex justify-end space-x-3">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
                 disabled={!tagName.trim()}
               >
                 Create Tag
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -181,26 +185,21 @@ export default function TagsPage() {
         {/* Page Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Tags</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <h1 className="text-3xl font-bold">Tags</h1>
+            <p className="text-muted-foreground">
               Organize your content with tags
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
             New Tag
-          </button>
+          </Button>
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -209,16 +208,16 @@ export default function TagsPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Tags</dt>
-                    <dd className="text-lg font-medium text-gray-900">{tags.length}</dd>
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Total Tags</dt>
+                    <dd className="text-lg font-medium">{tags.length}</dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -227,16 +226,16 @@ export default function TagsPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Tagged Posts</dt>
-                    <dd className="text-lg font-medium text-gray-900">{totalPosts}</dd>
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Tagged Posts</dt>
+                    <dd className="text-lg font-medium">{totalPosts}</dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
+          <Card>
+            <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -247,40 +246,38 @@ export default function TagsPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Unused Tags</dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Unused Tags</dt>
+                    <dd className="text-lg font-medium">
                       {tags.filter(t => t.postCount === 0).length}
                     </dd>
                   </dl>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="max-w-md">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-              Search Tags
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+        <Card>
+          <CardContent className="p-6">
+            <div className="max-w-md">
+              <label htmlFor="search" className="block text-sm font-medium mb-2">
+                Search Tags
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                  placeholder="Search tags..."
+                />
               </div>
-              <input
-                type="text"
-                id="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Search tags..."
-              />
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Tags Grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -296,11 +293,9 @@ export default function TagsPage() {
 
         {filteredTags.length === 0 && (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No tags found</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <TagIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-medium">No tags found</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
               {searchTerm ? 'Try adjusting your search terms.' : 'Get started by creating a new tag.'}
             </p>
           </div>
