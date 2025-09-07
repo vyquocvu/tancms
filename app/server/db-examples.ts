@@ -3,7 +3,7 @@
  * This file demonstrates how to use the database functions in your application
  */
 
-import { PrismaClient, PostStatus, Role } from '@prisma/client'
+import { PrismaClient, PostStatus } from '@prisma/client'
 import { 
   createPost, 
   updatePost, 

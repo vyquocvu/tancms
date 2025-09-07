@@ -44,9 +44,11 @@ UPDATE "Post" SET "slug" = LOWER(
       '.', ''
     ),
     ',', ''
-  ),
-  '--', '-'
+  )
 ) WHERE "slug" IS NULL;
+
+-- Fix any double dashes in slugs
+UPDATE "Post" SET "slug" = REPLACE("slug", '--', '-') WHERE "slug" LIKE '%-%-%';
 
 -- Ensure slug uniqueness by appending numbers if needed
 -- This is a simplified approach; in practice, you'd use a more sophisticated method

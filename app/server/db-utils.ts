@@ -2,7 +2,7 @@
  * Database utility functions for TanCMS
  */
 
-import { PrismaClient, PostStatus, Role } from '@prisma/client'
+import { PrismaClient, PostStatus } from '@prisma/client'
 import { generateSlug } from '../lib/utils'
 
 export type CreatePostData = {
@@ -17,6 +17,7 @@ export type CreatePostData = {
 
 export type UpdatePostData = Partial<CreatePostData> & {
   id: string
+  slug?: string
 }
 
 /**
