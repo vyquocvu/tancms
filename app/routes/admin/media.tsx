@@ -1,19 +1,17 @@
 import AdminLayout from './layout'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Plus, Search, Edit, Trash2, Upload, Image as ImageIcon, Video, FileText } from 'lucide-react'
-
-interface MediaFile {
-  id: string
-  url: string
-  name: string
-  type: 'image' | 'video' | 'document'
-  size: number
-  altText?: string
-  createdAt: string
-}
+import { 
+  uploadFile, 
+  getMediaFiles, 
+  updateMediaFile, 
+  deleteMediaFile, 
+  getMediaStatistics,
+  type MediaFile 
+} from '~/lib/local-media-service'
 
 function MediaCard({ media, onEdit, onDelete }: { 
   media: MediaFile; 
@@ -93,8 +91,13 @@ function MediaCard({ media, onEdit, onDelete }: {
   )
 }
 
-function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function UploadModal({ isOpen, onClose, onUploadComplete }: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  onUploadComplete: () => void;
+}) {
   const [dragActive, setDragActive] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -112,14 +115,37 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
     setDragActive(false)
     
     const files = e.dataTransfer.files
-    console.log('Files dropped:', files)
-    // Handle file upload here
+    handleFiles(files)
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    console.log('Files selected:', files)
-    // Handle file upload here
+    if (files) {
+      handleFiles(files)
+    }
+  }
+
+  const handleFiles = async (files: FileList) => {
+    if (uploading) return
+
+    setUploading(true)
+    try {
+      // Upload each file
+      for (const file of Array.from(files)) {
+        await uploadFile(file)
+      }
+      
+      // Notify parent component to refresh the list
+      onUploadComplete()
+      
+      // Close modal
+      onClose()
+    } catch (error) {
+      console.error('Upload failed:', error)
+      alert('Upload failed. Please try again.')
+    } finally {
+      setUploading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -133,7 +159,7 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center ${
               dragActive ? 'border-primary bg-primary/10' : 'border-gray-300'
-            }`}
+            } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
@@ -142,17 +168,20 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
             <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
             <div className="mt-2">
               <p className="text-sm text-muted-foreground">
-                Drop files here or{' '}
-                <label className="text-primary hover:text-primary/80 cursor-pointer">
-                  browse
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*,video/*,.pdf,.doc,.docx"
-                    onChange={handleFileInput}
-                    className="hidden"
-                  />
-                </label>
+                {uploading ? 'Uploading...' : 'Drop files here or'}{' '}
+                {!uploading && (
+                  <label className="text-primary hover:text-primary/80 cursor-pointer">
+                    browse
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*,video/*,.pdf,.doc,.docx"
+                      onChange={handleFileInput}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                )}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Supports images, videos, and documents up to 10MB
@@ -161,8 +190,8 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
+            <Button variant="outline" onClick={onClose} disabled={uploading}>
+              {uploading ? 'Uploading...' : 'Cancel'}
             </Button>
           </div>
         </div>
@@ -175,62 +204,38 @@ export default function MediaPage() {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [selectedType, setSelectedType] = useState<'all' | 'image' | 'video' | 'document'>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
+  const [stats, setStats] = useState({
+    total: 0,
+    images: 0,
+    videos: 0,
+    documents: 0,
+    totalSize: 0
+  })
+  const [loading, setLoading] = useState(true)
 
-  // Mock data - in real implementation this would come from the database
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([
-    {
-      id: '1',
-      url: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      name: 'hero-banner.jpg',
-      type: 'image',
-      size: 245760,
-      altText: 'Hero banner image',
-      createdAt: '2024-01-15'
-    },
-    {
-      id: '2',
-      url: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      name: 'tech-conference.jpg',
-      type: 'image',
-      size: 384512,
-      altText: 'Technology conference',
-      createdAt: '2024-01-14'
-    },
-    {
-      id: '3',
-      url: '/placeholder-video.mp4',
-      name: 'product-demo.mp4',
-      type: 'video',
-      size: 15728640,
-      createdAt: '2024-01-13'
-    },
-    {
-      id: '4',
-      url: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      name: 'code-screen.jpg',
-      type: 'image',
-      size: 198273,
-      altText: 'Code on computer screen',
-      createdAt: '2024-01-12'
-    },
-    {
-      id: '5',
-      url: '/placeholder-doc.pdf',
-      name: 'user-manual.pdf',
-      type: 'document',
-      size: 2097152,
-      createdAt: '2024-01-11'
-    },
-    {
-      id: '6',
-      url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      name: 'analytics-chart.jpg',
-      type: 'image',
-      size: 167234,
-      altText: 'Analytics dashboard',
-      createdAt: '2024-01-10'
+  // Load media files and stats
+  const loadMedia = async () => {
+    try {
+      setLoading(true)
+      const [mediaResult, statsResult] = await Promise.all([
+        getMediaFiles(1, 100, searchTerm, selectedType), // Load all for now
+        getMediaStatistics()
+      ])
+      
+      setMediaFiles(mediaResult.media)
+      setStats(statsResult)
+    } catch (error) {
+      console.error('Failed to load media:', error)
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
+
+  // Load data on component mount and when filters change
+  useEffect(() => {
+    loadMedia()
+  }, [searchTerm, selectedType])
 
   const filteredMedia = mediaFiles.filter(media => {
     const matchesType = selectedType === 'all' || media.type === selectedType
@@ -239,17 +244,36 @@ export default function MediaPage() {
   })
 
   const handleEditMedia = (media: MediaFile) => {
-    console.log('Edit media:', media)
-    // In a real implementation, this would open an edit modal
+    const newAltText = prompt('Enter alt text:', media.altText || '')
+    if (newAltText !== null) {
+      updateMediaFile(media.id, { altText: newAltText })
+        .then(() => {
+          loadMedia() // Refresh the list
+        })
+        .catch(error => {
+          console.error('Failed to update media:', error)
+          alert('Failed to update media')
+        })
+    }
   }
 
   const handleDeleteMedia = (media: MediaFile) => {
     if (window.confirm(`Are you sure you want to delete "${media.name}"?`)) {
-      setMediaFiles(mediaFiles.filter(m => m.id !== media.id))
+      deleteMediaFile(media.id)
+        .then(() => {
+          loadMedia() // Refresh the list
+        })
+        .catch(error => {
+          console.error('Failed to delete media:', error)
+          alert('Failed to delete media')
+        })
     }
   }
 
-  const totalSize = mediaFiles.reduce((sum, file) => sum + file.size, 0)
+  const handleUploadComplete = () => {
+    loadMedia() // Refresh the list after upload
+  }
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -282,13 +306,13 @@ export default function MediaPage() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 text-sm font-medium">{mediaFiles.length}</span>
+                    <span className="text-blue-600 text-sm font-medium">{stats.total}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-muted-foreground truncate">Total Files</dt>
-                    <dd className="text-lg font-medium">{mediaFiles.length}</dd>
+                    <dd className="text-lg font-medium">{stats.total}</dd>
                   </dl>
                 </div>
               </div>
@@ -300,17 +324,13 @@ export default function MediaPage() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-sm font-medium">
-                      {mediaFiles.filter(f => f.type === 'image').length}
-                    </span>
+                    <span className="text-green-600 text-sm font-medium">{stats.images}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-muted-foreground truncate">Images</dt>
-                    <dd className="text-lg font-medium">
-                      {mediaFiles.filter(f => f.type === 'image').length}
-                    </dd>
+                    <dd className="text-lg font-medium">{stats.images}</dd>
                   </dl>
                 </div>
               </div>
@@ -322,17 +342,13 @@ export default function MediaPage() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 text-sm font-medium">
-                      {mediaFiles.filter(f => f.type === 'video').length}
-                    </span>
+                    <span className="text-purple-600 text-sm font-medium">{stats.videos}</span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-muted-foreground truncate">Videos</dt>
-                    <dd className="text-lg font-medium">
-                      {mediaFiles.filter(f => f.type === 'video').length}
-                    </dd>
+                    <dd className="text-lg font-medium">{stats.videos}</dd>
                   </dl>
                 </div>
               </div>
@@ -345,14 +361,14 @@ export default function MediaPage() {
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                     <span className="text-orange-600 text-sm font-medium">
-                      {formatFileSize(totalSize)}
+                      {formatFileSize(stats.totalSize)}
                     </span>
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
                     <dt className="text-sm font-medium text-muted-foreground truncate">Storage Used</dt>
-                    <dd className="text-lg font-medium">{formatFileSize(totalSize)}</dd>
+                    <dd className="text-lg font-medium">{formatFileSize(stats.totalSize)}</dd>
                   </dl>
                 </div>
               </div>
@@ -403,33 +419,49 @@ export default function MediaPage() {
         </Card>
 
         {/* Media Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredMedia.map((media) => (
-            <MediaCard
-              key={media.id}
-              media={media}
-              onEdit={handleEditMedia}
-              onDelete={handleDeleteMedia}
-            />
-          ))}
-        </div>
-
-        {filteredMedia.length === 0 && (
+        {loading ? (
           <div className="text-center py-12">
-            <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-medium">No media files found</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {searchTerm || selectedType !== 'all' 
-                ? 'Try adjusting your search or filter criteria.' 
-                : 'Get started by uploading your first file.'}
-            </p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading media files...</p>
           </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredMedia.map((media) => (
+                <MediaCard
+                  key={media.id}
+                  media={media}
+                  onEdit={handleEditMedia}
+                  onDelete={handleDeleteMedia}
+                />
+              ))}
+            </div>
+
+            {filteredMedia.length === 0 && !loading && (
+              <div className="text-center py-12">
+                <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-2 text-sm font-medium">No media files found</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {searchTerm || selectedType !== 'all' 
+                    ? 'Try adjusting your search or filter criteria.' 
+                    : 'Get started by uploading your first file.'}
+                </p>
+                {!searchTerm && selectedType === 'all' && (
+                  <Button className="mt-4" onClick={() => setIsUploadModalOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Upload First File
+                  </Button>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Upload Modal */}
         <UploadModal
           isOpen={isUploadModalOpen}
           onClose={() => setIsUploadModalOpen(false)}
+          onUploadComplete={handleUploadComplete}
         />
       </div>
     </AdminLayout>

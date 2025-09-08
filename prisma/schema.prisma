@@ -65,6 +65,9 @@ model Tag {
 model Media {
   id        String   @id @default(cuid())
   url       String
+  filename  String
+  size      Int
+  mimeType  String
   altText   String?
   posts     Post[]
   createdAt DateTime @default(now())
