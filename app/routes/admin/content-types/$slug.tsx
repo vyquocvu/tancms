@@ -30,6 +30,7 @@ export default function ContentEntries() {
   // Load content type and entries
   useEffect(() => {
     loadData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadData = async () => {

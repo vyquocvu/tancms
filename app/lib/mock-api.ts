@@ -48,7 +48,7 @@ export type ContentFieldValue = {
 }
 
 // In-memory storage
-let contentTypes: ContentType[] = [
+const contentTypes: ContentType[] = [
   {
     id: '1',
     name: 'product',
@@ -93,7 +93,7 @@ let contentTypes: ContentType[] = [
 ]
 
 // In-memory storage for entries
-let contentEntries: ContentEntry[] = [
+const contentEntries: ContentEntry[] = [
   {
     id: '1',
     contentTypeId: '1',
