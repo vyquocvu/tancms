@@ -1,7 +1,7 @@
 import AdminLayout from './layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { FileText, CheckCircle, Tag, Image, TrendingUp } from 'lucide-react'
+import { CheckCircle, Tag, Image, TrendingUp } from 'lucide-react'
 
 interface DashboardStatsProps {
   title: string
@@ -38,7 +38,7 @@ function DashboardStats({ title, value, icon, trend }: DashboardStatsProps) {
 
 interface RecentActivityItem {
   id: string
-  type: 'post' | 'tag' | 'media'
+  type: 'tag' | 'media' | 'content'
   title: string
   user: string
   time: string
@@ -49,8 +49,8 @@ function RecentActivity() {
   const activities: RecentActivityItem[] = [
     {
       id: '1',
-      type: 'post',
-      title: 'Getting Started with TanCMS',
+      type: 'content',
+      title: 'Created new content type',
       user: 'Admin User',
       time: '2 hours ago'
     },
@@ -72,14 +72,14 @@ function RecentActivity() {
 
   const getActivityIcon = (type: string) => {
     switch (type) {
-      case 'post':
-        return <FileText className="h-5 w-5 text-blue-500" />
+      case 'content':
+        return <CheckCircle className="h-5 w-5 text-blue-500" />
       case 'tag':
         return <Tag className="h-5 w-5 text-green-500" />
       case 'media':
         return <Image className="h-5 w-5 text-purple-500" />
       default:
-        return <FileText className="h-5 w-5 text-gray-500" />
+        return <CheckCircle className="h-5 w-5 text-gray-500" />
     }
   }
 
@@ -128,17 +128,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <DashboardStats
-            title="Total Posts"
-            value={12}
-            icon={<FileText className="h-6 w-6 text-blue-400" />}
-            trend="+2 this week"
-          />
-          <DashboardStats
-            title="Published Posts"
-            value={8}
-            icon={<CheckCircle className="h-6 w-6 text-green-400" />}
+            title="Content Types"
+            value={5}
+            icon={<CheckCircle className="h-6 w-6 text-blue-400" />}
             trend="+1 this week"
           />
           <DashboardStats
@@ -167,13 +161,8 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="space-y-3">
                 <Button asChild className="w-full">
-                  <a href="/admin/posts/new">
-                    Create New Post
-                  </a>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
                   <a href="/admin/content-types">
-                    Manage Content Types
+                    Create Content Type
                   </a>
                 </Button>
                 <Button asChild variant="outline" className="w-full">

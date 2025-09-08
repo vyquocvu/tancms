@@ -25,99 +25,6 @@ POST /api/auth/logout
 GET /api/auth/me
 ```
 
-## Posts API
-
-### List Posts
-
-```typescript
-GET /api/posts
-Query Parameters:
-- page?: number (default: 1)
-- limit?: number (default: 10)
-- status?: 'draft' | 'published' | 'archived'
-- author?: string (user ID)
-- tag?: string (tag name)
-
-Response:
-{
-  "posts": Post[],
-  "pagination": {
-    "page": number,
-    "limit": number,
-    "total": number,
-    "totalPages": number
-  }
-}
-```
-
-### Get Single Post
-
-```typescript
-GET /api/posts/:id
-
-Response:
-{
-  "id": string,
-  "title": string,
-  "content": string,
-  "slug": string,
-  "published": boolean,
-  "excerpt": string | null,
-  "author": User,
-  "tags": Tag[],
-  "media": Media | null,
-  "createdAt": string,
-  "updatedAt": string
-}
-```
-
-### Create Post
-
-```typescript
-POST /api/posts
-Requires: AUTHOR role or higher
-
-{
-  "title": string,
-  "content": string,
-  "slug": string,
-  "published": boolean,
-  "excerpt"?: string,
-  "tagIds"?: string[],
-  "mediaId"?: string
-}
-
-Response: Post
-```
-
-### Update Post
-
-```typescript
-PUT /api/posts/:id
-Requires: EDITOR role or post author
-
-{
-  "title"?: string,
-  "content"?: string,
-  "slug"?: string,
-  "published"?: boolean,
-  "excerpt"?: string,
-  "tagIds"?: string[],
-  "mediaId"?: string
-}
-
-Response: Post
-```
-
-### Delete Post
-
-```typescript
-DELETE /api/posts/:id
-Requires: EDITOR role or post author
-
-Response: { "success": true }
-```
-
 ## Tags API
 
 ### List Tags
@@ -307,33 +214,12 @@ enum Role {
 }
 ```
 
-### Post
-
-```typescript
-interface Post {
-  id: string
-  title: string
-  content: string
-  slug: string
-  published: boolean
-  excerpt: string | null
-  author: User | null
-  authorId: string | null
-  tags: Tag[]
-  media: Media | null
-  mediaId: string | null
-  createdAt: string
-  updatedAt: string
-}
-```
-
 ### Tag
 
 ```typescript
 interface Tag {
   id: string
   name: string
-  posts?: Post[]
 }
 ```
 
@@ -422,23 +308,24 @@ List endpoints support cursor-based pagination:
 
 ## Filtering and Sorting
 
-### Posts Filtering
+### General Filtering
 
 ```typescript
-GET /api/posts?status=published&author=user123&tag=technology
+GET /api/tags?name=technology
+GET /api/media?type=image
 ```
 
 ### Sorting
 
 ```typescript
-GET /api/posts?sort=createdAt&order=desc
+GET /api/tags?sort=name&order=asc
+GET /api/media?sort=createdAt&order=desc
 ```
 
-Available sort fields:
+Available sort fields vary by endpoint:
 - `createdAt`
 - `updatedAt`
-- `title`
-- `publishedAt`
+- `name`
 
 ## Webhooks
 
@@ -489,18 +376,16 @@ const client = new TanCMSClient({
   apiKey: 'your-api-key'
 })
 
-// Get posts
-const posts = await client.posts.list({
-  status: 'published',
-  limit: 10
+// Get tags
+const tags = await client.tags.list()
+
+// Create tag
+const newTag = await client.tags.create({
+  name: 'Technology'
 })
 
-// Create post
-const newPost = await client.posts.create({
-  title: 'Hello World',
-  content: 'This is my first post',
-  slug: 'hello-world'
-})
+// Upload media
+const media = await client.media.upload(file)
 ```
 
 ## GraphQL (Coming Soon)
@@ -508,18 +393,19 @@ const newPost = await client.posts.create({
 TanCMS will support GraphQL in addition to REST:
 
 ```graphql
-query GetPosts($limit: Int, $status: PostStatus) {
-  posts(limit: $limit, status: $status) {
+query GetTags($limit: Int) {
+  tags(limit: $limit) {
     id
-    title
-    content
-    author {
-      name
-      email
-    }
-    tags {
-      name
-    }
+    name
+  }
+}
+
+query GetMedia($type: MediaType) {
+  media(type: $type) {
+    id
+    url
+    filename
+    altText
   }
 }
 ```
