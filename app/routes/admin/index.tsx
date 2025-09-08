@@ -172,6 +172,11 @@ export default function AdminDashboard() {
                   </a>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
+                  <a href="/admin/content-types">
+                    Manage Content Types
+                  </a>
+                </Button>
+                <Button asChild variant="outline" className="w-full">
                   <a href="/admin/tags">
                     Manage Tags
                   </a>

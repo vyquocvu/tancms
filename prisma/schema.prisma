@@ -81,3 +81,80 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
 }
+
+// Content Type Builder Models
+enum FieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  BOOLEAN
+  DATE
+  EMAIL
+  URL
+  JSON
+  RELATION
+  MEDIA
+}
+
+model ContentType {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  displayName String
+  description String?
+  slug        String         @unique
+  fields      ContentField[]
+  entries     ContentEntry[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([slug])
+}
+
+model ContentField {
+  id             String            @id @default(cuid())
+  name           String
+  displayName    String
+  fieldType      FieldType
+  required       Boolean           @default(false)
+  unique         Boolean           @default(false)
+  defaultValue   String?
+  options        String?           // JSON string for field options
+  relatedType    String?           // For relation fields
+  contentType    ContentType       @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
+  contentTypeId  String
+  fieldValues    ContentFieldValue[]
+  order          Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([contentTypeId, name])
+  @@index([contentTypeId])
+}
+
+model ContentEntry {
+  id            String              @id @default(cuid())
+  contentType   ContentType         @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
+  contentTypeId String
+  slug          String?
+  fieldValues   ContentFieldValue[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@unique([contentTypeId, slug])
+  @@index([contentTypeId])
+}
+
+model ContentFieldValue {
+  id             String       @id @default(cuid())
+  field          ContentField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  fieldId        String
+  entry          ContentEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId        String
+  value          String?      // JSON string for complex values
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([fieldId, entryId])
+  @@index([entryId])
+  @@index([fieldId])
+}
