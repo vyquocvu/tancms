@@ -83,7 +83,7 @@ export async function updateContentType(
   id: string, 
   data: Partial<CreateContentTypeData>
 ) {
-  const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
   
   if (data.name) updateData.name = data.name
   if (data.displayName) updateData.displayName = data.displayName
