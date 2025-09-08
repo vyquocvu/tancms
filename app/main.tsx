@@ -7,6 +7,9 @@ import AdminDashboard from './routes/admin/index'
 import PostsPage from './routes/admin/posts'
 import TagsPage from './routes/admin/tags'
 import MediaPage from './routes/admin/media'
+import ContentTypesPage from './routes/admin/content-types'
+import ContentTypeBuilder from './routes/admin/content-types/builder'
+import ContentEntriesPage from './routes/admin/content-types/$slug'
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('/')
@@ -33,7 +36,15 @@ function App() {
         return <TagsPage />
       case '#/admin/media':
         return <MediaPage />
+      case '#/admin/content-types':
+        return <ContentTypesPage />
+      case '#/admin/content-types/builder':
+        return <ContentTypeBuilder />
       default:
+        // Handle dynamic content entry routes like #/admin/content-types/product
+        if (currentRoute.startsWith('#/admin/content-types/') && currentRoute !== '#/admin/content-types/builder') {
+          return <ContentEntriesPage />
+        }
         return (
           <div className="min-h-screen bg-gray-50 flex items-center justify-center">
             <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
