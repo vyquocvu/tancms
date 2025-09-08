@@ -1,53 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from './layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Badge } from '~/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { Plus, Edit, Trash2, Database, Settings } from 'lucide-react'
+import { mockApi, type ContentType } from '~/lib/mock-api'
 
-// Mock data - in real implementation, this would come from server
-const mockContentTypes = [
-  {
-    id: '1',
-    name: 'product',
-    displayName: 'Product',
-    description: 'E-commerce product catalog',
-    slug: 'product',
-    fields: [
-      { name: 'title', displayName: 'Title', fieldType: 'TEXT' },
-      { name: 'price', displayName: 'Price', fieldType: 'NUMBER' },
-      { name: 'description', displayName: 'Description', fieldType: 'TEXTAREA' }
-    ],
-    _count: { entries: 25 },
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20')
-  },
-  {
-    id: '2',
-    name: 'author',
-    displayName: 'Author',
-    description: 'Author profiles and information',
-    slug: 'author',
-    fields: [
-      { name: 'name', displayName: 'Name', fieldType: 'TEXT' },
-      { name: 'bio', displayName: 'Biography', fieldType: 'TEXTAREA' },
-      { name: 'email', displayName: 'Email', fieldType: 'EMAIL' }
-    ],
-    _count: { entries: 8 },
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-18')
-  }
-]
-
+// Remove mock data - now using API
 interface ContentTypeCardProps {
-  contentType: {
-    id: string
-    displayName: string
-    description?: string
-    fields: { name: string; displayName: string; fieldType: string }[]
+  contentType: ContentType & {
     _count: { entries: number }
-    createdAt: Date
   }
   onEdit: (id: string) => void
   onDelete: (id: string) => void
@@ -76,7 +39,7 @@ function ContentTypeCard({ contentType, onEdit, onDelete, onManageEntries }: Con
           <div>
             <p className="text-sm font-medium mb-2">Fields ({contentType.fields.length})</p>
             <div className="flex flex-wrap gap-1">
-              {contentType.fields.slice(0, 3).map((field: { name: string; displayName: string }) => (
+              {contentType.fields.slice(0, 3).map((field) => (
                 <Badge key={field.name} variant="outline" className="text-xs">
                   {field.displayName}
                 </Badge>
@@ -127,27 +90,69 @@ function ContentTypeCard({ contentType, onEdit, onDelete, onManageEntries }: Con
 }
 
 export default function ContentTypes() {
-  const [contentTypes] = useState(mockContentTypes)
+  const [contentTypes, setContentTypes] = useState<(ContentType & { _count: { entries: number } })[]>([])
+  const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
+
+  // Load content types on component mount
+  useEffect(() => {
+    loadContentTypes()
+  }, [])
+
+  const loadContentTypes = async () => {
+    setLoading(true)
+    try {
+      const types = await mockApi.getContentTypes()
+      // Add mock entry counts for demo purposes
+      const typesWithCounts = types.map(type => ({
+        ...type,
+        _count: { entries: Math.floor(Math.random() * 50) + 1 }
+      }))
+      setContentTypes(typesWithCounts)
+    } catch (error) {
+      console.error('Failed to load content types:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleEdit = (id: string) => {
     // Navigate to edit content type
-    console.log('Edit content type:', id)
+    window.location.hash = `#/admin/content-types/builder?id=${id}`
   }
 
-  const handleDelete = (id: string) => {
-    // Handle delete with confirmation
-    console.log('Delete content type:', id)
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this content type?')) {
+      try {
+        await mockApi.deleteContentType(id)
+        await loadContentTypes() // Reload the list
+      } catch (error) {
+        console.error('Failed to delete content type:', error)
+        alert('Failed to delete content type')
+      }
+    }
   }
 
   const handleManageEntries = (id: string) => {
-    // Navigate to content entries for this type
-    console.log('Manage entries for:', id)
+    const contentType = contentTypes.find(ct => ct.id === id)
+    if (contentType) {
+      window.location.hash = `#/admin/content-types/${contentType.slug}`
+    }
   }
 
   const handleCreateNew = () => {
     // Navigate to create new content type
-    console.log('Create new content type')
+    window.location.hash = '#/admin/content-types/builder'
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading content types...</div>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (

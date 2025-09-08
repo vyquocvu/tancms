@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   Settings
 } from 'lucide-react'
+import { mockApi } from '~/lib/mock-api'
 
 const FIELD_TYPES = [
   { value: 'TEXT', label: 'Text', icon: Type, description: 'Short text input' },
@@ -215,8 +216,11 @@ function FieldEditor({ field, onChange, onDelete }: {
 }
 
 export default function ContentTypeBuilder() {
-  // In a real implementation, this would come from route params or server
-  const isEditing = false
+  // Get ID from URL params if editing
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const editingId = urlParams.get('id')
+  const isEditing = !!editingId
+  
   const [contentType, setContentType] = useState<ContentType>({
     name: '',
     displayName: '',
@@ -225,6 +229,46 @@ export default function ContentTypeBuilder() {
   })
   
   const [isSaving, setIsSaving] = useState(false)
+  const [loading, setLoading] = useState(isEditing)
+
+  // Load existing content type if editing
+  useEffect(() => {
+    if (isEditing && editingId) {
+      loadContentType(editingId)
+    }
+  }, [isEditing, editingId])
+
+  const loadContentType = async (id: string) => {
+    setLoading(true)
+    try {
+      const existing = await mockApi.getContentType(id)
+      if (existing) {
+        setContentType({
+          id: existing.id,
+          name: existing.name,
+          displayName: existing.displayName,
+          description: existing.description,
+          fields: existing.fields.map(field => ({
+            id: field.id,
+            name: field.name,
+            displayName: field.displayName,
+            fieldType: field.fieldType,
+            required: field.required,
+            unique: field.unique,
+            defaultValue: field.defaultValue,
+            options: field.options,
+            relatedType: field.relatedType,
+            order: field.order
+          }))
+        })
+      }
+    } catch (error) {
+      console.error('Failed to load content type:', error)
+      alert('Failed to load content type')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleContentTypeChange = (updates: Partial<ContentType>) => {
     setContentType(prev => ({ ...prev, ...updates }))
@@ -266,11 +310,52 @@ export default function ContentTypeBuilder() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      // In real implementation, this would call the server action
-      console.log('Saving content type:', contentType)
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      if (isEditing && contentType.id) {
+        // Update existing content type
+        await mockApi.updateContentType(contentType.id, {
+          name: contentType.name,
+          displayName: contentType.displayName,
+          description: contentType.description,
+          fields: contentType.fields.map(field => ({
+            id: field.id,
+            name: field.name,
+            displayName: field.displayName,
+            fieldType: field.fieldType,
+            required: field.required,
+            unique: field.unique,
+            defaultValue: field.defaultValue,
+            options: field.options,
+            relatedType: field.relatedType,
+            order: field.order
+          }))
+        })
+        alert('Content type updated successfully!')
+      } else {
+        // Create new content type
+        await mockApi.createContentType({
+          name: contentType.name,
+          displayName: contentType.displayName,
+          description: contentType.description,
+          fields: contentType.fields.map(field => ({
+            name: field.name,
+            displayName: field.displayName,
+            fieldType: field.fieldType,
+            required: field.required,
+            unique: field.unique,
+            defaultValue: field.defaultValue,
+            options: field.options,
+            relatedType: field.relatedType,
+            order: field.order
+          }))
+        })
+        alert('Content type created successfully!')
+      }
+      
+      // Navigate back to content types list
+      window.location.hash = '#/admin/content-types'
     } catch (error) {
       console.error('Error saving content type:', error)
+      alert('Failed to save content type')
     } finally {
       setIsSaving(false)
     }
@@ -278,13 +363,27 @@ export default function ContentTypeBuilder() {
 
   const canSave = contentType.name && contentType.displayName && contentType.fields.length > 0
 
+  const handleBack = () => {
+    window.location.hash = '#/admin/content-types'
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading content type...</div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Content Types
             </Button>

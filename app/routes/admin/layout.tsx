@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { Button } from '~/components/ui/button'
 import { LayoutDashboard, FileText, Tag, Image, Database } from 'lucide-react'
+import { demoAdmin } from '~/lib/mock-api'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -17,7 +18,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <a href="#/" className="text-xl font-bold hover:text-primary">TanCMS Admin</a>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Welcome, Admin</span>
+              <span className="text-sm text-muted-foreground">Welcome, {demoAdmin.name}</span>
               <Button variant="outline" size="sm">
                 Logout
               </Button>
