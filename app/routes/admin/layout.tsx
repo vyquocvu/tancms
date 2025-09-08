@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Button } from '~/components/ui/button'
-import { LayoutDashboard, FileText, Tag, Image } from 'lucide-react'
+import { LayoutDashboard, FileText, Tag, Image, Database } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -47,6 +47,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   <FileText className="mr-3 h-5 w-5" />
                   Posts
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#/admin/content-types"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground"
+                >
+                  <Database className="mr-3 h-5 w-5" />
+                  Content Types
                 </a>
               </li>
               <li>
