@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from '../layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -6,76 +6,124 @@ import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { Plus, Edit, Trash2, ArrowLeft, Search, Filter } from 'lucide-react'
-
-// Mock data for demo - would come from server in real implementation
-const mockContentType = {
-  id: '1',
-  name: 'product',
-  displayName: 'Product',
-  description: 'E-commerce product catalog',
-  slug: 'product',
-  fields: [
-    { id: '1', name: 'title', displayName: 'Title', fieldType: 'TEXT', required: true },
-    { id: '2', name: 'price', displayName: 'Price', fieldType: 'NUMBER', required: true },
-    { id: '3', name: 'description', displayName: 'Description', fieldType: 'TEXTAREA', required: false }
-  ]
-}
-
-const mockEntries = [
-  {
-    id: '1',
-    slug: 'laptop-pro-15',
-    fieldValues: [
-      { fieldId: '1', field: mockContentType.fields[0], value: 'Laptop Pro 15"' },
-      { fieldId: '2', field: mockContentType.fields[1], value: '1299.99' },
-      { fieldId: '3', field: mockContentType.fields[2], value: 'High-performance laptop with 15-inch display' }
-    ],
-    createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-01-22')
-  },
-  {
-    id: '2',
-    slug: 'wireless-mouse',
-    fieldValues: [
-      { fieldId: '1', field: mockContentType.fields[0], value: 'Wireless Mouse' },
-      { fieldId: '2', field: mockContentType.fields[1], value: '29.99' },
-      { fieldId: '3', field: mockContentType.fields[2], value: 'Ergonomic wireless mouse with USB receiver' }
-    ],
-    createdAt: new Date('2024-01-18'),
-    updatedAt: new Date('2024-01-19')
-  },
-  {
-    id: '3',
-    slug: 'mechanical-keyboard',
-    fieldValues: [
-      { fieldId: '1', field: mockContentType.fields[0], value: 'Mechanical Keyboard' },
-      { fieldId: '2', field: mockContentType.fields[1], value: '89.99' },
-      { fieldId: '3', field: mockContentType.fields[2], value: 'RGB backlit mechanical keyboard with blue switches' }
-    ],
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-16')
-  }
-]
+import ContentEntryForm from '~/components/content-entry-form'
+import { mockApi, type ContentType, type ContentEntry } from '~/lib/mock-api'
 
 export default function ContentEntries() {
-  const [entries] = useState(mockEntries)
+  const [contentType, setContentType] = useState<ContentType | null>(null)
+  const [entries, setEntries] = useState<ContentEntry[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [showForm, setShowForm] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<ContentEntry | null>(null)
+  const [formLoading, setFormLoading] = useState(false)
   const entriesPerPage = 10
 
-  const handleEdit = (entryId: string) => {
-    console.log('Edit entry:', entryId)
+  // Get content type slug from URL (this would come from router params in real app)
+  const getContentTypeSlug = () => {
+    const hash = window.location.hash
+    const parts = hash.split('/')
+    return parts[parts.length - 1] || 'product'
   }
 
-  const handleDelete = (entryId: string) => {
-    console.log('Delete entry:', entryId)
+  // Load content type and entries
+  useEffect(() => {
+    loadData()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const slug = getContentTypeSlug()
+      
+      // Get content types and find the one with matching slug
+      const contentTypes = await mockApi.getContentTypes()
+      const foundContentType = contentTypes.find(ct => ct.slug === slug)
+      
+      if (!foundContentType) {
+        console.error('Content type not found:', slug)
+        return
+      }
+
+      setContentType(foundContentType)
+      
+      // Load entries for this content type
+      const entries = await mockApi.getContentEntries(foundContentType.id)
+      setEntries(entries)
+    } catch (error) {
+      console.error('Failed to load data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleEdit = (entryId: string) => {
+    const entry = entries.find(e => e.id === entryId)
+    if (entry) {
+      setEditingEntry(entry)
+      setShowForm(true)
+    }
+  }
+
+  const handleDelete = async (entryId: string) => {
+    if (confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await mockApi.deleteContentEntry(entryId)
+        await loadData() // Reload entries
+      } catch (error) {
+        console.error('Failed to delete entry:', error)
+        alert('Failed to delete entry')
+      }
+    }
   }
 
   const handleCreateNew = () => {
-    console.log('Create new entry')
+    setEditingEntry(null)
+    setShowForm(true)
   }
 
-  const getFieldValue = (entry: typeof mockEntries[0], fieldName: string) => {
+  const handleFormSave = async (data: {
+    slug?: string
+    fieldValues: { fieldId: string; value: string }[]
+  }) => {
+    if (!contentType) return
+
+    setFormLoading(true)
+    try {
+      if (editingEntry) {
+        // Update existing entry
+        await mockApi.updateContentEntry(editingEntry.id, data)
+      } else {
+        // Create new entry
+        await mockApi.createContentEntry({
+          contentTypeId: contentType.id,
+          ...data
+        })
+      }
+      
+      setShowForm(false)
+      setEditingEntry(null)
+      await loadData() // Reload entries
+    } catch (error) {
+      console.error('Failed to save entry:', error)
+      alert('Failed to save entry')
+    } finally {
+      setFormLoading(false)
+    }
+  }
+
+  const handleFormCancel = () => {
+    setShowForm(false)
+    setEditingEntry(null)
+  }
+
+  const handleBackToContentTypes = () => {
+    window.location.hash = '#/admin/content-types'
+  }
+
+  const getFieldValue = (entry: ContentEntry, fieldName: string) => {
     const fieldValue = entry.fieldValues.find(fv => fv.field.name === fieldName)
     return fieldValue?.value || '—'
   }
@@ -83,12 +131,60 @@ export default function ContentEntries() {
   const filteredEntries = entries.filter(entry =>
     entry.fieldValues.some(fv =>
       fv.value.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || entry.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || (entry.slug && entry.slug.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   const totalPages = Math.ceil(filteredEntries.length / entriesPerPage)
   const startIndex = (currentPage - 1) * entriesPerPage
   const paginatedEntries = filteredEntries.slice(startIndex, startIndex + entriesPerPage)
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  if (!contentType) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Content Type Not Found</h3>
+            <p className="text-muted-foreground mb-4">
+              The requested content type could not be found.
+            </p>
+            <Button onClick={handleBackToContentTypes}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Content Types
+            </Button>
+          </div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  if (showForm) {
+    return (
+      <AdminLayout>
+        <div className="p-6">
+          <ContentEntryForm
+            contentType={contentType}
+            entry={editingEntry}
+            onSave={handleFormSave}
+            onCancel={handleFormCancel}
+            isLoading={formLoading}
+          />
+        </div>
+      </AdminLayout>
+    )
+  }
 
   return (
     <AdminLayout>
@@ -96,20 +192,20 @@ export default function ContentEntries() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleBackToContentTypes}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Content Types
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{mockContentType.displayName} Entries</h1>
+              <h1 className="text-3xl font-bold">{contentType.displayName} Entries</h1>
               <p className="text-muted-foreground">
-                Manage content entries for {mockContentType.displayName.toLowerCase()}
+                Manage content entries for {contentType.displayName.toLowerCase()}
               </p>
             </div>
           </div>
           <Button onClick={handleCreateNew}>
             <Plus className="h-4 w-4 mr-2" />
-            Create {mockContentType.displayName}
+            Create {contentType.displayName}
           </Button>
         </div>
 
@@ -150,7 +246,7 @@ export default function ContentEntries() {
               <div className="flex items-center">
                 <div className="ml-0">
                   <p className="text-sm font-medium text-muted-foreground">Fields</p>
-                  <p className="text-2xl font-bold">{mockContentType.fields.length}</p>
+                  <p className="text-2xl font-bold">{contentType.fields.length}</p>
                 </div>
               </div>
             </CardContent>
@@ -184,7 +280,7 @@ export default function ContentEntries() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {mockContentType.displayName} Entries ({filteredEntries.length})
+              {contentType.displayName} Entries ({filteredEntries.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -192,12 +288,14 @@ export default function ContentEntries() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Slug</TableHead>
-                  {mockContentType.fields.map((field) => (
-                    <TableHead key={field.id}>
-                      {field.displayName}
-                      {field.required && <span className="text-red-500 ml-1">*</span>}
-                    </TableHead>
-                  ))}
+                  {contentType.fields
+                    .sort((a, b) => a.order - b.order)
+                    .map((field) => (
+                      <TableHead key={field.id}>
+                        {field.displayName}
+                        {field.required && <span className="text-red-500 ml-1">*</span>}
+                      </TableHead>
+                    ))}
                   <TableHead>Created</TableHead>
                   <TableHead>Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -212,19 +310,25 @@ export default function ContentEntries() {
                         <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
                       </div>
                     </TableCell>
-                    {mockContentType.fields.map((field) => (
-                      <TableCell key={field.id}>
-                        <div className="max-w-48 truncate">
-                          {field.fieldType === 'NUMBER' ? (
-                            <Badge variant="secondary">
-                              ${getFieldValue(entry, field.name)}
-                            </Badge>
-                          ) : (
-                            getFieldValue(entry, field.name)
-                          )}
-                        </div>
-                      </TableCell>
-                    ))}
+                    {contentType.fields
+                      .sort((a, b) => a.order - b.order)
+                      .map((field) => (
+                        <TableCell key={field.id}>
+                          <div className="max-w-48 truncate">
+                            {field.fieldType === 'NUMBER' ? (
+                              <Badge variant="secondary">
+                                ${getFieldValue(entry, field.name)}
+                              </Badge>
+                            ) : field.fieldType === 'BOOLEAN' ? (
+                              <Badge variant={getFieldValue(entry, field.name) === 'true' ? 'default' : 'secondary'}>
+                                {getFieldValue(entry, field.name) === 'true' ? 'Yes' : 'No'}
+                              </Badge>
+                            ) : (
+                              getFieldValue(entry, field.name)
+                            )}
+                          </div>
+                        </TableCell>
+                      ))}
                     <TableCell className="text-muted-foreground">
                       {entry.createdAt.toLocaleDateString()}
                     </TableCell>
@@ -260,13 +364,13 @@ export default function ContentEntries() {
                 <p className="text-muted-foreground mb-4">
                   {searchTerm
                     ? 'No entries match your search criteria'
-                    : `No ${mockContentType.displayName.toLowerCase()} entries have been created yet`
+                    : `No ${contentType.displayName.toLowerCase()} entries have been created yet`
                   }
                 </p>
                 {!searchTerm && (
                   <Button onClick={handleCreateNew}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Your First {mockContentType.displayName}
+                    Create Your First {contentType.displayName}
                   </Button>
                 )}
               </div>

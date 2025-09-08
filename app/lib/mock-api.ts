@@ -30,8 +30,25 @@ export type ContentField = {
   contentTypeId: string
 }
 
+export type ContentEntry = {
+  id: string
+  contentTypeId: string
+  slug?: string
+  fieldValues: ContentFieldValue[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type ContentFieldValue = {
+  id: string
+  fieldId: string
+  entryId: string
+  field: ContentField
+  value: string
+}
+
 // In-memory storage
-let contentTypes: ContentType[] = [
+const contentTypes: ContentType[] = [
   {
     id: '1',
     name: 'product',
@@ -75,8 +92,104 @@ let contentTypes: ContentType[] = [
   }
 ]
 
+// In-memory storage for entries
+const contentEntries: ContentEntry[] = [
+  {
+    id: '1',
+    contentTypeId: '1',
+    slug: 'laptop-pro-15',
+    fieldValues: [
+      {
+        id: 'fv1',
+        fieldId: 'field1',
+        entryId: '1',
+        field: contentTypes[0].fields[0],
+        value: 'Laptop Pro 15"'
+      },
+      {
+        id: 'fv2',
+        fieldId: 'field2',
+        entryId: '1',
+        field: contentTypes[0].fields[1],
+        value: '1299.99'
+      },
+      {
+        id: 'fv3',
+        fieldId: 'field3',
+        entryId: '1',
+        field: contentTypes[0].fields[2],
+        value: 'High-performance laptop with 15-inch display'
+      }
+    ],
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date('2024-01-22')
+  },
+  {
+    id: '2',
+    contentTypeId: '1',
+    slug: 'wireless-mouse',
+    fieldValues: [
+      {
+        id: 'fv4',
+        fieldId: 'field1',
+        entryId: '2',
+        field: contentTypes[0].fields[0],
+        value: 'Wireless Mouse'
+      },
+      {
+        id: 'fv5',
+        fieldId: 'field2',
+        entryId: '2',
+        field: contentTypes[0].fields[1],
+        value: '29.99'
+      },
+      {
+        id: 'fv6',
+        fieldId: 'field3',
+        entryId: '2',
+        field: contentTypes[0].fields[2],
+        value: 'Ergonomic wireless mouse with USB receiver'
+      }
+    ],
+    createdAt: new Date('2024-01-18'),
+    updatedAt: new Date('2024-01-19')
+  },
+  {
+    id: '3',
+    contentTypeId: '1',
+    slug: 'mechanical-keyboard',
+    fieldValues: [
+      {
+        id: 'fv7',
+        fieldId: 'field1',
+        entryId: '3',
+        field: contentTypes[0].fields[0],
+        value: 'Mechanical Keyboard'
+      },
+      {
+        id: 'fv8',
+        fieldId: 'field2',
+        entryId: '3',
+        field: contentTypes[0].fields[1],
+        value: '89.99'
+      },
+      {
+        id: 'fv9',
+        fieldId: 'field3',
+        entryId: '3',
+        field: contentTypes[0].fields[2],
+        value: 'RGB backlit mechanical keyboard with blue switches'
+      }
+    ],
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-01-16')
+  }
+]
+
 let nextId = 2
 let nextFieldId = 4
+let nextEntryId = 4
+let nextFieldValueId = 10
 
 export const mockApi = {
   // Content Type operations
@@ -150,6 +263,140 @@ export const mockApi = {
     if (index === -1) return Promise.resolve(false)
 
     contentTypes.splice(index, 1)
+    return Promise.resolve(true)
+  },
+
+  // Content Entry operations
+  async getContentEntries(contentTypeId: string): Promise<ContentEntry[]> {
+    const entries = contentEntries.filter(entry => entry.contentTypeId === contentTypeId)
+    return Promise.resolve(entries)
+  },
+
+  async getContentEntry(id: string): Promise<ContentEntry | null> {
+    const entry = contentEntries.find(entry => entry.id === id)
+    return Promise.resolve(entry || null)
+  },
+
+  async createContentEntry(data: {
+    contentTypeId: string
+    slug?: string
+    fieldValues: { fieldId: string; value: string }[]
+  }): Promise<ContentEntry> {
+    const id = String(nextEntryId++)
+    const contentType = contentTypes.find(ct => ct.id === data.contentTypeId)
+    
+    if (!contentType) {
+      throw new Error('Content type not found')
+    }
+
+    // Generate slug if not provided
+    let slug = data.slug
+    if (!slug) {
+      // Generate slug from the first text field value
+      const firstTextField = data.fieldValues.find(fv => {
+        const field = contentType.fields.find(f => f.id === fv.fieldId)
+        return field?.fieldType === 'TEXT'
+      })
+      if (firstTextField) {
+        slug = generateSlug(firstTextField.value)
+      } else {
+        slug = `entry-${id}`
+      }
+    }
+
+    // Ensure slug is unique within content type
+    let uniqueSlug = slug
+    let counter = 1
+    while (contentEntries.some(entry => 
+      entry.contentTypeId === data.contentTypeId && entry.slug === uniqueSlug
+    )) {
+      uniqueSlug = `${slug}-${counter}`
+      counter++
+    }
+
+    const entry: ContentEntry = {
+      id,
+      contentTypeId: data.contentTypeId,
+      slug: uniqueSlug,
+      fieldValues: data.fieldValues.map(fv => {
+        const field = contentType.fields.find(f => f.id === fv.fieldId)
+        if (!field) throw new Error(`Field ${fv.fieldId} not found`)
+        
+        return {
+          id: String(nextFieldValueId++),
+          fieldId: fv.fieldId,
+          entryId: id,
+          field,
+          value: fv.value
+        }
+      }),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+
+    contentEntries.push(entry)
+    return Promise.resolve(entry)
+  },
+
+  async updateContentEntry(id: string, data: {
+    slug?: string
+    fieldValues?: { fieldId: string; value: string }[]
+  }): Promise<ContentEntry | null> {
+    const index = contentEntries.findIndex(entry => entry.id === id)
+    if (index === -1) return Promise.resolve(null)
+
+    const existing = contentEntries[index]
+    const contentType = contentTypes.find(ct => ct.id === existing.contentTypeId)
+    if (!contentType) throw new Error('Content type not found')
+
+    let updatedSlug = existing.slug
+    if (data.slug !== undefined) {
+      // Ensure slug is unique within content type
+      let slug = data.slug
+      let counter = 1
+      while (contentEntries.some(entry => 
+        entry.contentTypeId === existing.contentTypeId && 
+        entry.slug === slug && 
+        entry.id !== id
+      )) {
+        slug = `${data.slug}-${counter}`
+        counter++
+      }
+      updatedSlug = slug
+    }
+
+    let updatedFieldValues = existing.fieldValues
+    if (data.fieldValues) {
+      updatedFieldValues = data.fieldValues.map(fv => {
+        const field = contentType.fields.find(f => f.id === fv.fieldId)
+        if (!field) throw new Error(`Field ${fv.fieldId} not found`)
+        
+        return {
+          id: String(nextFieldValueId++),
+          fieldId: fv.fieldId,
+          entryId: id,
+          field,
+          value: fv.value
+        }
+      })
+    }
+
+    const updated: ContentEntry = {
+      ...existing,
+      slug: updatedSlug,
+      fieldValues: updatedFieldValues,
+      updatedAt: new Date()
+    }
+
+    contentEntries[index] = updated
+    return Promise.resolve(updated)
+  },
+
+  async deleteContentEntry(id: string): Promise<boolean> {
+    const index = contentEntries.findIndex(entry => entry.id === id)
+    if (index === -1) return Promise.resolve(false)
+
+    contentEntries.splice(index, 1)
     return Promise.resolve(true)
   }
 }
