@@ -89,6 +89,78 @@ const contentTypes: ContentType[] = [
     ],
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-20')
+  },
+  {
+    id: '2',
+    name: 'blog-post',
+    displayName: 'Blog Post',
+    description: 'Blog articles and posts',
+    slug: 'blog-post',
+    fields: [
+      {
+        id: 'field4',
+        name: 'title',
+        displayName: 'Title',
+        fieldType: 'TEXT',
+        required: true,
+        unique: false,
+        order: 0,
+        contentTypeId: '2'
+      },
+      {
+        id: 'field5',
+        name: 'content',
+        displayName: 'Content',
+        fieldType: 'TEXTAREA',
+        required: true,
+        unique: false,
+        order: 1,
+        contentTypeId: '2'
+      },
+      {
+        id: 'field6',
+        name: 'published',
+        displayName: 'Published',
+        fieldType: 'BOOLEAN',
+        required: false,
+        unique: false,
+        order: 2,
+        contentTypeId: '2'
+      }
+    ],
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-12')
+  },
+  {
+    id: '3',
+    name: 'category',
+    displayName: 'Category',
+    description: 'Product and content categories',
+    slug: 'category',
+    fields: [
+      {
+        id: 'field7',
+        name: 'name',
+        displayName: 'Name',
+        fieldType: 'TEXT',
+        required: true,
+        unique: true,
+        order: 0,
+        contentTypeId: '3'
+      },
+      {
+        id: 'field8',
+        name: 'description',
+        displayName: 'Description',
+        fieldType: 'TEXTAREA',
+        required: false,
+        unique: false,
+        order: 1,
+        contentTypeId: '3'
+      }
+    ],
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-01-08')
   }
 ]
 
@@ -183,13 +255,121 @@ const contentEntries: ContentEntry[] = [
     ],
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-16')
+  },
+  // Blog Post entries
+  {
+    id: '4',
+    contentTypeId: '2',
+    slug: 'getting-started-with-cms',
+    fieldValues: [
+      {
+        id: 'fv10',
+        fieldId: 'field4',
+        entryId: '4',
+        field: contentTypes[1].fields[0],
+        value: 'Getting Started with CMS'
+      },
+      {
+        id: 'fv11',
+        fieldId: 'field5',
+        entryId: '4',
+        field: contentTypes[1].fields[1],
+        value: 'Learn how to get started with our content management system...'
+      },
+      {
+        id: 'fv12',
+        fieldId: 'field6',
+        entryId: '4',
+        field: contentTypes[1].fields[2],
+        value: 'true'
+      }
+    ],
+    createdAt: new Date('2024-01-25'),
+    updatedAt: new Date('2024-01-26')
+  },
+  {
+    id: '5',
+    contentTypeId: '2',
+    slug: 'advanced-features',
+    fieldValues: [
+      {
+        id: 'fv13',
+        fieldId: 'field4',
+        entryId: '5',
+        field: contentTypes[1].fields[0],
+        value: 'Advanced Features Overview'
+      },
+      {
+        id: 'fv14',
+        fieldId: 'field5',
+        entryId: '5',
+        field: contentTypes[1].fields[1],
+        value: 'Explore the advanced features available in our CMS platform...'
+      },
+      {
+        id: 'fv15',
+        fieldId: 'field6',
+        entryId: '5',
+        field: contentTypes[1].fields[2],
+        value: 'false'
+      }
+    ],
+    createdAt: new Date('2024-01-23'),
+    updatedAt: new Date('2024-01-24')
+  },
+  // Category entries
+  {
+    id: '6',
+    contentTypeId: '3',
+    slug: 'electronics',
+    fieldValues: [
+      {
+        id: 'fv16',
+        fieldId: 'field7',
+        entryId: '6',
+        field: contentTypes[2].fields[0],
+        value: 'Electronics'
+      },
+      {
+        id: 'fv17',
+        fieldId: 'field8',
+        entryId: '6',
+        field: contentTypes[2].fields[1],
+        value: 'Electronic devices and accessories'
+      }
+    ],
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-12')
+  },
+  {
+    id: '7',
+    contentTypeId: '3',
+    slug: 'tutorials',
+    fieldValues: [
+      {
+        id: 'fv18',
+        fieldId: 'field7',
+        entryId: '7',
+        field: contentTypes[2].fields[0],
+        value: 'Tutorials'
+      },
+      {
+        id: 'fv19',
+        fieldId: 'field8',
+        entryId: '7',
+        field: contentTypes[2].fields[1],
+        value: 'How-to guides and tutorials'
+      }
+    ],
+    createdAt: new Date('2024-01-08'),
+    updatedAt: new Date('2024-01-09')
   }
 ]
 
-let nextId = 2
-let nextFieldId = 4
-let nextEntryId = 4
-let nextFieldValueId = 10
+let nextId = 4
+let nextFieldId = 9
+let nextEntryId = 8
+let nextFieldValueId = 20
 
 export const mockApi = {
   // Content Type operations
