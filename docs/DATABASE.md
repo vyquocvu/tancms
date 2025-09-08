@@ -9,10 +9,11 @@ TanCMS uses **SQLite** for development and **PostgreSQL/MySQL** for production, 
 ### Core Models
 
 - **User**: Admin users with role-based permissions (ADMIN, EDITOR, AUTHOR, VIEWER)
-- **Post**: Blog posts and pages with rich content, SEO-friendly slugs, and status management
 - **Tag**: Categorization system for content organization  
 - **Media**: File uploads and media management
 - **Session**: Authentication sessions for user security
+- **ContentType**: Dynamic content type definitions
+- **ContentEntry**: Flexible content entries based on content types
 
 ## Quick Start
 
@@ -53,13 +54,12 @@ npm run db:studio
 
 ## Database Schema
 
-### Post Model Features
+### Content Type System
 
-- **SEO-friendly URLs**: Auto-generated slugs from titles
-- **Content Management**: Title, excerpt, and full content
-- **Status System**: DRAFT, PUBLISHED, ARCHIVED states
-- **Relationships**: Author, tags, and media attachments
-- **Timestamps**: Creation and update tracking
+- **Dynamic Content Types**: Define custom content structures
+- **Field Types**: Support for text, numbers, booleans, dates, relations, and media
+- **Validation**: Built-in required and unique field constraints
+- **Relationships**: Link content types together
 
 ### User Roles
 
@@ -71,9 +71,9 @@ npm run db:studio
 ### Performance Optimizations
 
 The schema includes strategic indexes for:
-- Post status filtering
+- Content type filtering
 - Creation date sorting  
-- Author-based queries
+- User-based queries
 - Session management
 - User role filtering
 
@@ -98,12 +98,6 @@ npm run test          # Run tests
 
 The database includes helper functions for common operations:
 
-### Post Management
-- `createPost()` - Create posts with auto-generated slugs
-- `updatePost()` - Update posts with slug regeneration
-- `getPublishedPosts()` - Paginated published post listing
-- `getPostBySlug()` - Retrieve post by SEO-friendly URL
-
 ### Tag Management  
 - `upsertTag()` - Create or get existing tags
 
@@ -119,8 +113,6 @@ The seed script creates:
 - **Editor User**: editor@tancms.dev / editor123
 
 ### Content
-- **Welcome Post**: Introduction to TanCMS features
-- **Getting Started**: Setup and configuration guide
 - **Tags**: Technology, Web Development, React
 - **Sample Media**: Placeholder images
 
