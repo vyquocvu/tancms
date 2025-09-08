@@ -286,7 +286,7 @@ export default function ContentTypes() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => onManageEntries(contentType.id)}
+                            onClick={() => handleManageEntries(contentType.id)}
                           >
                             <Database className="h-4 w-4" />
                           </Button>
