@@ -16,11 +16,7 @@ enum Role {
   VIEWER
 }
 
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
+
 
 model User {
   id        String    @id @default(cuid())
@@ -28,7 +24,6 @@ model User {
   password  String
   name      String?
   role      Role      @default(VIEWER)
-  posts     Post[]
   sessions  Session[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -36,30 +31,11 @@ model User {
   @@index([role])
 }
 
-model Post {
-  id        String     @id @default(cuid())
-  title     String
-  slug      String     @unique
-  excerpt   String?
-  content   String
-  status    PostStatus @default(DRAFT)
-  author    User?      @relation(fields: [authorId], references: [id])
-  authorId  String?
-  tags      Tag[]
-  media     Media?     @relation(fields: [mediaId], references: [id])
-  mediaId   String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
 
-  @@index([status])
-  @@index([createdAt])
-  @@index([authorId])
-}
 
 model Tag {
   id    String   @id @default(cuid())
   name  String   @unique
-  posts Post[]
 }
 
 model Media {
@@ -69,7 +45,6 @@ model Media {
   size      Int
   mimeType  String
   altText   String?
-  posts     Post[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

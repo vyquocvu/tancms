@@ -4,7 +4,6 @@ import './styles/globals.css'
 
 // Import admin components
 import AdminDashboard from './routes/admin/index'
-import PostsPage from './routes/admin/posts'
 import TagsPage from './routes/admin/tags'
 import MediaPage from './routes/admin/media'
 import ContentTypesPage from './routes/admin/content-types'
@@ -30,8 +29,6 @@ function App() {
     switch (currentRoute) {
       case '#/admin':
         return <AdminDashboard />
-      case '#/admin/posts':
-        return <PostsPage />
       case '#/admin/tags':
         return <TagsPage />
       case '#/admin/media':

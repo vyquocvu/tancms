@@ -8,7 +8,6 @@ import { Plus, Search, Edit, Trash2, Tag as TagIcon } from 'lucide-react'
 interface Tag {
   id: string
   name: string
-  postCount: number
   createdAt: string
 }
 
@@ -19,9 +18,6 @@ function TagCard({ tag, onEdit, onDelete }: { tag: Tag; onEdit: (tag: Tag) => vo
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium">{tag.name}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {tag.postCount} {tag.postCount === 1 ? 'post' : 'posts'}
-            </p>
             <p className="text-xs text-muted-foreground">
               Created {tag.createdAt}
             </p>
@@ -116,37 +112,31 @@ export default function TagsPage() {
     {
       id: '1',
       name: 'Technology',
-      postCount: 5,
       createdAt: '2024-01-15'
     },
     {
       id: '2',
       name: 'Web Development',
-      postCount: 8,
       createdAt: '2024-01-14'
     },
     {
       id: '3',
       name: 'React',
-      postCount: 3,
       createdAt: '2024-01-13'
     },
     {
       id: '4',
       name: 'TypeScript',
-      postCount: 4,
       createdAt: '2024-01-12'
     },
     {
       id: '5',
       name: 'Design',
-      postCount: 2,
       createdAt: '2024-01-11'
     },
     {
       id: '6',
       name: 'Performance',
-      postCount: 1,
       createdAt: '2024-01-10'
     }
   ])
@@ -159,7 +149,6 @@ export default function TagsPage() {
     const newTag: Tag = {
       id: (tags.length + 1).toString(),
       name,
-      postCount: 0,
       createdAt: new Date().toISOString().split('T')[0]
     }
     setTags([...tags, newTag])
@@ -176,8 +165,6 @@ export default function TagsPage() {
       setTags(tags.filter(t => t.id !== tag.id))
     }
   }
-
-  const totalPosts = tags.reduce((sum, tag) => sum + tag.postCount, 0)
 
   return (
     <AdminLayout>
@@ -197,7 +184,7 @@ export default function TagsPage() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center">
@@ -221,35 +208,13 @@ export default function TagsPage() {
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 text-sm font-medium">{totalPosts}</span>
+                    <TagIcon className="w-4 h-4 text-green-600" />
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-muted-foreground truncate">Tagged Posts</dt>
-                    <dd className="text-lg font-medium">{totalPosts}</dd>
-                  </dl>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <span className="text-yellow-600 text-sm font-medium">
-                      {tags.filter(t => t.postCount === 0).length}
-                    </span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-muted-foreground truncate">Unused Tags</dt>
-                    <dd className="text-lg font-medium">
-                      {tags.filter(t => t.postCount === 0).length}
-                    </dd>
+                    <dt className="text-sm font-medium text-muted-foreground truncate">Active Tags</dt>
+                    <dd className="text-lg font-medium">{filteredTags.length}</dd>
                   </dl>
                 </div>
               </div>
