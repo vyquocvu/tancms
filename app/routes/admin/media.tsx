@@ -132,7 +132,7 @@ function UploadModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
           
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center ${
-              dragActive ? 'border-primary bg-primary/10' : 'border-border'
+              dragActive ? 'border-primary bg-primary/10' : 'border-gray-300'
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}

@@ -90,7 +90,7 @@ function RecentActivity() {
       </CardHeader>
       <CardContent>
         <div className="flow-root">
-          <ul className="-my-5 divide-y divide-border">
+          <ul className="-my-5 divide-y divide-gray-200">
             {activities.map((activity) => (
               <li key={activity.id} className="py-4">
                 <div className="flex items-center space-x-4">
