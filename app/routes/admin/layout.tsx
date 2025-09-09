@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useEffect } from 'react'
 import { Button } from '~/components/ui/button'
-import { LayoutDashboard, Tag, Image, Database, FileText, ChevronDown, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Tag, Image, Database, FileText, ChevronDown, ChevronRight, Settings } from 'lucide-react'
 import { demoAdmin, mockApi, type ContentType } from '~/lib/mock-api'
 
 interface AdminLayoutProps {
@@ -67,6 +67,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   <Database className="mr-3 h-5 w-5" />
                   Content Types
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#/admin/api-manager"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground"
+                >
+                  <Settings className="mr-3 h-5 w-5" />
+                  API Manager
                 </a>
               </li>
               

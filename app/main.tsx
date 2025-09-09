@@ -9,6 +9,7 @@ import MediaPage from './routes/admin/media'
 import ContentTypesPage from './routes/admin/content-types'
 import ContentTypeBuilder from './routes/admin/content-types/builder'
 import ContentEntriesPage from './routes/admin/content-types/$slug'
+import ApiManagerPage from './routes/admin/api-manager'
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('/')
@@ -37,6 +38,8 @@ function App() {
         return <ContentTypesPage />
       case '#/admin/content-types/builder':
         return <ContentTypeBuilder />
+      case '#/admin/api-manager':
+        return <ApiManagerPage />
       default:
         // Handle dynamic content entry routes like #/admin/content-types/product
         if (currentRoute.startsWith('#/admin/content-types/') && currentRoute !== '#/admin/content-types/builder') {
