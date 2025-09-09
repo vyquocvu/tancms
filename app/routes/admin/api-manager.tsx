@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AdminLayout from './layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -19,8 +19,12 @@ import {
   Trash2,
   Plus,
   Eye,
-  EyeOff
+  EyeOff,
+  Database,
+  Link,
+  BarChart3
 } from 'lucide-react'
+import { mockApi, type ContentType } from '~/lib/mock-api'
 
 interface ApiStatus {
   status: 'healthy' | 'degraded' | 'down'
@@ -56,6 +60,20 @@ interface RequestLog {
   apiKey?: string
 }
 
+interface ContentTypeEndpoint {
+  contentType: ContentType
+  enabled: boolean
+  endpoints: {
+    list: { enabled: boolean; requests: number }
+    get: { enabled: boolean; requests: number }
+    create: { enabled: boolean; requests: number }
+    update: { enabled: boolean; requests: number }
+    delete: { enabled: boolean; requests: number }
+  }
+  totalRequests: number
+  lastUsed?: string
+}
+
 export default function ApiManager() {
   const [apiStatus] = useState<ApiStatus>({
     status: 'healthy',
@@ -64,6 +82,45 @@ export default function ApiManager() {
     errorRate: 0.1,
     avgResponseTime: 145
   })
+
+  const [contentTypes, setContentTypes] = useState<ContentType[]>([])
+  const [contentTypeEndpoints, setContentTypeEndpoints] = useState<ContentTypeEndpoint[]>([])
+
+  // Load content types on component mount
+  useEffect(() => {
+    const loadContentTypes = async () => {
+      try {
+        const types = await mockApi.getContentTypes()
+        setContentTypes(types)
+        
+        // Initialize endpoint configurations for each content type
+        const endpointConfigs: ContentTypeEndpoint[] = types.map(contentType => ({
+          contentType,
+          enabled: true,
+          endpoints: {
+            list: { enabled: true, requests: Math.floor(Math.random() * 100) + 10 },
+            get: { enabled: true, requests: Math.floor(Math.random() * 50) + 5 },
+            create: { enabled: true, requests: Math.floor(Math.random() * 20) + 2 },
+            update: { enabled: true, requests: Math.floor(Math.random() * 15) + 1 },
+            delete: { enabled: true, requests: Math.floor(Math.random() * 5) + 1 }
+          },
+          totalRequests: 0,
+          lastUsed: new Date(Date.now() - Math.random() * 86400000).toISOString().split('T')[0]
+        }))
+        
+        // Calculate total requests
+        endpointConfigs.forEach(config => {
+          config.totalRequests = Object.values(config.endpoints).reduce((sum, endpoint) => sum + endpoint.requests, 0)
+        })
+        
+        setContentTypeEndpoints(endpointConfigs)
+      } catch (error) {
+        console.error('Failed to load content types:', error)
+      }
+    }
+    
+    loadContentTypes()
+  }, [])
 
   const [config, setConfig] = useState({
     enableAuth: false,
@@ -205,6 +262,46 @@ export default function ApiManager() {
     setApiKeys(prev => prev.map(key => 
       key.id === keyId ? { ...key, isActive: !key.isActive } : key
     ))
+  }
+
+  const toggleContentTypeEndpoint = (contentTypeId: string, enabled: boolean) => {
+    setContentTypeEndpoints(prev => prev.map(config =>
+      config.contentType.id === contentTypeId ? { ...config, enabled } : config
+    ))
+  }
+
+  const toggleSpecificEndpoint = (contentTypeId: string, endpointType: keyof ContentTypeEndpoint['endpoints'], enabled: boolean) => {
+    setContentTypeEndpoints(prev => prev.map(config =>
+      config.contentType.id === contentTypeId ? {
+        ...config,
+        endpoints: {
+          ...config.endpoints,
+          [endpointType]: { ...config.endpoints[endpointType], enabled }
+        }
+      } : config
+    ))
+  }
+
+  const getEndpointUrl = (contentTypeSlug: string, endpointType: string) => {
+    const baseUrl = '/api'
+    switch (endpointType) {
+      case 'list': return `${baseUrl}/${contentTypeSlug}`
+      case 'get': return `${baseUrl}/${contentTypeSlug}/:id`
+      case 'create': return `${baseUrl}/${contentTypeSlug}`
+      case 'update': return `${baseUrl}/${contentTypeSlug}/:id`
+      case 'delete': return `${baseUrl}/${contentTypeSlug}/:id`
+      default: return `${baseUrl}/${contentTypeSlug}`
+    }
+  }
+
+  const getEndpointMethod = (endpointType: string) => {
+    switch (endpointType) {
+      case 'list': case 'get': return 'GET'
+      case 'create': return 'POST'
+      case 'update': return 'PUT'
+      case 'delete': return 'DELETE'
+      default: return 'GET'
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -411,6 +508,112 @@ export default function ApiManager() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Content Type Endpoint Manager */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Database className="mr-2 h-5 w-5" />
+              Content Type Endpoints
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <p className="text-sm text-muted-foreground">
+                Manage API endpoints for each content type. Control which operations are available and monitor usage.
+              </p>
+              
+              <div className="space-y-4">
+                {contentTypeEndpoints.map((config) => (
+                  <div key={config.contentType.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div>
+                          <h4 className="font-medium text-lg">{config.contentType.displayName}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {config.contentType.description || `API endpoints for ${config.contentType.displayName.toLowerCase()}`}
+                          </p>
+                          <div className="flex items-center space-x-4 mt-2">
+                            <span className="text-sm text-muted-foreground">
+                              Slug: <code className="bg-muted px-1 rounded">{config.contentType.slug}</code>
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              Total Requests: <strong>{config.totalRequests.toLocaleString()}</strong>
+                            </span>
+                            {config.lastUsed && (
+                              <span className="text-sm text-muted-foreground">
+                                Last Used: {config.lastUsed}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={config.enabled ? "default" : "secondary"}>
+                          {config.enabled ? 'Enabled' : 'Disabled'}
+                        </Badge>
+                        <Switch
+                          checked={config.enabled}
+                          onCheckedChange={(enabled) => toggleContentTypeEndpoint(config.contentType.id, enabled)}
+                        />
+                      </div>
+                    </div>
+
+                    {config.enabled && (
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-sm text-muted-foreground mb-2 flex items-center">
+                          <Link className="mr-1 h-4 w-4" />
+                          Available Endpoints
+                        </h5>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {Object.entries(config.endpoints).map(([endpointType, endpointConfig]) => (
+                            <div key={endpointType} className="border rounded p-3 bg-muted/20">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center space-x-2">
+                                  <Badge variant="outline" className="text-xs">
+                                    {getEndpointMethod(endpointType)}
+                                  </Badge>
+                                  <span className="font-medium text-sm capitalize">{endpointType}</span>
+                                </div>
+                                <Switch
+                                  checked={endpointConfig.enabled}
+                                  onCheckedChange={(enabled) => toggleSpecificEndpoint(config.contentType.id, endpointType as keyof ContentTypeEndpoint['endpoints'], enabled)}
+                                  size="sm"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <code className="text-xs bg-background px-2 py-1 rounded block">
+                                  {getEndpointUrl(config.contentType.slug, endpointType)}
+                                </code>
+                                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                  <span className="flex items-center">
+                                    <BarChart3 className="mr-1 h-3 w-3" />
+                                    {endpointConfig.requests} requests
+                                  </span>
+                                  <Badge variant={endpointConfig.enabled ? "default" : "secondary"} className="text-xs">
+                                    {endpointConfig.enabled ? 'Active' : 'Disabled'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {contentTypeEndpoints.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Database className="mx-auto h-12 w-12 mb-4 opacity-50" />
+                  <p>No content types found</p>
+                  <p className="text-sm">Create content types to see their API endpoints here</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* API Keys Management */}
         {config.enableAuth && (
