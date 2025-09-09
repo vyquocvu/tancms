@@ -24,6 +24,26 @@ export class ApiRouter {
   static async route(request: ApiRequest): Promise<ApiResponse> {
     const { method, path, body, query } = request
     
+    // Handle special status endpoint
+    if (path === '/api/status') {
+      if (method === 'GET') {
+        return {
+          success: true,
+          data: {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+          }
+        }
+      } else {
+        return {
+          success: false,
+          error: 'Method not allowed',
+          details: [`HTTP method '${method}' is not supported for status endpoint`]
+        }
+      }
+    }
+    
     // Parse the path to extract content type and entry ID
     const pathParts = path.split('/').filter(Boolean) // Remove empty parts
     
@@ -140,6 +160,7 @@ export class ApiRouter {
 
 /**
  * Convenience functions for common API operations
+ * @deprecated Use the new api from ~/lib/api-manager instead
  */
 export const api = {
   /**
