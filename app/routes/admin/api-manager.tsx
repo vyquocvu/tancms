@@ -83,7 +83,6 @@ export default function ApiManager() {
     avgResponseTime: 145
   })
 
-  const [contentTypes, setContentTypes] = useState<ContentType[]>([])
   const [contentTypeEndpoints, setContentTypeEndpoints] = useState<ContentTypeEndpoint[]>([])
 
   // Load content types on component mount
@@ -91,7 +90,6 @@ export default function ApiManager() {
     const loadContentTypes = async () => {
       try {
         const types = await mockApi.getContentTypes()
-        setContentTypes(types)
         
         // Initialize endpoint configurations for each content type
         const endpointConfigs: ContentTypeEndpoint[] = types.map(contentType => ({
@@ -578,7 +576,6 @@ export default function ApiManager() {
                                 <Switch
                                   checked={endpointConfig.enabled}
                                   onCheckedChange={(enabled) => toggleSpecificEndpoint(config.contentType.id, endpointType as keyof ContentTypeEndpoint['endpoints'], enabled)}
-                                  size="sm"
                                 />
                               </div>
                               <div className="space-y-1">
