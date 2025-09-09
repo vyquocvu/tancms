@@ -91,7 +91,10 @@ export class ApiRouter {
               details: ['Request body is required for POST requests']
             }
           }
-          return await ContentAPI.createEntry(contentTypeSlug, body as any)
+          return await ContentAPI.createEntry(contentTypeSlug, body as {
+          slug?: string
+          fieldValues: { fieldId: string; value: string }[]
+        })
 
         case 'PUT':
           if (!entryId) {
@@ -109,7 +112,10 @@ export class ApiRouter {
               details: ['Request body is required for PUT requests']
             }
           }
-          return await ContentAPI.updateEntry(contentTypeSlug, entryId, body as any)
+          return await ContentAPI.updateEntry(contentTypeSlug, entryId, body as {
+          slug?: string
+          fieldValues?: { fieldId: string; value: string }[]
+        })
 
         case 'DELETE':
           if (!entryId) {

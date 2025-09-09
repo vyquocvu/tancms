@@ -56,6 +56,16 @@ function initializeApiManager(): void {
 // Initialize API manager
 initializeApiManager()
 
+function getResponseHeaders(response: { headers?: Record<string, string> }): Record<string, string> {
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    ...(response.headers || {})
+  }
+}
+
 export const Route = createAPIFileRoute('/api/$')({
   GET: async ({ request, params }) => {
     const url = new URL(request.url)
@@ -76,20 +86,14 @@ export const Route = createAPIFileRoute('/api/$')({
 
       return new Response(JSON.stringify(response), {
         status: response.success ? 200 : 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          ...(response as any).headers
-        }
+        headers: getResponseHeaders(response as { headers?: Record<string, string> })
       })
-    } catch (error) {
-      console.error('API GET error:', error)
+    } catch (apiError) {
+      console.error('API GET error:', apiError)
       return new Response(JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: [error instanceof Error ? error.message : 'Unknown error']
+        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -111,7 +115,7 @@ export const Route = createAPIFileRoute('/api/$')({
     try {
       const text = await request.text()
       body = text ? JSON.parse(text) : undefined
-    } catch (error) {
+    } catch {
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid JSON body',
@@ -132,20 +136,14 @@ export const Route = createAPIFileRoute('/api/$')({
 
       return new Response(JSON.stringify(response), {
         status: response.success ? 201 : 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          ...(response as any).headers
-        }
+        headers: getResponseHeaders(response as { headers?: Record<string, string> })
       })
-    } catch (error) {
-      console.error('API POST error:', error)
+    } catch (apiError) {
+      console.error('API POST error:', apiError)
       return new Response(JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: [error instanceof Error ? error.message : 'Unknown error']
+        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -167,7 +165,7 @@ export const Route = createAPIFileRoute('/api/$')({
     try {
       const text = await request.text()
       body = text ? JSON.parse(text) : undefined
-    } catch (error) {
+    } catch {
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid JSON body',
@@ -188,20 +186,14 @@ export const Route = createAPIFileRoute('/api/$')({
 
       return new Response(JSON.stringify(response), {
         status: response.success ? 200 : 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          ...(response as any).headers
-        }
+        headers: getResponseHeaders(response as { headers?: Record<string, string> })
       })
-    } catch (error) {
-      console.error('API PUT error:', error)
+    } catch (apiError) {
+      console.error('API PUT error:', apiError)
       return new Response(JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: [error instanceof Error ? error.message : 'Unknown error']
+        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -228,20 +220,14 @@ export const Route = createAPIFileRoute('/api/$')({
 
       return new Response(JSON.stringify(response), {
         status: response.success ? 200 : 400,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          ...(response as any).headers
-        }
+        headers: getResponseHeaders(response as { headers?: Record<string, string> })
       })
-    } catch (error) {
-      console.error('API DELETE error:', error)
+    } catch (apiError) {
+      console.error('API DELETE error:', apiError)
       return new Response(JSON.stringify({
         success: false,
         error: 'Internal server error',
-        details: [error instanceof Error ? error.message : 'Unknown error']
+        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }

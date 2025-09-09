@@ -8,8 +8,12 @@ import { mockApi } from '../app/lib/mock-api'
 
 describe('API Manager', () => {
   let apiManager: ApiManager
-  let testContentType: any
-  let testEntryId: string
+  let testContentType: {
+    id: string
+    slug: string
+    fields: Array<{ id: string }>
+  }
+  let testEntryId: string // eslint-disable-line @typescript-eslint/no-unused-vars
 
   beforeAll(async () => {
     // Create a test content type
@@ -105,7 +109,7 @@ describe('API Manager', () => {
       expect(response.data.entry).toBeDefined()
       
       const titleField = response.data.entry.fieldValues.find(
-        (fv: any) => fv.fieldId === testContentType.fields[0].id
+        (fv: { fieldId: string; value: string }) => fv.fieldId === testContentType.fields[0].id
       )
       expect(titleField.value).toBe('Updated Title')
     })
@@ -145,7 +149,7 @@ describe('API Manager', () => {
       const response = await apiManager.get('/api/status')
       
       expect(mockMiddleware).toHaveBeenCalled()
-      expect((response as any).middlewareExecuted).toBe(true)
+      expect((response as { middlewareExecuted?: boolean }).middlewareExecuted).toBe(true)
     })
 
     it('should remove middleware by name', async () => {
@@ -164,13 +168,13 @@ describe('API Manager', () => {
       const response = await apiManager.get('/api/status')
       
       expect(mockMiddleware).not.toHaveBeenCalled()
-      expect((response as any).middlewareExecuted).toBeUndefined()
+      expect((response as { middlewareExecuted?: boolean }).middlewareExecuted).toBeUndefined()
     })
 
     it('should handle middleware errors gracefully', async () => {
       apiManager.addMiddleware({
         name: 'error-middleware',
-        handler: async (request, next) => {
+        handler: async () => {
           throw new Error('Middleware error')
         }
       })
@@ -227,8 +231,8 @@ describe('API Manager', () => {
 
       const response = await corsManager.get('/api/status')
       expect(response.success).toBe(true)
-      expect((response as any).headers).toBeDefined()
-      expect((response as any).headers['Access-Control-Allow-Origin']).toBe('*')
+      expect((response as { headers?: Record<string, string> }).headers).toBeDefined()
+      expect((response as { headers?: Record<string, string> }).headers?.['Access-Control-Allow-Origin']).toBe('*')
     })
   })
 

@@ -111,10 +111,6 @@ async function customMiddlewareExample() {
     handler: async (request, next) => {
       console.log(`Rate limiter: Processing ${request.method} ${request.path}`)
       
-      // Simple rate limiting logic (in production, you'd use Redis or similar)
-      const now = Date.now()
-      const rateLimitKey = `${request.path}-${request.method}`
-      
       // For demo purposes, we'll allow all requests
       console.log(`Rate limit check passed for ${rateLimitKey}`)
       
