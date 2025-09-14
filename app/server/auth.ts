@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from './db'
-import type { User, Role } from '@prisma/client'
+
+export type Role = 'ADMIN' | 'EDITOR' | 'AUTHOR' | 'VIEWER'
 
 export interface AuthUser {
   id: string

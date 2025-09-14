@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { useAuth, type AuthUser } from '~/lib/auth-context'
 
 interface ProtectedRouteProps {
