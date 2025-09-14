@@ -2,6 +2,9 @@ import ReactDOM from 'react-dom/client'
 import { useState, useEffect } from 'react'
 import './styles/globals.css'
 
+// Import auth provider
+import { AuthProvider } from './lib/auth-context'
+
 // Import admin components
 import AdminDashboard from './routes/admin/index'
 import TagsPage from './routes/admin/tags'
@@ -10,6 +13,7 @@ import ContentTypesPage from './routes/admin/content-types'
 import ContentTypeBuilder from './routes/admin/content-types/builder'
 import ContentEntriesPage from './routes/admin/content-types/$slug'
 import ApiManagerPage from './routes/admin/api-manager'
+import LoginPage from './routes/login'
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState('/')
@@ -28,6 +32,8 @@ function App() {
 
   const renderRoute = () => {
     switch (currentRoute) {
+      case '#/login':
+        return <LoginPage />
       case '#/admin':
         return <AdminDashboard />
       case '#/admin/tags':
@@ -59,6 +65,12 @@ function App() {
                 >
                   Go to Admin Dashboard
                 </a>
+                <a
+                  href="#/login"
+                  className="block w-full bg-gray-600 text-white text-center py-3 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium"
+                >
+                  Admin Login
+                </a>
                 <div className="text-center">
                   <a href="#/blog" className="text-indigo-600 hover:text-indigo-700 text-sm">
                     View Blog →
@@ -71,7 +83,11 @@ function App() {
     }
   }
 
-  return renderRoute()
+  return (
+    <AuthProvider>
+      {renderRoute()}
+    </AuthProvider>
+  )
 }
 
 const rootElement = document.getElementById('root')!

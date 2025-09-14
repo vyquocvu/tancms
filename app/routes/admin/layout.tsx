@@ -1,7 +1,8 @@
 import { type ReactNode, useState, useEffect } from 'react'
 import { Button } from '~/components/ui/button'
-import { LayoutDashboard, Tag, Image, Database, FileText, ChevronDown, ChevronRight, Settings } from 'lucide-react'
-import { demoAdmin, mockApi, type ContentType } from '~/lib/mock-api'
+import { LayoutDashboard, Tag, Image, Database, FileText, ChevronDown, ChevronRight, Settings, LogOut } from 'lucide-react'
+import { mockApi, type ContentType } from '~/lib/mock-api'
+import { useAuth } from '~/lib/auth-context'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -11,6 +12,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([])
   const [isContentTypesExpanded, setIsContentTypesExpanded] = useState(true)
   const [loading, setLoading] = useState(true)
+  const { user, logout } = useAuth()
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    window.location.href = '/login'
+    return null
+  }
 
   // Load content types for sidebar
   useEffect(() => {
@@ -37,8 +45,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <a href="#/" className="text-xl font-bold hover:text-primary">TanCMS Admin</a>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">Welcome, {demoAdmin.name}</span>
-              <Button variant="outline" size="sm">
+              <span className="text-sm text-muted-foreground">Welcome, {user.name || user.email}</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={async () => {
+                  await logout()
+                  window.location.href = '/login'
+                }}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
             </div>
