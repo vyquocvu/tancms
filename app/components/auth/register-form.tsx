@@ -6,8 +6,15 @@ import { Label } from '~/components/ui/label'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Eye, EyeOff, UserPlus } from 'lucide-react'
 
+interface AuthUser {
+  id: string
+  email: string
+  name: string | null
+  role: string
+}
+
 interface RegisterFormProps {
-  onSuccess?: (user: any) => void
+  onSuccess?: (user: AuthUser) => void
   onLoginClick?: () => void
 }
 
@@ -107,7 +114,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
       if (onSuccess) {
         onSuccess(data.user)
       }
-    } catch (error) {
+    } catch {
       setErrors({ general: 'Network error. Please try again.' })
     } finally {
       setLoading(false)

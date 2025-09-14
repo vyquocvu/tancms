@@ -6,8 +6,15 @@ import { Label } from '~/components/ui/label'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 
+interface AuthUser {
+  id: string
+  email: string
+  name: string | null
+  role: string
+}
+
 interface LoginFormProps {
-  onSuccess?: (user: any) => void
+  onSuccess?: (user: AuthUser) => void
   onRegisterClick?: () => void
 }
 
@@ -72,7 +79,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
       if (onSuccess) {
         onSuccess(data.user)
       }
-    } catch (error) {
+    } catch {
       setErrors({ general: 'Network error. Please try again.' })
     } finally {
       setLoading(false)

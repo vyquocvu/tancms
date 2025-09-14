@@ -3,6 +3,7 @@ import { Button } from '~/components/ui/button'
 import { LayoutDashboard, Tag, Image, Database, FileText, ChevronDown, ChevronRight, Settings, LogOut } from 'lucide-react'
 import { mockApi, type ContentType } from '~/lib/mock-api'
 import { useAuth } from '~/lib/auth-context'
+import ProtectedRoute from '~/components/auth/protected-route'
 
 interface AdminLayoutProps {
   children: ReactNode
@@ -14,11 +15,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [loading, setLoading] = useState(true)
   const { user, logout } = useAuth()
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    window.location.href = '/login'
-    return null
-  }
+  return (
+    <ProtectedRoute requiredRole="AUTHOR">
+      <AdminLayoutContent 
+        contentTypes={contentTypes}
+        setContentTypes={setContentTypes}
+        isContentTypesExpanded={isContentTypesExpanded}
+        setIsContentTypesExpanded={setIsContentTypesExpanded}
+        loading={loading}
+        setLoading={setLoading}
+        user={user}
+        logout={logout}
+      >
+        {children}
+      </AdminLayoutContent>
+    </ProtectedRoute>
+  )
+}
+
+interface AdminLayoutContentProps {
+  children: ReactNode
+  contentTypes: ContentType[]
+  setContentTypes: (types: ContentType[]) => void
+  isContentTypesExpanded: boolean
+  setIsContentTypesExpanded: (expanded: boolean) => void
+  loading: boolean
+  setLoading: (loading: boolean) => void
+  user: any
+  logout: () => Promise<void>
+}
+
+function AdminLayoutContent({ 
+  children, 
+  contentTypes, 
+  setContentTypes, 
+  isContentTypesExpanded, 
+  setIsContentTypesExpanded, 
+  loading, 
+  setLoading, 
+  user, 
+  logout 
+}: AdminLayoutContentProps) {
 
   // Load content types for sidebar
   useEffect(() => {

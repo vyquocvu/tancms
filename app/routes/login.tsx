@@ -3,6 +3,13 @@ import { useAuth } from '~/lib/auth-context'
 import LoginForm from '~/components/auth/login-form'
 import RegisterForm from '~/components/auth/register-form'
 
+interface AuthUser {
+  id: string
+  email: string
+  name: string | null
+  role: string
+}
+
 export default function LoginPage() {
   const [isRegistering, setIsRegistering] = useState(false)
   const { user } = useAuth()
@@ -13,12 +20,12 @@ export default function LoginPage() {
     return null
   }
 
-  const handleLoginSuccess = (user: any) => {
+  const handleLoginSuccess = (user: AuthUser) => {
     // Redirect to admin dashboard
     window.location.href = '/admin'
   }
 
-  const handleRegisterSuccess = (user: any) => {
+  const handleRegisterSuccess = (user: AuthUser) => {
     // Redirect to admin dashboard
     window.location.href = '/admin'
   }
