@@ -1,95 +1,10 @@
 import ReactDOM from 'react-dom/client'
-import { useState, useEffect } from 'react'
+import { RouterProvider } from '@tanstack/react-router'
+import { createRouter } from './router'
 import './styles/globals.css'
 
-// Import auth provider
-import { AuthProvider } from './lib/auth-context'
-
-// Import admin components
-import AdminDashboard from './routes/admin/index'
-import TagsPage from './routes/admin/tags'
-import MediaPage from './routes/admin/media'
-import ContentTypesPage from './routes/admin/content-types'
-import ContentTypeBuilder from './routes/admin/content-types/builder'
-import ContentEntriesPage from './routes/admin/content-types/$slug'
-import ApiManagerPage from './routes/admin/api-manager'
-import LoginPage from './routes/login'
-
-function App() {
-  const [currentRoute, setCurrentRoute] = useState('/')
-
-  // Simple routing based on hash
-  const handleHashChange = () => {
-    setCurrentRoute(window.location.hash || '/')
-  }
-
-  // Set up hash change listener
-  useEffect(() => {
-    window.addEventListener('hashchange', handleHashChange)
-    handleHashChange() // Check initial hash
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [])
-
-  const renderRoute = () => {
-    switch (currentRoute) {
-      case '#/login':
-        return <LoginPage />
-      case '#/admin':
-        return <AdminDashboard />
-      case '#/admin/tags':
-        return <TagsPage />
-      case '#/admin/media':
-        return <MediaPage />
-      case '#/admin/content-types':
-        return <ContentTypesPage />
-      case '#/admin/content-types/builder':
-        return <ContentTypeBuilder />
-      case '#/admin/api-manager':
-        return <ApiManagerPage />
-      default:
-        // Handle dynamic content entry routes like #/admin/content-types/product
-        if (currentRoute.startsWith('#/admin/content-types/') && currentRoute !== '#/admin/content-types/builder') {
-          return <ContentEntriesPage />
-        }
-        return (
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">TanCMS</h1>
-              <p className="text-gray-600 mb-6">Welcome to your modern Content Management System!</p>
-              <p className="text-gray-500 mb-8">Built with React, TypeScript, Prisma, and SQLite.</p>
-              
-              <div className="space-y-3">
-                <a
-                  href="#/admin"
-                  className="block w-full bg-indigo-600 text-white text-center py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors font-medium"
-                >
-                  Go to Admin Dashboard
-                </a>
-                <a
-                  href="#/login"
-                  className="block w-full bg-gray-600 text-white text-center py-3 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium"
-                >
-                  Admin Login
-                </a>
-                <div className="text-center">
-                  <a href="#/blog" className="text-indigo-600 hover:text-indigo-700 text-sm">
-                    View Blog →
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <AuthProvider>
-      {renderRoute()}
-    </AuthProvider>
-  )
-}
+const router = createRouter()
 
 const rootElement = document.getElementById('root')!
 const root = ReactDOM.createRoot(rootElement)
-root.render(<App />)
+root.render(<RouterProvider router={router} />)
