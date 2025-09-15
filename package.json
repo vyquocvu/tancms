@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "start": "node dist/index.js",
+    "dev": "vinxi dev",
+    "build": "vinxi build",
+    "start": "vinxi start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview",
+    "preview": "vinxi preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
@@ -28,8 +28,8 @@
     "@prisma/client": "^6.14.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@tanstack/react-query": "^5.85.5",
-    "@tanstack/react-router": "^1.131.27",
-    "@tanstack/react-start": "^1.131.35",
+    "@tanstack/react-router": "^1.120.20",
+    "@tanstack/react-start": "^1.120.20",
     "@types/node": "^24.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -41,8 +41,9 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@tailwindcss/postcss": "^4.1.13",
-    "@tanstack/react-start-plugin": "^1.131.35",
+    "@tanstack/react-start-plugin": "^1.120.20",
     "@tanstack/start": "^1.120.20",
+    "@tanstack/router-generator": "^1.120.20",
     "@types/bcryptjs": "^2.4.6",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
@@ -60,6 +61,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.5"
   }
 }
