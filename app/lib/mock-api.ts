@@ -30,10 +30,16 @@ export type ContentField = {
   contentTypeId: string
 }
 
+export type ContentStatus = 'DRAFT' | 'PUBLISHED' | 'SCHEDULED' | 'ARCHIVED'
+
 export type ContentEntry = {
   id: string
   contentTypeId: string
   slug?: string
+  status: ContentStatus
+  publishedAt?: Date
+  scheduledAt?: Date
+  authorId?: string
   fieldValues: ContentFieldValue[]
   createdAt: Date
   updatedAt: Date
@@ -170,6 +176,9 @@ const contentEntries: ContentEntry[] = [
     id: '1',
     contentTypeId: '1',
     slug: 'laptop-pro-15',
+    status: 'PUBLISHED',
+    publishedAt: new Date('2024-01-22'),
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv1',
@@ -200,6 +209,9 @@ const contentEntries: ContentEntry[] = [
     id: '2',
     contentTypeId: '1',
     slug: 'wireless-mouse',
+    status: 'PUBLISHED',
+    publishedAt: new Date('2024-01-19'),
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv4',
@@ -230,6 +242,8 @@ const contentEntries: ContentEntry[] = [
     id: '3',
     contentTypeId: '1',
     slug: 'mechanical-keyboard',
+    status: 'DRAFT',
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv7',
@@ -261,6 +275,9 @@ const contentEntries: ContentEntry[] = [
     id: '4',
     contentTypeId: '2',
     slug: 'getting-started-with-cms',
+    status: 'PUBLISHED',
+    publishedAt: new Date('2024-01-26'),
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv10',
@@ -291,6 +308,9 @@ const contentEntries: ContentEntry[] = [
     id: '5',
     contentTypeId: '2',
     slug: 'advanced-features',
+    status: 'SCHEDULED',
+    scheduledAt: new Date('2024-02-01'),
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv13',
@@ -322,6 +342,9 @@ const contentEntries: ContentEntry[] = [
     id: '6',
     contentTypeId: '3',
     slug: 'electronics',
+    status: 'PUBLISHED',
+    publishedAt: new Date('2024-01-12'),
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv16',
@@ -345,6 +368,8 @@ const contentEntries: ContentEntry[] = [
     id: '7',
     contentTypeId: '3',
     slug: 'tutorials',
+    status: 'DRAFT',
+    authorId: 'user1',
     fieldValues: [
       {
         id: 'fv18',
@@ -460,6 +485,10 @@ export const mockApi = {
   async createContentEntry(data: {
     contentTypeId: string
     slug?: string
+    status?: ContentStatus
+    publishedAt?: Date
+    scheduledAt?: Date
+    authorId?: string
     fieldValues: { fieldId: string; value: string }[]
   }): Promise<ContentEntry> {
     const id = String(nextEntryId++)
@@ -498,6 +527,10 @@ export const mockApi = {
       id,
       contentTypeId: data.contentTypeId,
       slug: uniqueSlug,
+      status: data.status || 'DRAFT',
+      publishedAt: data.publishedAt,
+      scheduledAt: data.scheduledAt,
+      authorId: data.authorId,
       fieldValues: data.fieldValues.map(fv => {
         const field = contentType.fields.find(f => f.id === fv.fieldId)
         if (!field) throw new Error(`Field ${fv.fieldId} not found`)
@@ -520,6 +553,10 @@ export const mockApi = {
 
   async updateContentEntry(id: string, data: {
     slug?: string
+    status?: ContentStatus
+    publishedAt?: Date
+    scheduledAt?: Date
+    authorId?: string
     fieldValues?: { fieldId: string; value: string }[]
   }): Promise<ContentEntry | null> {
     const index = contentEntries.findIndex(entry => entry.id === id)
@@ -564,6 +601,10 @@ export const mockApi = {
     const updated: ContentEntry = {
       ...existing,
       slug: updatedSlug,
+      status: data.status !== undefined ? data.status : existing.status,
+      publishedAt: data.publishedAt !== undefined ? data.publishedAt : existing.publishedAt,
+      scheduledAt: data.scheduledAt !== undefined ? data.scheduledAt : existing.scheduledAt,
+      authorId: data.authorId !== undefined ? data.authorId : existing.authorId,
       fieldValues: updatedFieldValues,
       updatedAt: new Date()
     }
@@ -578,6 +619,60 @@ export const mockApi = {
 
     contentEntries.splice(index, 1)
     return Promise.resolve(true)
+  },
+
+  // Workflow-specific operations
+  async publishContentEntry(id: string): Promise<ContentEntry | null> {
+    return this.updateContentEntry(id, {
+      status: 'PUBLISHED',
+      publishedAt: new Date()
+    })
+  },
+
+  async unpublishContentEntry(id: string): Promise<ContentEntry | null> {
+    return this.updateContentEntry(id, {
+      status: 'DRAFT',
+      publishedAt: undefined
+    })
+  },
+
+  async scheduleContentEntry(id: string, scheduledAt: Date): Promise<ContentEntry | null> {
+    return this.updateContentEntry(id, {
+      status: 'SCHEDULED',
+      scheduledAt
+    })
+  },
+
+  async unscheduleContentEntry(id: string): Promise<ContentEntry | null> {
+    return this.updateContentEntry(id, {
+      status: 'DRAFT',
+      scheduledAt: undefined
+    })
+  },
+
+  async archiveContentEntry(id: string): Promise<ContentEntry | null> {
+    return this.updateContentEntry(id, {
+      status: 'ARCHIVED'
+    })
+  },
+
+  // Filter entries by status
+  async getContentEntriesByStatus(contentTypeId: string, status: ContentStatus): Promise<ContentEntry[]> {
+    const entries = contentEntries.filter(entry => 
+      entry.contentTypeId === contentTypeId && entry.status === status
+    )
+    return Promise.resolve(entries)
+  },
+
+  // Get scheduled entries that should be published
+  async getScheduledEntriesToPublish(): Promise<ContentEntry[]> {
+    const now = new Date()
+    const entries = contentEntries.filter(entry => 
+      entry.status === 'SCHEDULED' && 
+      entry.scheduledAt && 
+      entry.scheduledAt <= now
+    )
+    return Promise.resolve(entries)
   }
 }
 

@@ -7,7 +7,7 @@ import { Badge } from '~/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { Plus, Edit, Trash2, ArrowLeft, Search, Filter } from 'lucide-react'
 import ContentEntryForm from '~/components/content-entry-form'
-import { mockApi, type ContentType, type ContentEntry } from '~/lib/mock-api'
+import { mockApi, type ContentType, type ContentEntry, type ContentStatus } from '~/lib/mock-api'
 
 export default function ContentEntries() {
   const [contentType, setContentType] = useState<ContentType | null>(null)
@@ -86,6 +86,9 @@ export default function ContentEntries() {
 
   const handleFormSave = async (data: {
     slug?: string
+    status?: ContentStatus
+    publishedAt?: Date
+    scheduledAt?: Date
     fieldValues: { fieldId: string; value: string }[]
   }) => {
     if (!contentType) return
@@ -99,6 +102,7 @@ export default function ContentEntries() {
         // Create new entry
         await mockApi.createContentEntry({
           contentTypeId: contentType.id,
+          authorId: 'user1', // In real app, get from auth context
           ...data
         })
       }
@@ -126,6 +130,35 @@ export default function ContentEntries() {
   const getFieldValue = (entry: ContentEntry, fieldName: string) => {
     const fieldValue = entry.fieldValues.find(fv => fv.field.name === fieldName)
     return fieldValue?.value || '—'
+  }
+
+  const getStatusBadge = (entry: ContentEntry) => {
+    const statusConfig = {
+      DRAFT: { color: 'bg-yellow-100 text-yellow-800', emoji: '📝', label: 'Draft' },
+      PUBLISHED: { color: 'bg-green-100 text-green-800', emoji: '✅', label: 'Published' },
+      SCHEDULED: { color: 'bg-blue-100 text-blue-800', emoji: '⏰', label: 'Scheduled' },
+      ARCHIVED: { color: 'bg-gray-100 text-gray-800', emoji: '📦', label: 'Archived' },
+    }
+    
+    const config = statusConfig[entry.status]
+    return (
+      <div className="flex flex-col gap-1">
+        <Badge className={config.color}>
+          {config.emoji} {config.label}
+        </Badge>
+        {entry.status === 'SCHEDULED' && entry.scheduledAt && (
+          <div className="text-xs text-muted-foreground">
+            {new Date(entry.scheduledAt).toLocaleDateString()} at{' '}
+            {new Date(entry.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        )}
+        {entry.status === 'PUBLISHED' && entry.publishedAt && (
+          <div className="text-xs text-muted-foreground">
+            {new Date(entry.publishedAt).toLocaleDateString()}
+          </div>
+        )}
+      </div>
+    )
   }
 
   const filteredEntries = entries.filter(entry =>
@@ -226,7 +259,7 @@ export default function ContentEntries() {
               <div className="flex items-center">
                 <div className="ml-0">
                   <p className="text-sm font-medium text-muted-foreground">Published</p>
-                  <p className="text-2xl font-bold">{entries.length}</p>
+                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'PUBLISHED').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -235,8 +268,8 @@ export default function ContentEntries() {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
-                  <p className="text-2xl font-bold">2d ago</p>
+                  <p className="text-sm font-medium text-muted-foreground">Drafts</p>
+                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'DRAFT').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -245,8 +278,8 @@ export default function ContentEntries() {
             <CardContent className="p-6">
               <div className="flex items-center">
                 <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Fields</p>
-                  <p className="text-2xl font-bold">{contentType.fields.length}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Scheduled</p>
+                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'SCHEDULED').length}</p>
                 </div>
               </div>
             </CardContent>
@@ -288,6 +321,7 @@ export default function ContentEntries() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Slug</TableHead>
+                  <TableHead>Status</TableHead>
                   {contentType.fields
                     .sort((a, b) => a.order - b.order)
                     .map((field) => (
@@ -309,6 +343,9 @@ export default function ContentEntries() {
                         <div className="font-mono text-sm">{entry.slug}</div>
                         <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(entry)}
                     </TableCell>
                     {contentType.fields
                       .sort((a, b) => a.order - b.order)
