@@ -76,10 +76,25 @@ Visit `http://localhost:3000` to see your CMS in action!
 
 ## 📚 Documentation
 
+### Getting Started
 - **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
 - **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and usage
+
+### Technical Documentation
 - [Architecture Overview](./docs/ARCHITECTURE.md) - Technical deep dive
 - [API Reference](./docs/API.md) - Complete API documentation
+- [API Manager](./docs/API_MANAGER.md) - REST API management and middleware
+- [Content Type Builder](./docs/CONTENT_TYPE_BUILDER.md) - Dynamic content types
+- [Dynamic API](./docs/DYNAMIC_API.md) - Auto-generated API endpoints
+- [Authentication](./docs/AUTHENTICATION.md) - Auth system and security
+
+### Feature Analysis & Roadmap
+- **[Executive Summary](./docs/EXECUTIVE_SUMMARY.md)** - TanCMS vs Strapi analysis overview
+- **[Feature Comparison](./docs/STRAPI_COMPARISON.md)** - Detailed comparison with Strapi
+- **[Implementation Tasks](./docs/FEATURE_TASKS.md)** - Detailed roadmap for missing features
+- **[Quick Wins](./docs/QUICK_WINS.md)** - Immediate improvements (1-2 weeks each)
+
+### Development & Deployment
 - [Deployment Guide](./docs/DEPLOYMENT.md) - Deploy to any platform
 - [Contributing Guide](./CONTRIBUTING.md) - Development workflow
 - [Development Playbook](./Agents.md) - For AI agents and detailed development
