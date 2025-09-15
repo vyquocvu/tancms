@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
+import { WysiwygEditor } from './ui/wysiwyg-editor'
 import { Label } from './ui/label'
 import { Switch } from './ui/switch'
 import { X, Save } from 'lucide-react'
@@ -63,6 +64,10 @@ export default function ContentEntryForm({
         [fieldId]: ''
       }))
     }
+  }
+
+  const handleWysiwygChange = (fieldId: string) => (value: string) => {
+    handleFieldChange(fieldId, value)
   }
 
   const validateForm = (): boolean => {
@@ -144,10 +149,12 @@ export default function ContentEntryForm({
       
       case 'TEXTAREA':
         return (
-          <Textarea
-            rows={4}
+          <WysiwygEditor
+            value={value}
+            onChange={handleWysiwygChange(field.id)}
             placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
+            className={error ? 'border-red-500' : ''}
+            rows={4}
           />
         )
       
