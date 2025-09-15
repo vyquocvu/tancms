@@ -3,7 +3,7 @@ import { renderToReadableStream } from 'react-dom/server'
 import { StartServer } from '@tanstack/start/server'
 import { createRouter } from './router'
 
-export default async function handler(request: Request): Promise<Response> {
+export default async function handler(_request: Request): Promise<Response> {
   const router = createRouter()
   const stream = await renderToReadableStream(<StartServer router={router} />)
   
