@@ -55,7 +55,6 @@ const mockPosts = [
 function PostsPage() {
   const posts = mockPosts
   const [statusFilter, setStatusFilter] = useState('ALL')
-  const [selectedPosts, setSelectedPosts] = useState([])
   
   const filteredPosts = posts.filter(post => {
     if (statusFilter === 'ALL') return true
@@ -71,7 +70,7 @@ function PostsPage() {
     }
   }
   
-  const handleQuickAction = (postId, action) => {
+  const handleQuickAction = (postId: number, action: string) => {
     // In a real app, this would call the API
     console.log(`Performing ${action} on post ${postId}`)
     alert(`Would ${action} post ${postId} - this is a demo`)
