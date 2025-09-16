@@ -1,23 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import AdminLayout from '../layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { Input } from '~/components/ui/input'
 import { Badge } from '~/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
-import { Plus, Edit, Trash2, ArrowLeft, Search, Filter } from 'lucide-react'
+import { Plus, Edit, Trash2, ArrowLeft } from 'lucide-react'
 import ContentEntryForm from '~/components/content-entry-form'
+import { DataTable, type DataTableColumn } from '~/components/ui/data-table'
+import { ContentFilters, type ContentFilter } from '~/components/ui/content-filters'
+import { BulkActions, type BulkAction } from '~/components/ui/bulk-actions'
 import { mockApi, type ContentType, type ContentEntry, type ContentStatus } from '~/lib/mock-api'
 
 export default function ContentEntries() {
   const [contentType, setContentType] = useState<ContentType | null>(null)
   const [entries, setEntries] = useState<ContentEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [showForm, setShowForm] = useState(false)
   const [editingEntry, setEditingEntry] = useState<ContentEntry | null>(null)
   const [formLoading, setFormLoading] = useState(false)
+  const [filters, setFilters] = useState<ContentFilter>({})
+  const [selectedEntries, setSelectedEntries] = useState<ContentEntry[]>([])
   const entriesPerPage = 10
 
   // Get content type slug from URL (this would come from router params in real app)
@@ -161,11 +163,213 @@ export default function ContentEntries() {
     )
   }
 
-  const filteredEntries = entries.filter(entry =>
-    entry.fieldValues.some(fv =>
-      fv.value.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || (entry.slug && entry.slug.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  // Enhanced filtering logic
+  const filteredEntries = useMemo(() => {
+    return entries.filter(entry => {
+      // Status filter
+      if (filters.status && filters.status.length > 0) {
+        if (!filters.status.includes(entry.status)) return false
+      }
+
+      // Search filter
+      if (filters.search && filters.search.length > 0) {
+        const searchLower = filters.search.toLowerCase()
+        const matchesSlug = entry.slug?.toLowerCase().includes(searchLower)
+        const matchesFieldValues = entry.fieldValues.some(fv =>
+          fv.value.toLowerCase().includes(searchLower)
+        )
+        if (!matchesSlug && !matchesFieldValues) return false
+      }
+
+      // Created date range filter
+      if (filters.createdRange) {
+        if (filters.createdRange.from && entry.createdAt < filters.createdRange.from) return false
+        if (filters.createdRange.to && entry.createdAt > filters.createdRange.to) return false
+      }
+
+      // Updated date range filter
+      if (filters.updatedRange) {
+        if (filters.updatedRange.from && entry.updatedAt < filters.updatedRange.from) return false
+        if (filters.updatedRange.to && entry.updatedAt > filters.updatedRange.to) return false
+      }
+
+      return true
+    })
+  }, [entries, filters])
+
+  // Define table columns
+  const columns: DataTableColumn<ContentEntry>[] = useMemo(() => {
+    if (!contentType) return []
+
+    const baseColumns: DataTableColumn<ContentEntry>[] = [
+      {
+        id: 'slug',
+        header: 'Slug',
+        accessorKey: 'slug',
+        sortable: true,
+        cell: (entry) => (
+          <div>
+            <div className="font-mono text-sm">{entry.slug}</div>
+            <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
+          </div>
+        ),
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        sortable: true,
+        cell: (entry) => getStatusBadge(entry),
+      },
+    ]
+
+    // Add dynamic field columns
+    const fieldColumns = contentType.fields
+      .sort((a, b) => a.order - b.order)
+      .map((field): DataTableColumn<ContentEntry> => ({
+        id: field.id,
+        header: field.displayName + (field.required ? ' *' : ''),
+        accessorFn: (entry) => getFieldValue(entry, field.name),
+        sortable: true,
+        cell: (entry) => (
+          <div className="max-w-48 truncate">
+            {field.fieldType === 'NUMBER' ? (
+              <Badge variant="secondary">
+                ${getFieldValue(entry, field.name)}
+              </Badge>
+            ) : field.fieldType === 'BOOLEAN' ? (
+              <Badge variant={getFieldValue(entry, field.name) === 'true' ? 'default' : 'secondary'}>
+                {getFieldValue(entry, field.name) === 'true' ? 'Yes' : 'No'}
+              </Badge>
+            ) : (
+              getFieldValue(entry, field.name)
+            )}
+          </div>
+        ),
+      }))
+
+    const endColumns: DataTableColumn<ContentEntry>[] = [
+      {
+        id: 'createdAt',
+        header: 'Created',
+        accessorKey: 'createdAt',
+        sortable: true,
+        cell: (entry) => (
+          <span className="text-muted-foreground">
+            {entry.createdAt.toLocaleDateString()}
+          </span>
+        ),
+      },
+      {
+        id: 'updatedAt',
+        header: 'Updated',
+        accessorKey: 'updatedAt',
+        sortable: true,
+        cell: (entry) => (
+          <span className="text-muted-foreground">
+            {entry.updatedAt.toLocaleDateString()}
+          </span>
+        ),
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        sortable: false,
+        cell: (entry) => (
+          <div className="flex justify-end space-x-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleEdit(entry.id)
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDelete(entry.id)
+              }}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+      },
+    ]
+
+    return [...baseColumns, ...fieldColumns, ...endColumns]
+  }, [contentType])
+
+  // Bulk actions configuration
+  const bulkActions: BulkAction[] = [
+    {
+      id: 'publish',
+      label: 'Publish',
+      icon: () => <span>✅</span>,
+      variant: 'default',
+    },
+    {
+      id: 'draft',
+      label: 'Set to Draft',
+      icon: () => <span>📝</span>,
+      variant: 'outline',
+    },
+    {
+      id: 'archive',
+      label: 'Archive',
+      icon: () => <span>📦</span>,
+      variant: 'secondary',
+      requiresConfirmation: true,
+      confirmationMessage: 'Are you sure you want to archive these entries?',
+    },
+    {
+      id: 'delete',
+      label: 'Delete',
+      icon: () => <span>🗑️</span>,
+      variant: 'destructive',
+      requiresConfirmation: true,
+      confirmationMessage: 'Are you sure you want to delete these entries? This action cannot be undone.',
+    },
+  ]
+
+  // Handle bulk actions
+  const handleBulkAction = async (actionId: string, items: ContentEntry[]) => {
+    try {
+      for (const entry of items) {
+        if (actionId === 'delete') {
+          await mockApi.deleteContentEntry(entry.id)
+        } else if (actionId === 'publish') {
+          await mockApi.updateContentEntry(entry.id, { status: 'PUBLISHED' as ContentStatus })
+        } else if (actionId === 'draft') {
+          await mockApi.updateContentEntry(entry.id, { status: 'DRAFT' as ContentStatus })
+        } else if (actionId === 'archive') {
+          await mockApi.updateContentEntry(entry.id, { status: 'ARCHIVED' as ContentStatus })
+        }
+      }
+      await loadData() // Reload entries
+    } catch (error) {
+      console.error('Bulk action failed:', error)
+      alert('Failed to perform bulk action')
+    }
+  }
+
+  // Selection handlers
+  const handleSelectAll = () => {
+    setSelectedEntries(filteredEntries)
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedEntries([])
+  }
+
+  const handleClearSelection = () => {
+    setSelectedEntries([])
+  }
 
   const totalPages = Math.ceil(filteredEntries.length / entriesPerPage)
   const startIndex = (currentPage - 1) * entriesPerPage
@@ -286,30 +490,25 @@ export default function ContentEntries() {
           </Card>
         </div>
 
-        {/* Filters and Search */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    placeholder="Search entries..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                Filters
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Enhanced Filters */}
+        <ContentFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+        />
 
-        {/* Entries Table */}
+        {/* Bulk Actions */}
+        <BulkActions
+          selectedItems={selectedEntries}
+          onClearSelection={handleClearSelection}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={handleDeselectAll}
+          totalItems={filteredEntries.length}
+          actions={bulkActions}
+          onAction={handleBulkAction}
+          isLoading={formLoading}
+        />
+
+        {/* Enhanced Data Table */}
         <Card>
           <CardHeader>
             <CardTitle>
@@ -317,94 +516,31 @@ export default function ContentEntries() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Slug</TableHead>
-                  <TableHead>Status</TableHead>
-                  {contentType.fields
-                    .sort((a, b) => a.order - b.order)
-                    .map((field) => (
-                      <TableHead key={field.id}>
-                        {field.displayName}
-                        {field.required && <span className="text-red-500 ml-1">*</span>}
-                      </TableHead>
-                    ))}
-                  <TableHead>Created</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedEntries.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <div className="font-mono text-sm">{entry.slug}</div>
-                        <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(entry)}
-                    </TableCell>
-                    {contentType.fields
-                      .sort((a, b) => a.order - b.order)
-                      .map((field) => (
-                        <TableCell key={field.id}>
-                          <div className="max-w-48 truncate">
-                            {field.fieldType === 'NUMBER' ? (
-                              <Badge variant="secondary">
-                                ${getFieldValue(entry, field.name)}
-                              </Badge>
-                            ) : field.fieldType === 'BOOLEAN' ? (
-                              <Badge variant={getFieldValue(entry, field.name) === 'true' ? 'default' : 'secondary'}>
-                                {getFieldValue(entry, field.name) === 'true' ? 'Yes' : 'No'}
-                              </Badge>
-                            ) : (
-                              getFieldValue(entry, field.name)
-                            )}
-                          </div>
-                        </TableCell>
-                      ))}
-                    <TableCell className="text-muted-foreground">
-                      {entry.createdAt.toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {entry.updatedAt.toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(entry.id)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(entry.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              data={paginatedEntries}
+              columns={columns}
+              searchValue={filters.search || ''}
+              onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value || undefined }))}
+              searchPlaceholder="Search entries..."
+              enableColumnToggle={true}
+              enableSorting={true}
+              enableSearch={false} // We handle search through filters
+              enableSelection={true}
+              selectedRows={selectedEntries}
+              onSelectionChange={setSelectedEntries}
+              getRowId={(row) => row.id}
+            />
 
-            {paginatedEntries.length === 0 && (
+            {filteredEntries.length === 0 && (
               <div className="text-center py-12">
                 <h3 className="text-lg font-semibold mb-2">No entries found</h3>
                 <p className="text-muted-foreground mb-4">
-                  {searchTerm
+                  {Object.keys(filters).length > 0
                     ? 'No entries match your search criteria'
                     : `No ${contentType.displayName.toLowerCase()} entries have been created yet`
                   }
                 </p>
-                {!searchTerm && (
+                {Object.keys(filters).length === 0 && (
                   <Button onClick={handleCreateNew}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Your First {contentType.displayName}
