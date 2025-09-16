@@ -24,6 +24,15 @@ export type ContentField = {
   required: boolean
   unique: boolean
   defaultValue?: string
+  placeholder?: string
+  helpText?: string
+  validation?: {
+    minLength?: number
+    maxLength?: number
+    min?: number
+    max?: number
+    pattern?: string
+  }
   options?: Record<string, unknown>
   relatedType?: string
   order: number

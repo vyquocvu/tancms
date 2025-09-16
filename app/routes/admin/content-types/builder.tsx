@@ -31,6 +31,10 @@ const FIELD_TYPES = [
   { value: 'DATE', label: 'Date', icon: Calendar, description: 'Date picker' },
   { value: 'EMAIL', label: 'Email', icon: AtSign, description: 'Email address input' },
   { value: 'URL', label: 'URL', icon: Link, description: 'Web URL input' },
+  { value: 'PHONE', label: 'Phone', icon: AtSign, description: 'Phone number with validation' },
+  { value: 'COLOR', label: 'Color', icon: AtSign, description: 'Color picker with hex input' },
+  { value: 'SLUG', label: 'Slug', icon: Link, description: 'URL-friendly identifier' },
+  { value: 'PASSWORD', label: 'Password', icon: AtSign, description: 'Password with strength meter' },
   { value: 'JSON', label: 'JSON', icon: Database, description: 'JSON data object' },
   { value: 'MEDIA', label: 'Media', icon: Image, description: 'File/image upload' },
   { value: 'RELATION', label: 'Relation', icon: Database, description: 'Link to other content' }
@@ -44,6 +48,15 @@ interface ContentField {
   required: boolean
   unique: boolean
   defaultValue?: string
+  placeholder?: string
+  helpText?: string
+  validation?: {
+    minLength?: number
+    maxLength?: number
+    min?: number
+    max?: number
+    pattern?: string
+  }
   options?: Record<string, unknown>
   relatedType?: string
   order: number
@@ -189,7 +202,9 @@ function FieldEditor({ field, onChange, onDelete }: {
           </div>
         </div>
 
-        {(field.fieldType === 'TEXT' || field.fieldType === 'TEXTAREA' || field.fieldType === 'NUMBER') && (
+        {(field.fieldType === 'TEXT' || field.fieldType === 'TEXTAREA' || field.fieldType === 'NUMBER' || 
+          field.fieldType === 'EMAIL' || field.fieldType === 'URL' || field.fieldType === 'PHONE' || 
+          field.fieldType === 'COLOR' || field.fieldType === 'SLUG' || field.fieldType === 'PASSWORD') && (
           <div className="mt-4">
             <label className="text-sm font-medium mb-1 block">Default Value</label>
             <Input
@@ -197,6 +212,90 @@ function FieldEditor({ field, onChange, onDelete }: {
               onChange={(e) => onChange({ defaultValue: e.target.value })}
               placeholder="Default value"
             />
+          </div>
+        )}
+
+        {/* Enhanced field options */}
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="text-sm font-medium mb-1 block">Placeholder Text</label>
+            <Input
+              value={field.placeholder || ''}
+              onChange={(e) => onChange({ placeholder: e.target.value })}
+              placeholder="Enter placeholder text..."
+            />
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium mb-1 block">Help Text</label>
+            <Input
+              value={field.helpText || ''}
+              onChange={(e) => onChange({ helpText: e.target.value })}
+              placeholder="Helpful description for users..."
+            />
+          </div>
+        </div>
+
+        {/* Validation options */}
+        {(field.fieldType === 'TEXT' || field.fieldType === 'TEXTAREA') && (
+          <div className="mt-4 space-y-4 p-4 border rounded-lg bg-muted/20">
+            <h4 className="text-sm font-medium">Text Validation</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Min Length</label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={field.validation?.minLength || ''}
+                  onChange={(e) => onChange({ 
+                    validation: { ...field.validation, minLength: e.target.value ? parseInt(e.target.value) : undefined }
+                  })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Max Length</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={field.validation?.maxLength || ''}
+                  onChange={(e) => onChange({ 
+                    validation: { ...field.validation, maxLength: e.target.value ? parseInt(e.target.value) : undefined }
+                  })}
+                  placeholder="255"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {field.fieldType === 'NUMBER' && (
+          <div className="mt-4 space-y-4 p-4 border rounded-lg bg-muted/20">
+            <h4 className="text-sm font-medium">Number Validation</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Minimum Value</label>
+                <Input
+                  type="number"
+                  value={field.validation?.min || ''}
+                  onChange={(e) => onChange({ 
+                    validation: { ...field.validation, min: e.target.value ? parseFloat(e.target.value) : undefined }
+                  })}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Maximum Value</label>
+                <Input
+                  type="number"
+                  value={field.validation?.max || ''}
+                  onChange={(e) => onChange({ 
+                    validation: { ...field.validation, max: e.target.value ? parseFloat(e.target.value) : undefined }
+                  })}
+                  placeholder="100"
+                />
+              </div>
+            </div>
           </div>
         )}
 
