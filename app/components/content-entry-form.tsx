@@ -2,11 +2,9 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { Textarea } from './ui/textarea'
-import { WysiwygEditor } from './ui/wysiwyg-editor'
 import { Label } from './ui/label'
-import { Switch } from './ui/switch'
 import { X, Save, Calendar, Clock } from 'lucide-react'
+import { FieldRenderer, validateFieldValue } from './forms/field-renderer'
 import type { ContentType, ContentField, ContentEntry, ContentStatus } from '~/lib/mock-api'
 
 interface ContentEntryFormProps {
@@ -75,40 +73,15 @@ export default function ContentEntryForm({
     }
   }
 
-  const handleWysiwygChange = (fieldId: string) => (value: string) => {
-    handleFieldChange(fieldId, value)
-  }
-
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
     
     contentType.fields.forEach(field => {
       const value = formData[field.id] || ''
+      const validation = validateFieldValue(field, value)
       
-      if (field.required && !value.trim()) {
-        newErrors[field.id] = `${field.displayName} is required`
-      }
-      
-      // Type-specific validation
-      if (value && field.fieldType === 'EMAIL') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!emailRegex.test(value)) {
-          newErrors[field.id] = 'Please enter a valid email address'
-        }
-      }
-      
-      if (value && field.fieldType === 'URL') {
-        try {
-          new URL(value)
-        } catch {
-          newErrors[field.id] = 'Please enter a valid URL'
-        }
-      }
-      
-      if (value && field.fieldType === 'NUMBER') {
-        if (isNaN(Number(value))) {
-          newErrors[field.id] = 'Please enter a valid number'
-        }
+      if (!validation.isValid && validation.message) {
+        newErrors[field.id] = validation.message
       }
     })
     
@@ -150,123 +123,14 @@ export default function ContentEntryForm({
     const value = formData[field.id] || ''
     const error = errors[field.id]
     
-    const commonProps = {
-      id: field.id,
-      value,
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
-        handleFieldChange(field.id, e.target.value),
-      className: error ? 'border-red-500' : ''
-    }
-
-    switch (field.fieldType) {
-      case 'TEXT':
-        return (
-          <Input
-            type="text"
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
-          />
-        )
-      
-      case 'TEXTAREA':
-        return (
-          <WysiwygEditor
-            value={value}
-            onChange={handleWysiwygChange(field.id)}
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            className={error ? 'border-red-500' : ''}
-            rows={4}
-          />
-        )
-      
-      case 'NUMBER':
-        return (
-          <Input
-            type="number"
-            step="any"
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
-          />
-        )
-      
-      case 'EMAIL':
-        return (
-          <Input
-            type="email"
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
-          />
-        )
-      
-      case 'URL':
-        return (
-          <Input
-            type="url"
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
-          />
-        )
-      
-      case 'DATE':
-        return (
-          <Input
-            type="date"
-            {...commonProps}
-          />
-        )
-      
-      case 'BOOLEAN':
-        return (
-          <div className="flex items-center space-x-2">
-            <Switch
-              id={field.id}
-              checked={value === 'true'}
-              onCheckedChange={(checked) => 
-                handleFieldChange(field.id, checked ? 'true' : 'false')
-              }
-            />
-            <Label htmlFor={field.id}>
-              {value === 'true' ? 'Yes' : 'No'}
-            </Label>
-          </div>
-        )
-      
-      case 'JSON':
-        return (
-          <Textarea
-            rows={6}
-            placeholder="Enter valid JSON"
-            className={`font-mono ${error ? 'border-red-500' : ''}`}
-            value={value}
-            onChange={(e) => {
-              handleFieldChange(field.id, e.target.value)
-              // Validate JSON
-              if (e.target.value) {
-                try {
-                  JSON.parse(e.target.value)
-                  if (errors[field.id]) {
-                    setErrors(prev => ({ ...prev, [field.id]: '' }))
-                  }
-                } catch {
-                  setErrors(prev => ({ 
-                    ...prev, 
-                    [field.id]: 'Invalid JSON format' 
-                  }))
-                }
-              }
-            }}
-          />
-        )
-      
-      default:
-        return (
-          <Input
-            type="text"
-            placeholder={`Enter ${field.displayName.toLowerCase()}`}
-            {...commonProps}
-          />
-        )
-    }
+    return (
+      <FieldRenderer
+        field={field}
+        value={value}
+        onChange={(newValue) => handleFieldChange(field.id, newValue)}
+        error={error}
+      />
+    )
   }
 
   return (
@@ -355,20 +219,8 @@ export default function ContentEntryForm({
           {contentType.fields
             .sort((a, b) => a.order - b.order)
             .map((field) => (
-              <div key={field.id} className="space-y-2">
-                <Label htmlFor={field.id}>
-                  {field.displayName}
-                  {field.required && <span className="text-red-500 ml-1">*</span>}
-                </Label>
+              <div key={field.id}>
                 {renderField(field)}
-                {errors[field.id] && (
-                  <p className="text-sm text-red-500">{errors[field.id]}</p>
-                )}
-                {field.fieldType === 'JSON' && !errors[field.id] && (
-                  <p className="text-xs text-muted-foreground">
-                    Enter valid JSON format, e.g., {`{"key": "value"}`}
-                  </p>
-                )}
               </div>
             ))}
 
