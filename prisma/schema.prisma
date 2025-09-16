@@ -19,14 +19,15 @@ enum Role {
 
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  name      String?
-  role      Role      @default(VIEWER)
-  sessions  Session[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id           String         @id @default(cuid())
+  email        String         @unique
+  password     String
+  name         String?
+  role         Role           @default(VIEWER)
+  sessions     Session[]
+  contentEntries ContentEntry[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([role])
 }
@@ -74,6 +75,13 @@ enum FieldType {
   MEDIA
 }
 
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
 model ContentType {
   id          String         @id @default(cuid())
   name        String         @unique
@@ -114,12 +122,21 @@ model ContentEntry {
   contentType   ContentType         @relation(fields: [contentTypeId], references: [id], onDelete: Cascade)
   contentTypeId String
   slug          String?
+  status        ContentStatus       @default(DRAFT)
+  publishedAt   DateTime?
+  scheduledAt   DateTime?
+  authorId      String?
+  author        User?               @relation(fields: [authorId], references: [id])
   fieldValues   ContentFieldValue[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
   @@unique([contentTypeId, slug])
   @@index([contentTypeId])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([scheduledAt])
+  @@index([authorId])
 }
 
 model ContentFieldValue {

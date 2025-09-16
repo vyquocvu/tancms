@@ -6,14 +6,17 @@ import { Textarea } from './ui/textarea'
 import { WysiwygEditor } from './ui/wysiwyg-editor'
 import { Label } from './ui/label'
 import { Switch } from './ui/switch'
-import { X, Save } from 'lucide-react'
-import type { ContentType, ContentField, ContentEntry } from '~/lib/mock-api'
+import { X, Save, Calendar, Clock } from 'lucide-react'
+import type { ContentType, ContentField, ContentEntry, ContentStatus } from '~/lib/mock-api'
 
 interface ContentEntryFormProps {
   contentType: ContentType
   entry?: ContentEntry | null
   onSave: (data: { 
     slug?: string
+    status?: ContentStatus
+    publishedAt?: Date
+    scheduledAt?: Date
     fieldValues: { fieldId: string; value: string }[] 
   }) => Promise<void>
   onCancel: () => void
@@ -29,6 +32,8 @@ export default function ContentEntryForm({
 }: ContentEntryFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [slug, setSlug] = useState('')
+  const [status, setStatus] = useState<ContentStatus>('DRAFT')
+  const [scheduledAt, setScheduledAt] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Initialize form data
@@ -38,11 +43,15 @@ export default function ContentEntryForm({
     if (entry) {
       // Editing existing entry
       setSlug(entry.slug || '')
+      setStatus(entry.status)
+      setScheduledAt(entry.scheduledAt ? entry.scheduledAt.toISOString().slice(0, 16) : '')
       entry.fieldValues.forEach(fv => {
         initialData[fv.fieldId] = fv.value
       })
     } else {
       // Creating new entry - use default values
+      setStatus('DRAFT')
+      setScheduledAt('')
       contentType.fields.forEach(field => {
         initialData[field.id] = field.defaultValue || ''
       })
@@ -119,8 +128,20 @@ export default function ContentEntryForm({
       value: formData[field.id] || ''
     }))
     
+    let publishedAt: Date | undefined
+    let finalScheduledAt: Date | undefined
+    
+    if (status === 'PUBLISHED') {
+      publishedAt = new Date()
+    } else if (status === 'SCHEDULED' && scheduledAt) {
+      finalScheduledAt = new Date(scheduledAt)
+    }
+    
     await onSave({
       slug: slug || undefined,
+      status,
+      publishedAt,
+      scheduledAt: finalScheduledAt,
       fieldValues
     })
   }
@@ -275,6 +296,59 @@ export default function ContentEntryForm({
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
             />
+          </div>
+
+          {/* Content Status and Workflow */}
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+            <h3 className="text-sm font-medium">Publishing Options</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <select
+                  id="status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as ContentStatus)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="DRAFT">📝 Draft</option>
+                  <option value="PUBLISHED">✅ Published</option>
+                  <option value="SCHEDULED">⏰ Scheduled</option>
+                  <option value="ARCHIVED">📦 Archived</option>
+                </select>
+              </div>
+
+              {status === 'SCHEDULED' && (
+                <div className="space-y-2">
+                  <Label htmlFor="scheduledAt">
+                    <Calendar className="w-4 h-4 inline mr-1" />
+                    Scheduled Date & Time
+                  </Label>
+                  <Input
+                    id="scheduledAt"
+                    type="datetime-local"
+                    value={scheduledAt}
+                    onChange={(e) => setScheduledAt(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Content will be automatically published at the scheduled time
+                  </p>
+                </div>
+              )}
+              
+              {status === 'PUBLISHED' && entry?.publishedAt && (
+                <div className="space-y-2">
+                  <Label>
+                    <Clock className="w-4 h-4 inline mr-1" />
+                    Published
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {entry.publishedAt.toLocaleString()}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Dynamic fields */}
