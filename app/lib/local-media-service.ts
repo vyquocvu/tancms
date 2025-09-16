@@ -192,6 +192,61 @@ export async function deleteMediaFile(id: string): Promise<boolean> {
 }
 
 /**
+ * Delete multiple media files in bulk
+ */
+export async function deleteMediaFiles(ids: string[]): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    try {
+      const media = getStoredMedia()
+      
+      // Find and revoke blob URLs for items to be deleted
+      const itemsToDelete = media.filter(item => ids.includes(item.id))
+      itemsToDelete.forEach(item => {
+        if (item.url.startsWith('blob:')) {
+          URL.revokeObjectURL(item.url)
+        }
+      })
+      
+      // Remove items from array
+      const remainingMedia = media.filter(item => !ids.includes(item.id))
+      saveMedia(remainingMedia)
+      
+      resolve(true)
+    } catch (error) {
+      console.error('Failed to delete media files:', error)
+      reject(new Error('Failed to delete media files'))
+    }
+  })
+}
+
+/**
+ * Update multiple media files in bulk
+ */
+export async function updateMediaFiles(updates: Array<{ id: string; data: { altText?: string } }>): Promise<MediaFile[]> {
+  return new Promise((resolve, reject) => {
+    try {
+      const media = getStoredMedia()
+      const updatedItems: MediaFile[] = []
+      
+      // Apply updates
+      updates.forEach(({ id, data }) => {
+        const index = media.findIndex(item => item.id === id)
+        if (index !== -1) {
+          media[index] = { ...media[index], ...data }
+          updatedItems.push(media[index])
+        }
+      })
+      
+      saveMedia(media)
+      resolve(updatedItems)
+    } catch (error) {
+      console.error('Failed to update media files:', error)
+      reject(new Error('Failed to update media files'))
+    }
+  })
+}
+
+/**
  * Get media statistics
  */
 export async function getMediaStatistics(): Promise<{

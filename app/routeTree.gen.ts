@@ -15,6 +15,7 @@ import { Route as LoginImport } from './routes/login'
 import { Route as BlogImport } from './routes/blog'
 import { Route as AdminImport } from './routes/admin'
 import { Route as AdminPostsImport } from './routes/admin.posts'
+import { Route as AdminMediaImport } from './routes/admin.media'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
@@ -39,6 +40,11 @@ const AdminPostsRoute = AdminPostsImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AdminMediaRoute = AdminMediaImport.update({
+  path: '/admin/media',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
@@ -60,6 +66,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPostsImport
       parentRoute: typeof rootRoute
     }
+    '/admin/media': {
+      preLoaderRoute: typeof AdminMediaImport
+      parentRoute: typeof rootRoute
+    }
     '/blog': {
       preLoaderRoute: typeof BlogImport
       parentRoute: typeof rootRoute
@@ -77,6 +87,7 @@ export const routeTree = rootRoute.addChildren([
   IndexRoute,
   AdminRoute,
   AdminPostsRoute,
+  AdminMediaRoute,
   BlogRoute,
   LoginRoute,
 ])
