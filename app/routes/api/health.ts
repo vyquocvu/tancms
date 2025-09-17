@@ -91,7 +91,7 @@ export const Route = createAPIFileRoute('/api/health')({
     if (detailed) {
       try {
         const fs = await import('fs/promises')
-        const stats = await fs.stat(process.cwd())
+        await fs.stat(process.cwd())
         
         checks.checks.filesystem = {
           status: 'pass',
@@ -100,7 +100,7 @@ export const Route = createAPIFileRoute('/api/health')({
             workingDirectory: process.cwd()
           }
         }
-      } catch (error) {
+      } catch {
         checks.checks.filesystem = {
           status: 'fail',
           error: 'Cannot access filesystem'
@@ -129,7 +129,7 @@ export const Route = createAPIFileRoute('/api/health')({
             active: sessionsCount - expiredSessionsCount
           }
         }
-      } catch (error) {
+      } catch {
         checks.checks.sessions = {
           status: 'fail',
           error: 'Cannot check session status'
@@ -138,9 +138,6 @@ export const Route = createAPIFileRoute('/api/health')({
     }
 
     // Security headers check
-    const hasSecurityHeaders = request.headers.get('x-frame-options') || 
-                              request.headers.get('content-security-policy')
-
     checks.checks.security = {
       status: 'pass',
       ...(detailed && {

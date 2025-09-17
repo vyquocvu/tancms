@@ -2,7 +2,7 @@
  * Enhanced authentication utilities with additional security measures
  */
 
-import { hashPassword, verifyPassword } from './auth'
+import { authenticateUser } from './auth'
 import type { AuthUser } from './auth'
 
 export interface LoginAttempt {
@@ -221,7 +221,6 @@ export async function authenticateUserSecure(
   
   // Check if account is locked out
   if (loginTracker.isLockedOut(email, ip)) {
-    const failedAttempts = loginTracker.getFailedAttempts(email, ip)
     const lockoutTime = DEFAULT_SECURITY_CONFIG.lockoutDurationMs
     
     return {
@@ -422,11 +421,3 @@ class SecurityAuditLogger {
  */
 export const securityAudit = new SecurityAuditLogger()
 
-/**
- * Authentication functions for use by authenticateUser
- */
-async function authenticateUser(email: string, password: string): Promise<AuthUser | null> {
-  // This is a placeholder - in the actual implementation, this would use the existing
-  // authenticateUser function from auth.ts
-  return null
-}

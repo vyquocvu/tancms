@@ -29,13 +29,14 @@ export const Route = createAPIFileRoute('/api/security/audit')({
       let auditData
 
       switch (action) {
-        case 'failed-logins':
+        case 'failed-logins': {
           const since = url.searchParams.get('since')
           const sinceDate = since ? new Date(since) : undefined
           auditData = securityAudit.getFailedLogins(sinceDate)
           break
+        }
 
-        case 'user-activity':
+        case 'user-activity': {
           const userId = url.searchParams.get('userId')
           if (!userId) {
             const response = new Response(
@@ -51,6 +52,7 @@ export const Route = createAPIFileRoute('/api/security/audit')({
           }
           auditData = securityAudit.getLogsByUser(userId, limit)
           break
+        }
 
         default:
           auditData = securityAudit.getRecentLogs(limit)

@@ -57,7 +57,7 @@ export function removeScriptTags(input: string): string {
   sanitized = sanitized.replace(/\s*on\w+\s*=\s*[^>]*/gi, '')
   
   // Remove data: URLs that could contain scripts
-  sanitized = sanitized.replace(/data:\s*text\/html/gi, '')
+  sanitized = sanitized.replace(/data:\s*text[/]html/gi, '')
   
   return sanitized
 }
@@ -127,7 +127,7 @@ export function sanitizeHtml(input: string, options: SanitizationOptions = {}): 
   }
   
   // Allow only specific tags
-  const allowedTagsRegex = new RegExp(`<(?!\/?(?:${allowedTags.join('|')})\\b)[^>]*>`, 'gi')
+  const allowedTagsRegex = new RegExp(`<(?!/?(?:${allowedTags.join('|')})\\b)[^>]*>`, 'gi')
   sanitized = sanitized.replace(allowedTagsRegex, '')
   
   // Remove disallowed attributes

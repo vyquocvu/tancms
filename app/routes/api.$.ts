@@ -7,13 +7,12 @@ import { createAPIFileRoute } from '@tanstack/start/api'
 import { apiManager, type ApiConfig } from '~/lib/api-manager'
 import { ApiResponseBuilder } from '~/lib/api-response'
 import { 
-  generateSecurityHeaders, 
   applySecurityHeaders, 
   createRateLimitMiddleware,
   validateRequestSize 
 } from '~/server/security-headers'
 import { sanitizeApiInput } from '~/lib/security/sanitization'
-import { createComprehensiveCSRFProtection, applyCSRFTokenToResponse } from '~/lib/security/csrf'
+import { createComprehensiveCSRFProtection } from '~/lib/security/csrf'
 
 /**
  * Initialize API manager with configuration from environment

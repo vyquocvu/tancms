@@ -5,7 +5,7 @@ import {
   getSessionUser,
   createUser,
 } from '~/server/auth'
-import { authenticateUserSecure, securityAudit, generateSecureToken } from '~/server/security-auth'
+import { authenticateUserSecure, securityAudit } from '~/server/security-auth'
 import { validatePasswordStrength } from '~/server/security-auth'
 import { sanitizeApiInput } from '~/lib/security/sanitization'
 import { applySecurityHeaders } from '~/server/security-headers'
@@ -139,7 +139,8 @@ export const Route = createAPIFileRoute('/api/auth')({
         }
 
         case 'register': {
-          const body = await request.json()
+          const rawBody = await request.json()
+          const body = sanitizeApiInput(rawBody)
           const result = registerSchema.safeParse(body)
 
           if (!result.success) {
@@ -180,8 +181,8 @@ export const Route = createAPIFileRoute('/api/auth')({
                 },
               }
             )
-          } catch (error: any) {
-            if (error.code === 'P2002') {
+          } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
               // Prisma unique constraint error
               return new Response(
                 JSON.stringify({
