@@ -71,11 +71,21 @@ function checkEnvironment() {
   // Check database setup
   if (existsSync('prisma/schema.prisma')) {
     log(`✅ Prisma schema found`, colors.green)
+    
+    // Check if Prisma client is generated
+    if (existsSync('node_modules/.prisma/client')) {
+      log(`✅ Prisma client generated`, colors.green)
+    } else {
+      log(`⚠️  Prisma client not generated - may require network access`, colors.yellow)
+      log(`   Note: This is normal in restricted environments (CI/sandboxes)`, colors.blue)
+      warnings++
+    }
 
     if (existsSync('prisma/dev.db')) {
       log(`✅ SQLite database exists`, colors.green)
     } else {
       log(`⚠️  Database not initialized - run 'npm run db:migrate'`, colors.yellow)
+      log(`   Note: Database operations may be limited without Prisma client`, colors.blue)
       warnings++
     }
   } else {
@@ -122,6 +132,15 @@ function checkEnvironment() {
     if (!existsSync('prisma/dev.db')) {
       log(`• npm run db:migrate`, colors.blue)
       log(`• npm run db:seed`, colors.blue)
+    }
+    
+    // Add note about network restrictions
+    if (!existsSync('node_modules/.prisma/client')) {
+      log(`\n${colors.bold}Note about Prisma:${colors.reset}`)
+      log(`If you see "binaries.prisma.sh" errors, this is due to network restrictions`, colors.blue)
+      log(`in sandboxed/CI environments. The application will still work for most`, colors.blue)
+      log(`development tasks. Database operations may be limited but tests and build`, colors.blue)
+      log(`will continue to function normally.`, colors.blue)
     }
   }
 

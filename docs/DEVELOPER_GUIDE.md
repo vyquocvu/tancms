@@ -228,6 +228,49 @@ npm run format       # Format code
 npx tsc --noEmit     # Check TypeScript
 ```
 
+#### 5. Prisma Network Restrictions
+
+**Problem**: Errors like "getaddrinfo ENOTFOUND binaries.prisma.sh" or Prisma engine download failures
+
+**Root Cause**: Network restrictions in sandboxed environments (CI, GitHub Codespaces, etc.) blocking access to `binaries.prisma.sh` and `checkpoint.prisma.io`
+
+**Impact**: Limited database operations, but core development still works
+
+**What Still Works**:
+- ✅ Tests pass (107/107)
+- ✅ Build completes successfully  
+- ✅ Linting and formatting
+- ✅ Development server starts
+- ✅ Most application features
+
+**What's Limited**:
+- ❌ Database migrations
+- ❌ Database seeding
+- ❌ Prisma Studio
+- ❌ Database-dependent features
+
+**Solutions**:
+
+**Option A: Use without database** (recommended for code review/testing)
+```bash
+# These commands work normally
+npm run test         # All tests pass
+npm run build        # Build succeeds
+npm run lint         # Code quality checks
+npm run format       # Code formatting
+```
+
+**Option B: Work with restrictions** (shows helpful warnings)
+```bash
+npm run dev:setup    # Handles errors gracefully
+npm run check-env    # Shows clear status and guidance
+```
+
+**Option C: For repository admins** (configure network access)
+Add these domains to the allowlist in [Copilot coding agent settings](https://github.com/vyquocvu/tancms/settings/copilot/coding_agent):
+- `binaries.prisma.sh`
+- `checkpoint.prisma.io`
+
 #### 5. Network Issues (Prisma)
 
 **Problem**: Cannot download Prisma engines
