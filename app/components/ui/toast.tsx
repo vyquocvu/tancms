@@ -41,45 +41,62 @@ export function ToastProvider({ children }: ToastProviderProps) {
     setToasts(prev => prev.filter(toast => toast.id !== id))
   }, [])
 
-  const showToast = useCallback((toast: Omit<Toast, 'id'>) => {
-    const id = Math.random().toString(36).substr(2, 9)
-    const newToast = { ...toast, id }
-    
-    setToasts(prev => [...prev, newToast])
+  const showToast = useCallback(
+    (toast: Omit<Toast, 'id'>) => {
+      const id = Math.random().toString(36).substr(2, 9)
+      const newToast = { ...toast, id }
 
-    // Auto-hide toast after duration
-    const duration = toast.duration ?? (toast.type === 'error' ? 8000 : 5000)
-    if (duration > 0) {
-      setTimeout(() => hideToast(id), duration)
-    }
-  }, [hideToast])
+      setToasts(prev => [...prev, newToast])
 
-  const showSuccess = useCallback((title: string, description?: string) => {
-    showToast({ type: 'success', title, description })
-  }, [showToast])
+      // Auto-hide toast after duration
+      const duration = toast.duration ?? (toast.type === 'error' ? 8000 : 5000)
+      if (duration > 0) {
+        setTimeout(() => hideToast(id), duration)
+      }
+    },
+    [hideToast]
+  )
 
-  const showError = useCallback((title: string, description?: string) => {
-    showToast({ type: 'error', title, description })
-  }, [showToast])
+  const showSuccess = useCallback(
+    (title: string, description?: string) => {
+      showToast({ type: 'success', title, description })
+    },
+    [showToast]
+  )
 
-  const showWarning = useCallback((title: string, description?: string) => {
-    showToast({ type: 'warning', title, description })
-  }, [showToast])
+  const showError = useCallback(
+    (title: string, description?: string) => {
+      showToast({ type: 'error', title, description })
+    },
+    [showToast]
+  )
 
-  const showInfo = useCallback((title: string, description?: string) => {
-    showToast({ type: 'info', title, description })
-  }, [showToast])
+  const showWarning = useCallback(
+    (title: string, description?: string) => {
+      showToast({ type: 'warning', title, description })
+    },
+    [showToast]
+  )
+
+  const showInfo = useCallback(
+    (title: string, description?: string) => {
+      showToast({ type: 'info', title, description })
+    },
+    [showToast]
+  )
 
   return (
-    <ToastContext.Provider value={{
-      toasts,
-      showToast,
-      hideToast,
-      showSuccess,
-      showError,
-      showWarning,
-      showInfo
-    }}>
+    <ToastContext.Provider
+      value={{
+        toasts,
+        showToast,
+        hideToast,
+        showSuccess,
+        showError,
+        showWarning,
+        showInfo,
+      }}
+    >
       {children}
       <ToastContainer toasts={toasts} onHide={hideToast} />
     </ToastContext.Provider>
@@ -95,10 +112,10 @@ function ToastContainer({ toasts, onHide }: ToastContainerProps) {
   if (toasts.length === 0) return null
 
   return (
-    <div 
-      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full"
-      role="region"
-      aria-label="Notifications"
+    <div
+      className='fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full'
+      role='region'
+      aria-label='Notifications'
     >
       {toasts.map(toast => (
         <ToastItem key={toast.id} toast={toast} onHide={onHide} />
@@ -129,13 +146,13 @@ function ToastItem({ toast, onHide }: ToastItemProps) {
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle className="h-5 w-5" />
+        return <CheckCircle className='h-5 w-5' />
       case 'error':
-        return <AlertCircle className="h-5 w-5" />
+        return <AlertCircle className='h-5 w-5' />
       case 'warning':
-        return <AlertTriangle className="h-5 w-5" />
+        return <AlertTriangle className='h-5 w-5' />
       case 'info':
-        return <Info className="h-5 w-5" />
+        return <Info className='h-5 w-5' />
     }
   }
 
@@ -168,31 +185,25 @@ function ToastItem({ toast, onHide }: ToastItemProps) {
   return (
     <div
       className={cn(
-        "rounded-lg border shadow-lg transition-all duration-150 ease-in-out transform",
-        "p-4 flex items-start gap-3",
+        'rounded-lg border shadow-lg transition-all duration-150 ease-in-out transform',
+        'p-4 flex items-start gap-3',
         getStyles(),
-        isVisible 
-          ? "translate-x-0 opacity-100" 
-          : "translate-x-full opacity-0"
+        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       )}
-      role="alert"
+      role='alert'
       aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
     >
-      <div className={cn("flex-shrink-0 mt-0.5", getIconColor())}>
-        {getIcon()}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium">{toast.title}</p>
-        {toast.description && (
-          <p className="text-sm opacity-90 mt-1">{toast.description}</p>
-        )}
+      <div className={cn('flex-shrink-0 mt-0.5', getIconColor())}>{getIcon()}</div>
+      <div className='flex-1 min-w-0'>
+        <p className='text-sm font-medium'>{toast.title}</p>
+        {toast.description && <p className='text-sm opacity-90 mt-1'>{toast.description}</p>}
       </div>
       <button
         onClick={handleClose}
-        className="flex-shrink-0 ml-2 p-1 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent focus:ring-current"
-        aria-label="Close notification"
+        className='flex-shrink-0 ml-2 p-1 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent focus:ring-current'
+        aria-label='Close notification'
       >
-        <X className="h-4 w-4" />
+        <X className='h-4 w-4' />
       </button>
     </div>
   )
@@ -217,5 +228,5 @@ export const toast = {
   },
   info: (title: string, description?: string) => {
     globalToastRef?.showInfo(title, description)
-  }
+  },
 }

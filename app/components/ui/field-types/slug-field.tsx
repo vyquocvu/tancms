@@ -18,13 +18,13 @@ interface SlugFieldProps {
   className?: string
 }
 
-export function SlugField({ 
-  value, 
-  onChange, 
-  placeholder = "url-friendly-slug", 
+export function SlugField({
+  value,
+  onChange,
+  placeholder = 'url-friendly-slug',
   error,
   sourceText,
-  className = '' 
+  className = '',
 }: SlugFieldProps) {
   const [localError, setLocalError] = useState<string>()
   const [isAutoGenerating, setIsAutoGenerating] = useState(!value)
@@ -42,12 +42,12 @@ export function SlugField({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     onChange(newValue)
-    
+
     // Disable auto-generation when user manually edits
     if (newValue !== '' && isAutoGenerating) {
       setIsAutoGenerating(false)
     }
-    
+
     // Clear local error when user starts typing
     if (localError) {
       setLocalError(undefined)
@@ -76,11 +76,11 @@ export function SlugField({
   const displayError = error || localError
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center space-x-2">
-        <div className="flex-1">
+    <div className='space-y-2'>
+      <div className='flex items-center space-x-2'>
+        <div className='flex-1'>
           <Input
-            type="text"
+            type='text'
             value={value}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -88,31 +88,27 @@ export function SlugField({
             className={`${displayError ? 'border-red-500' : ''} ${className}`}
           />
         </div>
-        
+
         {sourceText && (
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
+            type='button'
+            variant='outline'
+            size='sm'
             onClick={handleAutoGenerate}
-            title="Generate slug from title"
+            title='Generate slug from title'
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className='h-4 w-4' />
           </Button>
         )}
       </div>
 
       {isAutoGenerating && sourceText && (
-        <p className="text-xs text-blue-600">
-          Auto-generating from source text
-        </p>
+        <p className='text-xs text-blue-600'>Auto-generating from source text</p>
       )}
 
-      {displayError && (
-        <p className="text-sm text-red-500">{displayError}</p>
-      )}
-      
-      <p className="text-xs text-muted-foreground">
+      {displayError && <p className='text-sm text-red-500'>{displayError}</p>}
+
+      <p className='text-xs text-muted-foreground'>
         URL-friendly identifier using lowercase letters, numbers, and hyphens
       </p>
     </div>

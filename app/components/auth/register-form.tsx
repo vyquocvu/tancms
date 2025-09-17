@@ -69,7 +69,7 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
@@ -81,9 +81,9 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
       const response = await fetch('/api/auth?action=register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, name, password, confirmPassword })
+        body: JSON.stringify({ email, name, password, confirmPassword }),
       })
 
       const data = await response.json()
@@ -122,132 +122,122 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-          <UserPlus className="w-6 h-6 text-primary" />
+    <Card className='w-full max-w-md mx-auto'>
+      <CardHeader className='text-center'>
+        <div className='mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
+          <UserPlus className='w-6 h-6 text-primary' />
         </div>
-        <CardTitle className="text-2xl">Create Account</CardTitle>
-        <p className="text-muted-foreground">Join TanCMS to get started</p>
+        <CardTitle className='text-2xl'>Create Account</CardTitle>
+        <p className='text-muted-foreground'>Join TanCMS to get started</p>
       </CardHeader>
 
       <CardContent>
         {errors.general && (
-          <Alert className="mb-6" variant="destructive">
+          <Alert className='mb-6' variant='destructive'>
             <AlertDescription>{errors.general}</AlertDescription>
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
+        <form onSubmit={handleSubmit} className='space-y-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='name'>Full Name</Label>
             <Input
-              id="name"
-              type="text"
-              placeholder="Enter your full name"
+              id='name'
+              type='text'
+              placeholder='Enter your full name'
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               className={errors.name ? 'border-destructive' : ''}
               disabled={loading}
             />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name}</p>
-            )}
+            {errors.name && <p className='text-sm text-destructive'>{errors.name}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+          <div className='space-y-2'>
+            <Label htmlFor='email'>Email</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
+              id='email'
+              type='email'
+              placeholder='Enter your email'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className={errors.email ? 'border-destructive' : ''}
               disabled={loading}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
-            )}
+            {errors.email && <p className='text-sm text-destructive'>{errors.email}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
+          <div className='space-y-2'>
+            <Label htmlFor='password'>Password</Label>
+            <div className='relative'>
               <Input
-                id="password"
+                id='password'
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password"
+                placeholder='Create a password'
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
                 disabled={loading}
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className='h-4 w-4 text-gray-400' />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className='h-4 w-4 text-gray-400' />
                 )}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
-            )}
+            {errors.password && <p className='text-sm text-destructive'>{errors.password}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative">
+          <div className='space-y-2'>
+            <Label htmlFor='confirmPassword'>Confirm Password</Label>
+            <div className='relative'>
               <Input
-                id="confirmPassword"
+                id='confirmPassword'
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your password"
+                placeholder='Confirm your password'
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
                 className={errors.confirmPassword ? 'border-destructive pr-10' : 'pr-10'}
                 disabled={loading}
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 disabled={loading}
               >
                 {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className='h-4 w-4 text-gray-400' />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className='h-4 w-4 text-gray-400' />
                 )}
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+              <p className='text-sm text-destructive'>{errors.confirmPassword}</p>
             )}
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type='submit' className='w-full' disabled={loading}>
             {loading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </form>
 
         {onLoginClick && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className='mt-6 text-center'>
+            <p className='text-sm text-muted-foreground'>
               Already have an account?{' '}
               <button
-                type="button"
+                type='button'
                 onClick={onLoginClick}
-                className="text-primary hover:underline font-medium"
+                className='text-primary hover:underline font-medium'
                 disabled={loading}
               >
                 Sign in here

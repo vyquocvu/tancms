@@ -13,10 +13,10 @@ async function verifyPassword(password: string, hashedPassword: string): Promise
 
 function hasPermission(userRole: string, requiredRole: string): boolean {
   const roleHierarchy: Record<string, number> = {
-    'VIEWER': 1,
-    'AUTHOR': 2,
-    'EDITOR': 3,
-    'ADMIN': 4
+    VIEWER: 1,
+    AUTHOR: 2,
+    EDITOR: 3,
+    ADMIN: 4,
   }
 
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole]
@@ -27,7 +27,7 @@ describe('Authentication Utilities', () => {
     it('should hash passwords correctly', async () => {
       const password = 'testpassword123'
       const hashedPassword = await hashPassword(password)
-      
+
       expect(hashedPassword).toBeDefined()
       expect(hashedPassword).not.toBe(password)
       expect(hashedPassword.length).toBeGreaterThan(50) // bcrypt hashes are long
@@ -36,10 +36,10 @@ describe('Authentication Utilities', () => {
     it('should verify passwords correctly', async () => {
       const password = 'testpassword123'
       const hashedPassword = await hashPassword(password)
-      
+
       const isValid = await verifyPassword(password, hashedPassword)
       expect(isValid).toBe(true)
-      
+
       const isInvalid = await verifyPassword('wrongpassword', hashedPassword)
       expect(isInvalid).toBe(false)
     })

@@ -4,7 +4,9 @@ This document describes the authentication system implemented for TanCMS.
 
 ## Overview
 
-TanCMS uses session-based authentication with role-based access control (RBAC). The system provides secure login, logout, and registration functionality with different permission levels.
+TanCMS uses session-based authentication with role-based access control (RBAC).
+The system provides secure login, logout, and registration functionality with
+different permission levels.
 
 ## Architecture
 
@@ -36,9 +38,11 @@ Each role inherits permissions from lower roles.
 ### Authentication Endpoints (`/api/auth`)
 
 #### POST `/api/auth?action=login`
+
 Authenticates a user with email and password.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -47,6 +51,7 @@ Authenticates a user with email and password.
 ```
 
 **Response:**
+
 ```json
 {
   "user": {
@@ -59,9 +64,11 @@ Authenticates a user with email and password.
 ```
 
 #### POST `/api/auth?action=register`
+
 Creates a new user account.
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com",
@@ -72,9 +79,11 @@ Creates a new user account.
 ```
 
 #### POST `/api/auth?action=logout`
+
 Logs out the current user by invalidating their session.
 
 #### GET `/api/auth?action=me`
+
 Returns the current authenticated user information.
 
 ## Frontend Components
@@ -90,6 +99,7 @@ const { user, loading, login, logout, register } = useAuth()
 ### Login Form (`LoginForm`)
 
 Professional login component with:
+
 - Email and password validation
 - Error handling
 - Loading states
@@ -98,6 +108,7 @@ Professional login component with:
 ### Register Form (`RegisterForm`)
 
 Registration component with:
+
 - Form validation
 - Password confirmation
 - Error handling
@@ -110,17 +121,20 @@ Admin routes automatically redirect unauthenticated users to the login page.
 ## Security Features
 
 ### Password Security
+
 - Passwords are hashed using bcryptjs with 12 salt rounds
 - No plain text passwords are stored
 - Password strength validation (minimum 6 characters)
 
 ### Session Management
+
 - Sessions expire after 30 days
 - HttpOnly cookies prevent XSS attacks
 - SameSite cookie attribute for CSRF protection
 - Secure cookies in production
 
 ### Authorization
+
 - Role-based access control
 - Permission hierarchy enforcement
 - Route-level protection
@@ -144,6 +158,7 @@ The seed script creates default users for testing:
 ## Usage Examples
 
 ### Login Flow
+
 1. User navigates to `/login` or `#/login`
 2. User enters email and password
 3. System validates credentials
@@ -151,12 +166,14 @@ The seed script creates default users for testing:
 5. User is redirected to admin dashboard
 
 ### Logout Flow
+
 1. User clicks logout button
 2. System invalidates session
 3. Session cookie is cleared
 4. User is redirected to login page
 
 ### Protected Access
+
 1. User attempts to access admin route
 2. System checks for valid session
 3. If authenticated, access is granted
@@ -165,6 +182,7 @@ The seed script creates default users for testing:
 ## Development
 
 ### Testing Authentication
+
 Run the test suite to verify authentication functionality:
 
 ```bash
@@ -172,6 +190,7 @@ npm test -- auth.test.ts
 ```
 
 ### Database Setup
+
 Initialize the database with default users:
 
 ```bash
@@ -180,6 +199,7 @@ npm run db:seed
 ```
 
 ### Environment Variables
+
 Required environment variables:
 
 ```bash

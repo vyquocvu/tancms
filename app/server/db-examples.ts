@@ -4,10 +4,7 @@
  */
 
 import { PrismaClient } from '@prisma/client'
-import { 
-  upsertTag,
-  cleanupExpiredSessions
-} from './db-utils'
+import { upsertTag, cleanupExpiredSessions } from './db-utils'
 
 const prisma = new PrismaClient()
 
@@ -18,12 +15,12 @@ async function exampleCreateTags() {
       upsertTag(prisma, 'JavaScript'),
       upsertTag(prisma, 'TypeScript'),
       upsertTag(prisma, 'React'),
-      upsertTag(prisma, 'Next.js')
+      upsertTag(prisma, 'Next.js'),
     ])
-    
+
     console.log('Created/found tags:')
     tags.forEach(tag => console.log(`- ${tag.name} (${tag.id})`))
-    
+
     return tags
   } catch (error) {
     console.error('Error creating tags:', error)
@@ -44,24 +41,20 @@ async function exampleCleanupSessions() {
 // Example: Complete workflow
 async function exampleWorkflow() {
   console.log('=== TanCMS Database Examples ===\n')
-  
+
   // 1. Create tags
   console.log('1. Creating tags...')
   await exampleCreateTags()
-  
+
   // 2. Cleanup sessions
   console.log('\n2. Cleaning up expired sessions...')
   await exampleCleanupSessions()
-  
+
   console.log('\n=== Examples completed ===')
 }
 
 // Export functions for use in other parts of your application
-export {
-  exampleCreateTags,
-  exampleCleanupSessions,
-  exampleWorkflow
-}
+export { exampleCreateTags, exampleCleanupSessions, exampleWorkflow }
 
 // Uncomment to run examples (ensure you have a proper environment setup)
 // exampleWorkflow()

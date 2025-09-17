@@ -9,7 +9,7 @@ describe('ApiResponseBuilder', () => {
   beforeEach(() => {
     // Mock crypto.randomUUID
     vi.stubGlobal('crypto', {
-      randomUUID: () => 'test-uuid-123'
+      randomUUID: () => 'test-uuid-123',
     })
   })
 
@@ -264,7 +264,7 @@ describe('ApiResponseBuilder', () => {
       // Create multiple UUIDs to test uniqueness
       let callCount = 0
       vi.stubGlobal('crypto', {
-        randomUUID: () => `uuid-${++callCount}`
+        randomUUID: () => `uuid-${++callCount}`,
       })
 
       const response1 = ApiResponseBuilder.success()
@@ -277,9 +277,9 @@ describe('ApiResponseBuilder', () => {
 
     it('should include processing time when provided', () => {
       const processingTime = 150
-      
+
       const response = ApiResponseBuilder.success({
-        meta: { processingTime }
+        meta: { processingTime },
       })
 
       expect(response.meta.processingTime).toBe(processingTime)

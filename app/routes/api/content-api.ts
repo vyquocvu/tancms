@@ -22,31 +22,34 @@ export class ContentAPI {
    * List all entries for a content type
    * GET /api/{contentType}
    */
-  static async listEntries(contentTypeSlug: string, params?: {
-    page?: number
-    limit?: number
-    search?: string
-  }): Promise<ApiResponse> {
+  static async listEntries(
+    contentTypeSlug: string,
+    params?: {
+      page?: number
+      limit?: number
+      search?: string
+    }
+  ): Promise<ApiResponse> {
     try {
       // Get content type by slug
       const contentTypes = await mockApi.getContentTypes()
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
-      
+
       if (!contentType) {
         return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Get entries for this content type
       const entries = await mockApi.getContentEntries(contentType.id)
-      
+
       // Apply search filter if provided
       let filteredEntries = entries
       if (params?.search) {
         const searchTerm = params.search.toLowerCase()
-        filteredEntries = entries.filter(entry => 
-          entry.fieldValues.some(fv => 
-            fv.value.toLowerCase().includes(searchTerm)
-          ) || entry.slug?.toLowerCase().includes(searchTerm)
+        filteredEntries = entries.filter(
+          entry =>
+            entry.fieldValues.some(fv => fv.value.toLowerCase().includes(searchTerm)) ||
+            entry.slug?.toLowerCase().includes(searchTerm)
         )
       }
 
@@ -67,9 +70,9 @@ export class ContentAPI {
             total: filteredEntries.length,
             totalPages: Math.ceil(filteredEntries.length / limit),
             hasNext: startIndex + limit < filteredEntries.length,
-            hasPrev: page > 1
-          }
-        }
+            hasPrev: page > 1,
+          },
+        },
       })
     } catch (error) {
       console.error('Error listing entries:', error)
@@ -86,14 +89,14 @@ export class ContentAPI {
       // Get content type by slug
       const contentTypes = await mockApi.getContentTypes()
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
-      
+
       if (!contentType) {
         return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Get the specific entry
       const entry = await mockApi.getContentEntry(entryId)
-      
+
       if (!entry || entry.contentTypeId !== contentType.id) {
         return ApiResponseBuilder.notFound('Entry', entryId)
       }
@@ -102,8 +105,8 @@ export class ContentAPI {
         message: `Retrieved entry '${entryId}' from content type '${contentTypeSlug}'`,
         data: {
           entry,
-          contentType
-        }
+          contentType,
+        },
       })
     } catch (error) {
       console.error('Error getting entry:', error)
@@ -115,12 +118,15 @@ export class ContentAPI {
    * Create a new entry
    * POST /api/{contentType}
    */
-  static async createEntry(contentTypeSlug: string, data: ContentEntryRequest): Promise<ApiResponse> {
+  static async createEntry(
+    contentTypeSlug: string,
+    data: ContentEntryRequest
+  ): Promise<ApiResponse> {
     try {
       // Get content type by slug
       const contentTypes = await mockApi.getContentTypes()
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
-      
+
       if (!contentType) {
         return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
@@ -128,7 +134,7 @@ export class ContentAPI {
       // Validate required fields
       const validationErrors: string[] = []
       const requiredFields = contentType.fields.filter(field => field.required)
-      
+
       for (const requiredField of requiredFields) {
         const fieldValue = data.fieldValues.find(fv => fv.fieldId === requiredField.id)
         if (!fieldValue || !fieldValue.value?.trim()) {
@@ -144,15 +150,15 @@ export class ContentAPI {
       const entry = await mockApi.createContentEntry({
         contentTypeId: contentType.id,
         slug: data.slug,
-        fieldValues: data.fieldValues
+        fieldValues: data.fieldValues,
       })
 
       return ApiResponseBuilder.success({
         message: `Entry created successfully in content type '${contentTypeSlug}'`,
         data: {
           entry,
-          contentType
-        }
+          contentType,
+        },
       })
     } catch (error) {
       console.error('Error creating entry:', error)
@@ -164,12 +170,16 @@ export class ContentAPI {
    * Update an existing entry
    * PUT /api/{contentType}/:id
    */
-  static async updateEntry(contentTypeSlug: string, entryId: string, data: Partial<ContentEntryRequest>): Promise<ApiResponse> {
+  static async updateEntry(
+    contentTypeSlug: string,
+    entryId: string,
+    data: Partial<ContentEntryRequest>
+  ): Promise<ApiResponse> {
     try {
       // Get content type by slug
       const contentTypes = await mockApi.getContentTypes()
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
-      
+
       if (!contentType) {
         return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
@@ -184,7 +194,7 @@ export class ContentAPI {
       if (data.fieldValues) {
         const validationErrors: string[] = []
         const requiredFields = contentType.fields.filter(field => field.required)
-        
+
         for (const requiredField of requiredFields) {
           const fieldValue = data.fieldValues.find(fv => fv.fieldId === requiredField.id)
           if (!fieldValue || !fieldValue.value?.trim()) {
@@ -200,14 +210,14 @@ export class ContentAPI {
       // Update the entry
       const entry = await mockApi.updateContentEntry(entryId, {
         slug: data.slug,
-        fieldValues: data.fieldValues
+        fieldValues: data.fieldValues,
       })
 
       if (!entry) {
         return ApiResponseBuilder.error({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to update entry',
-          details: ['Entry could not be updated']
+          details: ['Entry could not be updated'],
         })
       }
 
@@ -215,8 +225,8 @@ export class ContentAPI {
         message: `Entry '${entryId}' updated successfully`,
         data: {
           entry,
-          contentType
-        }
+          contentType,
+        },
       })
     } catch (error) {
       console.error('Error updating entry:', error)
@@ -233,7 +243,7 @@ export class ContentAPI {
       // Get content type by slug
       const contentTypes = await mockApi.getContentTypes()
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
-      
+
       if (!contentType) {
         return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
@@ -251,7 +261,7 @@ export class ContentAPI {
         return ApiResponseBuilder.error({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to delete entry',
-          details: ['Entry could not be deleted']
+          details: ['Entry could not be deleted'],
         })
       }
 
@@ -259,8 +269,8 @@ export class ContentAPI {
         message: `Entry '${entryId}' deleted successfully`,
         data: {
           message: 'Entry deleted successfully',
-          deletedEntryId: entryId
-        }
+          deletedEntryId: entryId,
+        },
       })
     } catch (error) {
       console.error('Error deleting entry:', error)

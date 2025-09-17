@@ -42,7 +42,6 @@ function saveMedia(media: MediaFile[]) {
   }
 }
 
-
 /**
  * Get media type from mime type
  */
@@ -60,7 +59,7 @@ export async function uploadFile(file: File, altText?: string): Promise<MediaFil
     try {
       // Create blob URL for the file
       const url = URL.createObjectURL(file)
-      
+
       // Create media record
       const mediaFile: MediaFile = {
         id: generateId(),
@@ -71,14 +70,14 @@ export async function uploadFile(file: File, altText?: string): Promise<MediaFil
         size: file.size,
         mimeType: file.type,
         altText,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
       }
-      
+
       // Save to localStorage
       const media = getStoredMedia()
       media.unshift(mediaFile) // Add to beginning for recent-first order
       saveMedia(media)
-      
+
       resolve(mediaFile)
     } catch (error) {
       console.error('Upload failed:', error)
@@ -95,36 +94,34 @@ export async function getMediaFiles(
   pageSize: number = 20,
   searchTerm?: string,
   type?: string
-): Promise<{ media: MediaFile[], pagination: any }> {
-  return new Promise((resolve) => {
+): Promise<{ media: MediaFile[]; pagination: any }> {
+  return new Promise(resolve => {
     try {
       let media = getStoredMedia()
-      
+
       // Apply filters
       if (searchTerm) {
-        media = media.filter(item => 
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        media = media.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
       }
-      
+
       if (type && type !== 'all') {
         media = media.filter(item => item.type === type)
       }
-      
+
       // Apply pagination
       const total = media.length
       const totalPages = Math.ceil(total / pageSize)
       const start = (page - 1) * pageSize
       const paginatedMedia = media.slice(start, start + pageSize)
-      
+
       resolve({
         media: paginatedMedia,
         pagination: {
           page,
           pageSize,
           total,
-          totalPages
-        }
+          totalPages,
+        },
       })
     } catch (error) {
       console.error('Failed to get media files:', error)
@@ -141,16 +138,16 @@ export async function updateMediaFile(id: string, data: { altText?: string }): P
     try {
       const media = getStoredMedia()
       const index = media.findIndex(item => item.id === id)
-      
+
       if (index === -1) {
         reject(new Error('Media file not found'))
         return
       }
-      
+
       // Update the media item
       media[index] = { ...media[index], ...data }
       saveMedia(media)
-      
+
       resolve(media[index])
     } catch (error) {
       console.error('Failed to update media:', error)
@@ -167,22 +164,22 @@ export async function deleteMediaFile(id: string): Promise<boolean> {
     try {
       const media = getStoredMedia()
       const index = media.findIndex(item => item.id === id)
-      
+
       if (index === -1) {
         reject(new Error('Media file not found'))
         return
       }
-      
+
       // Revoke the blob URL to free memory
       const item = media[index]
       if (item.url.startsWith('blob:')) {
         URL.revokeObjectURL(item.url)
       }
-      
+
       // Remove from array
       media.splice(index, 1)
       saveMedia(media)
-      
+
       resolve(true)
     } catch (error) {
       console.error('Failed to delete media:', error)
@@ -198,7 +195,7 @@ export async function deleteMediaFiles(ids: string[]): Promise<boolean> {
   return new Promise((resolve, reject) => {
     try {
       const media = getStoredMedia()
-      
+
       // Find and revoke blob URLs for items to be deleted
       const itemsToDelete = media.filter(item => ids.includes(item.id))
       itemsToDelete.forEach(item => {
@@ -206,11 +203,11 @@ export async function deleteMediaFiles(ids: string[]): Promise<boolean> {
           URL.revokeObjectURL(item.url)
         }
       })
-      
+
       // Remove items from array
       const remainingMedia = media.filter(item => !ids.includes(item.id))
       saveMedia(remainingMedia)
-      
+
       resolve(true)
     } catch (error) {
       console.error('Failed to delete media files:', error)
@@ -222,12 +219,14 @@ export async function deleteMediaFiles(ids: string[]): Promise<boolean> {
 /**
  * Update multiple media files in bulk
  */
-export async function updateMediaFiles(updates: Array<{ id: string; data: { altText?: string } }>): Promise<MediaFile[]> {
+export async function updateMediaFiles(
+  updates: Array<{ id: string; data: { altText?: string } }>
+): Promise<MediaFile[]> {
   return new Promise((resolve, reject) => {
     try {
       const media = getStoredMedia()
       const updatedItems: MediaFile[] = []
-      
+
       // Apply updates
       updates.forEach(({ id, data }) => {
         const index = media.findIndex(item => item.id === id)
@@ -236,7 +235,7 @@ export async function updateMediaFiles(updates: Array<{ id: string; data: { altT
           updatedItems.push(media[index])
         }
       })
-      
+
       saveMedia(media)
       resolve(updatedItems)
     } catch (error) {
@@ -256,18 +255,18 @@ export async function getMediaStatistics(): Promise<{
   documents: number
   totalSize: number
 }> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     try {
       const media = getStoredMedia()
-      
+
       const stats = {
         total: media.length,
         images: media.filter(item => item.type === 'image').length,
         videos: media.filter(item => item.type === 'video').length,
         documents: media.filter(item => item.type === 'document').length,
-        totalSize: media.reduce((sum, item) => sum + item.size, 0)
+        totalSize: media.reduce((sum, item) => sum + item.size, 0),
       }
-      
+
       resolve(stats)
     } catch (error) {
       console.error('Failed to get media stats:', error)

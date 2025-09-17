@@ -14,19 +14,19 @@ interface PhoneFieldProps {
   className?: string
 }
 
-export function PhoneField({ 
-  value, 
-  onChange, 
-  placeholder = "Enter phone number", 
+export function PhoneField({
+  value,
+  onChange,
+  placeholder = 'Enter phone number',
   error,
-  className = '' 
+  className = '',
 }: PhoneFieldProps) {
   const [localError, setLocalError] = useState<string>()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     onChange(newValue)
-    
+
     // Clear local error when user starts typing
     if (localError) {
       setLocalError(undefined)
@@ -47,19 +47,17 @@ export function PhoneField({
   const displayError = error || localError
 
   return (
-    <div className="space-y-1">
+    <div className='space-y-1'>
       <Input
-        type="tel"
+        type='tel'
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
         className={`${displayError ? 'border-red-500' : ''} ${className}`}
       />
-      {displayError && (
-        <p className="text-sm text-red-500">{displayError}</p>
-      )}
-      <p className="text-xs text-muted-foreground">
+      {displayError && <p className='text-sm text-red-500'>{displayError}</p>}
+      <p className='text-xs text-muted-foreground'>
         Examples: +1 (555) 123-4567, 555-123-4567, +33 1 42 86 83 26
       </p>
     </div>

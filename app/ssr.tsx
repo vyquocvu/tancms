@@ -6,7 +6,7 @@ import { createRouter } from './router'
 export default async function handler(_request: Request): Promise<Response> {
   const router = createRouter()
   const stream = await renderToReadableStream(<StartServer router={router} />)
-  
+
   return new Response(stream, {
     status: 200,
     headers: {

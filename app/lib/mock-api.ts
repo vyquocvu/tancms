@@ -79,7 +79,7 @@ const contentTypes: ContentType[] = [
         required: true,
         unique: false,
         order: 0,
-        contentTypeId: '1'
+        contentTypeId: '1',
       },
       {
         id: 'field2',
@@ -89,7 +89,7 @@ const contentTypes: ContentType[] = [
         required: true,
         unique: false,
         order: 1,
-        contentTypeId: '1'
+        contentTypeId: '1',
       },
       {
         id: 'field3',
@@ -99,11 +99,11 @@ const contentTypes: ContentType[] = [
         required: false,
         unique: false,
         order: 2,
-        contentTypeId: '1'
-      }
+        contentTypeId: '1',
+      },
     ],
     createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20')
+    updatedAt: new Date('2024-01-20'),
   },
   {
     id: '2',
@@ -120,7 +120,7 @@ const contentTypes: ContentType[] = [
         required: true,
         unique: false,
         order: 0,
-        contentTypeId: '2'
+        contentTypeId: '2',
       },
       {
         id: 'field5',
@@ -130,7 +130,7 @@ const contentTypes: ContentType[] = [
         required: true,
         unique: false,
         order: 1,
-        contentTypeId: '2'
+        contentTypeId: '2',
       },
       {
         id: 'field6',
@@ -140,11 +140,11 @@ const contentTypes: ContentType[] = [
         required: false,
         unique: false,
         order: 2,
-        contentTypeId: '2'
-      }
+        contentTypeId: '2',
+      },
     ],
     createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12')
+    updatedAt: new Date('2024-01-12'),
   },
   {
     id: '3',
@@ -161,7 +161,7 @@ const contentTypes: ContentType[] = [
         required: true,
         unique: true,
         order: 0,
-        contentTypeId: '3'
+        contentTypeId: '3',
       },
       {
         id: 'field8',
@@ -171,12 +171,12 @@ const contentTypes: ContentType[] = [
         required: false,
         unique: false,
         order: 1,
-        contentTypeId: '3'
-      }
+        contentTypeId: '3',
+      },
     ],
     createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-08')
-  }
+    updatedAt: new Date('2024-01-08'),
+  },
 ]
 
 // In-memory storage for entries
@@ -194,25 +194,25 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field1',
         entryId: '1',
         field: contentTypes[0].fields[0],
-        value: 'Laptop Pro 15"'
+        value: 'Laptop Pro 15"',
       },
       {
         id: 'fv2',
         fieldId: 'field2',
         entryId: '1',
         field: contentTypes[0].fields[1],
-        value: '1299.99'
+        value: '1299.99',
       },
       {
         id: 'fv3',
         fieldId: 'field3',
         entryId: '1',
         field: contentTypes[0].fields[2],
-        value: 'High-performance laptop with 15-inch display'
-      }
+        value: 'High-performance laptop with 15-inch display',
+      },
     ],
     createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-01-22')
+    updatedAt: new Date('2024-01-22'),
   },
   {
     id: '2',
@@ -227,25 +227,25 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field1',
         entryId: '2',
         field: contentTypes[0].fields[0],
-        value: 'Wireless Mouse'
+        value: 'Wireless Mouse',
       },
       {
         id: 'fv5',
         fieldId: 'field2',
         entryId: '2',
         field: contentTypes[0].fields[1],
-        value: '29.99'
+        value: '29.99',
       },
       {
         id: 'fv6',
         fieldId: 'field3',
         entryId: '2',
         field: contentTypes[0].fields[2],
-        value: 'Ergonomic wireless mouse with USB receiver'
-      }
+        value: 'Ergonomic wireless mouse with USB receiver',
+      },
     ],
     createdAt: new Date('2024-01-18'),
-    updatedAt: new Date('2024-01-19')
+    updatedAt: new Date('2024-01-19'),
   },
   {
     id: '3',
@@ -259,25 +259,25 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field1',
         entryId: '3',
         field: contentTypes[0].fields[0],
-        value: 'Mechanical Keyboard'
+        value: 'Mechanical Keyboard',
       },
       {
         id: 'fv8',
         fieldId: 'field2',
         entryId: '3',
         field: contentTypes[0].fields[1],
-        value: '89.99'
+        value: '89.99',
       },
       {
         id: 'fv9',
         fieldId: 'field3',
         entryId: '3',
         field: contentTypes[0].fields[2],
-        value: 'RGB backlit mechanical keyboard with blue switches'
-      }
+        value: 'RGB backlit mechanical keyboard with blue switches',
+      },
     ],
     createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-16')
+    updatedAt: new Date('2024-01-16'),
   },
   // Blog Post entries
   {
@@ -293,25 +293,25 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field4',
         entryId: '4',
         field: contentTypes[1].fields[0],
-        value: 'Getting Started with CMS'
+        value: 'Getting Started with CMS',
       },
       {
         id: 'fv11',
         fieldId: 'field5',
         entryId: '4',
         field: contentTypes[1].fields[1],
-        value: 'Learn how to get started with our content management system...'
+        value: 'Learn how to get started with our content management system...',
       },
       {
         id: 'fv12',
         fieldId: 'field6',
         entryId: '4',
         field: contentTypes[1].fields[2],
-        value: 'true'
-      }
+        value: 'true',
+      },
     ],
     createdAt: new Date('2024-01-25'),
-    updatedAt: new Date('2024-01-26')
+    updatedAt: new Date('2024-01-26'),
   },
   {
     id: '5',
@@ -326,25 +326,25 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field4',
         entryId: '5',
         field: contentTypes[1].fields[0],
-        value: 'Advanced Features Overview'
+        value: 'Advanced Features Overview',
       },
       {
         id: 'fv14',
         fieldId: 'field5',
         entryId: '5',
         field: contentTypes[1].fields[1],
-        value: 'Explore the advanced features available in our CMS platform...'
+        value: 'Explore the advanced features available in our CMS platform...',
       },
       {
         id: 'fv15',
         fieldId: 'field6',
         entryId: '5',
         field: contentTypes[1].fields[2],
-        value: 'false'
-      }
+        value: 'false',
+      },
     ],
     createdAt: new Date('2024-01-23'),
-    updatedAt: new Date('2024-01-24')
+    updatedAt: new Date('2024-01-24'),
   },
   // Category entries
   {
@@ -360,18 +360,18 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field7',
         entryId: '6',
         field: contentTypes[2].fields[0],
-        value: 'Electronics'
+        value: 'Electronics',
       },
       {
         id: 'fv17',
         fieldId: 'field8',
         entryId: '6',
         field: contentTypes[2].fields[1],
-        value: 'Electronic devices and accessories'
-      }
+        value: 'Electronic devices and accessories',
+      },
     ],
     createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12')
+    updatedAt: new Date('2024-01-12'),
   },
   {
     id: '7',
@@ -385,19 +385,19 @@ const contentEntries: ContentEntry[] = [
         fieldId: 'field7',
         entryId: '7',
         field: contentTypes[2].fields[0],
-        value: 'Tutorials'
+        value: 'Tutorials',
       },
       {
         id: 'fv19',
         fieldId: 'field8',
         entryId: '7',
         field: contentTypes[2].fields[1],
-        value: 'How-to guides and tutorials'
-      }
+        value: 'How-to guides and tutorials',
+      },
     ],
     createdAt: new Date('2024-01-08'),
-    updatedAt: new Date('2024-01-09')
-  }
+    updatedAt: new Date('2024-01-09'),
+  },
 ]
 
 let nextId = 4
@@ -424,7 +424,7 @@ export const mockApi = {
   }): Promise<ContentType> {
     const id = String(nextId++)
     const slug = generateSlug(data.name)
-    
+
     const contentType: ContentType = {
       id,
       name: data.name,
@@ -435,22 +435,25 @@ export const mockApi = {
         ...field,
         id: String(nextFieldId++),
         contentTypeId: id,
-        order: index
+        order: index,
       })),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
 
     contentTypes.push(contentType)
     return Promise.resolve(contentType)
   },
 
-  async updateContentType(id: string, data: Partial<{
-    name: string
-    displayName: string
-    description: string
-    fields: (Omit<ContentField, 'id' | 'contentTypeId'> & { id?: string })[]
-  }>): Promise<ContentType | null> {
+  async updateContentType(
+    id: string,
+    data: Partial<{
+      name: string
+      displayName: string
+      description: string
+      fields: (Omit<ContentField, 'id' | 'contentTypeId'> & { id?: string })[]
+    }>
+  ): Promise<ContentType | null> {
     const index = contentTypes.findIndex(ct => ct.id === id)
     if (index === -1) return Promise.resolve(null)
 
@@ -459,13 +462,15 @@ export const mockApi = {
       ...existing,
       ...data,
       slug: data.name ? generateSlug(data.name) : existing.slug,
-      fields: data.fields ? data.fields.map((field, fieldIndex) => ({
-        ...field,
-        id: field.id || String(nextFieldId++),
-        contentTypeId: id,
-        order: fieldIndex
-      })) : existing.fields,
-      updatedAt: new Date()
+      fields: data.fields
+        ? data.fields.map((field, fieldIndex) => ({
+            ...field,
+            id: field.id || String(nextFieldId++),
+            contentTypeId: id,
+            order: fieldIndex,
+          }))
+        : existing.fields,
+      updatedAt: new Date(),
     }
 
     contentTypes[index] = updated
@@ -502,7 +507,7 @@ export const mockApi = {
   }): Promise<ContentEntry> {
     const id = String(nextEntryId++)
     const contentType = contentTypes.find(ct => ct.id === data.contentTypeId)
-    
+
     if (!contentType) {
       throw new Error('Content type not found')
     }
@@ -525,9 +530,11 @@ export const mockApi = {
     // Ensure slug is unique within content type
     let uniqueSlug = slug
     let counter = 1
-    while (contentEntries.some(entry => 
-      entry.contentTypeId === data.contentTypeId && entry.slug === uniqueSlug
-    )) {
+    while (
+      contentEntries.some(
+        entry => entry.contentTypeId === data.contentTypeId && entry.slug === uniqueSlug
+      )
+    ) {
       uniqueSlug = `${slug}-${counter}`
       counter++
     }
@@ -543,31 +550,34 @@ export const mockApi = {
       fieldValues: data.fieldValues.map(fv => {
         const field = contentType.fields.find(f => f.id === fv.fieldId)
         if (!field) throw new Error(`Field ${fv.fieldId} not found`)
-        
+
         return {
           id: String(nextFieldValueId++),
           fieldId: fv.fieldId,
           entryId: id,
           field,
-          value: fv.value
+          value: fv.value,
         }
       }),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
 
     contentEntries.push(entry)
     return Promise.resolve(entry)
   },
 
-  async updateContentEntry(id: string, data: {
-    slug?: string
-    status?: ContentStatus
-    publishedAt?: Date
-    scheduledAt?: Date
-    authorId?: string
-    fieldValues?: { fieldId: string; value: string }[]
-  }): Promise<ContentEntry | null> {
+  async updateContentEntry(
+    id: string,
+    data: {
+      slug?: string
+      status?: ContentStatus
+      publishedAt?: Date
+      scheduledAt?: Date
+      authorId?: string
+      fieldValues?: { fieldId: string; value: string }[]
+    }
+  ): Promise<ContentEntry | null> {
     const index = contentEntries.findIndex(entry => entry.id === id)
     if (index === -1) return Promise.resolve(null)
 
@@ -580,11 +590,12 @@ export const mockApi = {
       // Ensure slug is unique within content type
       let slug = data.slug
       let counter = 1
-      while (contentEntries.some(entry => 
-        entry.contentTypeId === existing.contentTypeId && 
-        entry.slug === slug && 
-        entry.id !== id
-      )) {
+      while (
+        contentEntries.some(
+          entry =>
+            entry.contentTypeId === existing.contentTypeId && entry.slug === slug && entry.id !== id
+        )
+      ) {
         slug = `${data.slug}-${counter}`
         counter++
       }
@@ -596,13 +607,13 @@ export const mockApi = {
       updatedFieldValues = data.fieldValues.map(fv => {
         const field = contentType.fields.find(f => f.id === fv.fieldId)
         if (!field) throw new Error(`Field ${fv.fieldId} not found`)
-        
+
         return {
           id: String(nextFieldValueId++),
           fieldId: fv.fieldId,
           entryId: id,
           field,
-          value: fv.value
+          value: fv.value,
         }
       })
     }
@@ -615,7 +626,7 @@ export const mockApi = {
       scheduledAt: data.scheduledAt !== undefined ? data.scheduledAt : existing.scheduledAt,
       authorId: data.authorId !== undefined ? data.authorId : existing.authorId,
       fieldValues: updatedFieldValues,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     }
 
     contentEntries[index] = updated
@@ -634,41 +645,44 @@ export const mockApi = {
   async publishContentEntry(id: string): Promise<ContentEntry | null> {
     return this.updateContentEntry(id, {
       status: 'PUBLISHED',
-      publishedAt: new Date()
+      publishedAt: new Date(),
     })
   },
 
   async unpublishContentEntry(id: string): Promise<ContentEntry | null> {
     return this.updateContentEntry(id, {
       status: 'DRAFT',
-      publishedAt: undefined
+      publishedAt: undefined,
     })
   },
 
   async scheduleContentEntry(id: string, scheduledAt: Date): Promise<ContentEntry | null> {
     return this.updateContentEntry(id, {
       status: 'SCHEDULED',
-      scheduledAt
+      scheduledAt,
     })
   },
 
   async unscheduleContentEntry(id: string): Promise<ContentEntry | null> {
     return this.updateContentEntry(id, {
       status: 'DRAFT',
-      scheduledAt: undefined
+      scheduledAt: undefined,
     })
   },
 
   async archiveContentEntry(id: string): Promise<ContentEntry | null> {
     return this.updateContentEntry(id, {
-      status: 'ARCHIVED'
+      status: 'ARCHIVED',
     })
   },
 
   // Filter entries by status
-  async getContentEntriesByStatus(contentTypeId: string, status: ContentStatus): Promise<ContentEntry[]> {
-    const entries = contentEntries.filter(entry => 
-      entry.contentTypeId === contentTypeId && entry.status === status
+  async getContentEntriesByStatus(
+    contentTypeId: string,
+    status: ContentStatus
+  ): Promise<ContentEntry[]> {
+    const entries = contentEntries.filter(
+      entry => entry.contentTypeId === contentTypeId && entry.status === status
     )
     return Promise.resolve(entries)
   },
@@ -676,13 +690,11 @@ export const mockApi = {
   // Get scheduled entries that should be published
   async getScheduledEntriesToPublish(): Promise<ContentEntry[]> {
     const now = new Date()
-    const entries = contentEntries.filter(entry => 
-      entry.status === 'SCHEDULED' && 
-      entry.scheduledAt && 
-      entry.scheduledAt <= now
+    const entries = contentEntries.filter(
+      entry => entry.status === 'SCHEDULED' && entry.scheduledAt && entry.scheduledAt <= now
     )
     return Promise.resolve(entries)
-  }
+  },
 }
 
 // Demo admin user
@@ -690,5 +702,5 @@ export const demoAdmin = {
   id: 'demo-admin',
   name: 'Demo Admin',
   email: 'admin@demo.tancms.dev',
-  role: 'ADMIN' as const
+  role: 'ADMIN' as const,
 }

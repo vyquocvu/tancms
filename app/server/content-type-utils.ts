@@ -63,15 +63,15 @@ export async function createContentType(prisma: PrismaClient, data: CreateConten
           defaultValue: field.defaultValue,
           options: field.options ? JSON.stringify(field.options) : null,
           relatedType: field.relatedType,
-          order: field.order ?? index
-        }))
-      }
+          order: field.order ?? index,
+        })),
+      },
     },
     include: {
       fields: {
-        orderBy: { order: 'asc' }
-      }
-    }
+        orderBy: { order: 'asc' },
+      },
+    },
   })
 }
 
@@ -79,25 +79,27 @@ export async function createContentType(prisma: PrismaClient, data: CreateConten
  * Update an existing content type
  */
 export async function updateContentType(
-  prisma: PrismaClient, 
-  id: string, 
+  prisma: PrismaClient,
+  id: string,
   data: Partial<CreateContentTypeData>
 ) {
   const updateData: Record<string, unknown> = {}
-  
+
   if (data.name) updateData.name = data.name
   if (data.displayName) updateData.displayName = data.displayName
   if (data.description !== undefined) updateData.description = data.description
-  
+
   // If name changed, update slug
   if (data.name) {
     const baseSlug = generateSlug(data.name)
     let slug = baseSlug
     let counter = 1
 
-    while (await prisma.contentType.findFirst({ 
-      where: { slug, id: { not: id } } 
-    })) {
+    while (
+      await prisma.contentType.findFirst({
+        where: { slug, id: { not: id } },
+      })
+    ) {
       slug = `${baseSlug}-${counter}`
       counter++
     }
@@ -109,9 +111,9 @@ export async function updateContentType(
     data: updateData,
     include: {
       fields: {
-        orderBy: { order: 'asc' }
-      }
-    }
+        orderBy: { order: 'asc' },
+      },
+    },
   })
 }
 
@@ -122,13 +124,13 @@ export async function getContentTypes(prisma: PrismaClient) {
   return await prisma.contentType.findMany({
     include: {
       fields: {
-        orderBy: { order: 'asc' }
+        orderBy: { order: 'asc' },
       },
       _count: {
-        select: { entries: true }
-      }
+        select: { entries: true },
+      },
     },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
   })
 }
 
@@ -140,9 +142,9 @@ export async function getContentTypeById(prisma: PrismaClient, id: string) {
     where: { id },
     include: {
       fields: {
-        orderBy: { order: 'asc' }
-      }
-    }
+        orderBy: { order: 'asc' },
+      },
+    },
   })
 }
 
@@ -154,9 +156,9 @@ export async function getContentTypeBySlug(prisma: PrismaClient, slug: string) {
     where: { slug },
     include: {
       fields: {
-        orderBy: { order: 'asc' }
-      }
-    }
+        orderBy: { order: 'asc' },
+      },
+    },
   })
 }
 
@@ -165,7 +167,7 @@ export async function getContentTypeBySlug(prisma: PrismaClient, slug: string) {
  */
 export async function deleteContentType(prisma: PrismaClient, id: string) {
   return await prisma.contentType.delete({
-    where: { id }
+    where: { id },
   })
 }
 
@@ -178,7 +180,7 @@ export async function addFieldToContentType(
   fieldData: CreateContentFieldData
 ) {
   const existingFields = await prisma.contentField.count({
-    where: { contentTypeId }
+    where: { contentTypeId },
   })
 
   return await prisma.contentField.create({
@@ -192,8 +194,8 @@ export async function addFieldToContentType(
       options: fieldData.options ? JSON.stringify(fieldData.options) : null,
       relatedType: fieldData.relatedType,
       order: fieldData.order ?? existingFields,
-      contentTypeId
-    }
+      contentTypeId,
+    },
   })
 }
 
@@ -206,7 +208,7 @@ export async function updateContentField(
   data: Partial<CreateContentFieldData>
 ) {
   const updateData: Record<string, unknown> = {}
-  
+
   if (data.name) updateData.name = data.name
   if (data.displayName) updateData.displayName = data.displayName
   if (data.fieldType) updateData.fieldType = data.fieldType
@@ -221,7 +223,7 @@ export async function updateContentField(
 
   return await prisma.contentField.update({
     where: { id: fieldId },
-    data: updateData
+    data: updateData,
   })
 }
 
@@ -230,7 +232,7 @@ export async function updateContentField(
  */
 export async function deleteContentField(prisma: PrismaClient, fieldId: string) {
   return await prisma.contentField.delete({
-    where: { id: fieldId }
+    where: { id: fieldId },
   })
 }
 
@@ -239,15 +241,17 @@ export async function deleteContentField(prisma: PrismaClient, fieldId: string) 
  */
 export async function createContentEntry(prisma: PrismaClient, data: CreateContentEntryData) {
   let slug = data.slug
-  
+
   if (slug) {
     let counter = 1
     const baseSlug = slug
-    
+
     // Ensure slug is unique within content type
-    while (await prisma.contentEntry.findFirst({ 
-      where: { contentTypeId: data.contentTypeId, slug } 
-    })) {
+    while (
+      await prisma.contentEntry.findFirst({
+        where: { contentTypeId: data.contentTypeId, slug },
+      })
+    ) {
       slug = `${baseSlug}-${counter}`
       counter++
     }
@@ -260,18 +264,18 @@ export async function createContentEntry(prisma: PrismaClient, data: CreateConte
       fieldValues: {
         create: data.fieldValues.map(fv => ({
           fieldId: fv.fieldId,
-          value: typeof fv.value === 'string' ? fv.value : JSON.stringify(fv.value)
-        }))
-      }
+          value: typeof fv.value === 'string' ? fv.value : JSON.stringify(fv.value),
+        })),
+      },
     },
     include: {
       contentType: true,
       fieldValues: {
         include: {
-          field: true
-        }
-      }
-    }
+          field: true,
+        },
+      },
+    },
   })
 }
 
@@ -292,24 +296,24 @@ export async function getContentEntries(
       include: {
         fieldValues: {
           include: {
-            field: true
-          }
-        }
+            field: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
       skip,
-      take: pageSize
+      take: pageSize,
     }),
     prisma.contentEntry.count({
-      where: { contentTypeId }
-    })
+      where: { contentTypeId },
+    }),
   ])
 
   return {
     entries,
     total,
     pages: Math.ceil(total / pageSize),
-    currentPage: page
+    currentPage: page,
   }
 }
 
@@ -323,16 +327,16 @@ export async function getContentEntryById(prisma: PrismaClient, id: string) {
       contentType: {
         include: {
           fields: {
-            orderBy: { order: 'asc' }
-          }
-        }
+            orderBy: { order: 'asc' },
+          },
+        },
       },
       fieldValues: {
         include: {
-          field: true
-        }
-      }
-    }
+          field: true,
+        },
+      },
+    },
   })
 }
 
@@ -345,24 +349,26 @@ export async function updateContentEntry(
   data: Partial<CreateContentEntryData>
 ) {
   const updateData: Record<string, unknown> = {}
-  
+
   if (data.slug !== undefined) {
     const entry = await prisma.contentEntry.findUnique({
-      where: { id: entryId }
+      where: { id: entryId },
     })
-    
+
     if (entry && data.slug) {
       let slug = data.slug
       let counter = 1
       const baseSlug = slug
-      
-      while (await prisma.contentEntry.findFirst({ 
-        where: { 
-          contentTypeId: entry.contentTypeId, 
-          slug, 
-          id: { not: entryId } 
-        } 
-      })) {
+
+      while (
+        await prisma.contentEntry.findFirst({
+          where: {
+            contentTypeId: entry.contentTypeId,
+            slug,
+            id: { not: entryId },
+          },
+        })
+      ) {
         slug = `${baseSlug}-${counter}`
         counter++
       }
@@ -375,14 +381,14 @@ export async function updateContentEntry(
   if (data.fieldValues) {
     // Delete existing field values and create new ones
     await prisma.contentFieldValue.deleteMany({
-      where: { entryId }
+      where: { entryId },
     })
-    
+
     updateData.fieldValues = {
       create: data.fieldValues.map(fv => ({
         fieldId: fv.fieldId,
-        value: typeof fv.value === 'string' ? fv.value : JSON.stringify(fv.value)
-      }))
+        value: typeof fv.value === 'string' ? fv.value : JSON.stringify(fv.value),
+      })),
     }
   }
 
@@ -393,10 +399,10 @@ export async function updateContentEntry(
       contentType: true,
       fieldValues: {
         include: {
-          field: true
-        }
-      }
-    }
+          field: true,
+        },
+      },
+    },
   })
 }
 
@@ -405,6 +411,6 @@ export async function updateContentEntry(
  */
 export async function deleteContentEntry(prisma: PrismaClient, entryId: string) {
   return await prisma.contentEntry.delete({
-    where: { id: entryId }
+    where: { id: entryId },
   })
 }

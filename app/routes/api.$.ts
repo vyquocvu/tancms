@@ -15,7 +15,7 @@ function initializeApiManager(): void {
     enableAuth: process.env.NODE_ENV === 'production' && !!process.env.API_KEYS,
     enableLogging: process.env.NODE_ENV !== 'test',
     corsEnabled: true,
-    apiKeys: process.env.API_KEYS ? process.env.API_KEYS.split(',') : undefined
+    apiKeys: process.env.API_KEYS ? process.env.API_KEYS.split(',') : undefined,
   }
 
   // Configure the API manager if needed
@@ -30,21 +30,23 @@ function initializeApiManager(): void {
           }
 
           const apiKey = request.query?.['api_key'] || request.query?.['apiKey']
-          
+
           if (!apiKey) {
-            return ApiResponseBuilder.authRequired('API key is required. Provide it as ?api_key=your_key')
+            return ApiResponseBuilder.authRequired(
+              'API key is required. Provide it as ?api_key=your_key'
+            )
           }
 
           if (!config.apiKeys?.includes(apiKey)) {
             return ApiResponseBuilder.error({
               code: 'AUTHENTICATION_FAILED',
               message: 'Invalid API key provided',
-              details: ['The provided API key is not valid']
+              details: ['The provided API key is not valid'],
             })
           }
 
           return next()
-        }
+        },
       })
     }
   }
@@ -58,7 +60,7 @@ export const Route = createAPIFileRoute('/api/$')({
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
-    
+
     // Convert URLSearchParams to plain object
     url.searchParams.forEach((value, key) => {
       query[key] = value
@@ -68,13 +70,13 @@ export const Route = createAPIFileRoute('/api/$')({
       const response = await apiManager.handleRequest({
         method: 'GET',
         path,
-        query
+        query,
       })
 
       return ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
     } catch (apiError) {
       console.error('API GET error:', apiError)
@@ -87,7 +89,7 @@ export const Route = createAPIFileRoute('/api/$')({
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
-    
+
     // Convert URLSearchParams to plain object
     url.searchParams.forEach((value, key) => {
       query[key] = value
@@ -101,7 +103,7 @@ export const Route = createAPIFileRoute('/api/$')({
       const errorResponse = ApiResponseBuilder.error({
         code: 'BAD_REQUEST',
         message: 'Invalid JSON in request body',
-        details: ['Request body must contain valid JSON']
+        details: ['Request body must contain valid JSON'],
       })
       return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
@@ -111,13 +113,13 @@ export const Route = createAPIFileRoute('/api/$')({
         method: 'POST',
         path,
         body,
-        query
+        query,
       })
 
       return ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
     } catch (apiError) {
       console.error('API POST error:', apiError)
@@ -130,7 +132,7 @@ export const Route = createAPIFileRoute('/api/$')({
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
-    
+
     // Convert URLSearchParams to plain object
     url.searchParams.forEach((value, key) => {
       query[key] = value
@@ -144,7 +146,7 @@ export const Route = createAPIFileRoute('/api/$')({
       const errorResponse = ApiResponseBuilder.error({
         code: 'BAD_REQUEST',
         message: 'Invalid JSON in request body',
-        details: ['Request body must contain valid JSON']
+        details: ['Request body must contain valid JSON'],
       })
       return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
@@ -154,13 +156,13 @@ export const Route = createAPIFileRoute('/api/$')({
         method: 'PUT',
         path,
         body,
-        query
+        query,
       })
 
       return ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
     } catch (apiError) {
       console.error('API PUT error:', apiError)
@@ -173,7 +175,7 @@ export const Route = createAPIFileRoute('/api/$')({
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
-    
+
     // Convert URLSearchParams to plain object
     url.searchParams.forEach((value, key) => {
       query[key] = value
@@ -183,13 +185,13 @@ export const Route = createAPIFileRoute('/api/$')({
       const response = await apiManager.handleRequest({
         method: 'DELETE',
         path,
-        query
+        query,
       })
 
       return ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
     } catch (apiError) {
       console.error('API DELETE error:', apiError)
@@ -206,8 +208,8 @@ export const Route = createAPIFileRoute('/api/$')({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400'
-      }
+        'Access-Control-Max-Age': '86400',
+      },
     })
-  }
+  },
 })

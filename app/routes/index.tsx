@@ -106,7 +106,7 @@ function HomePage() {
         placeholder: 'Enter the blog post title',
         helpText: 'The main title of your blog post',
         order: 1,
-        contentTypeId: 'demo-blog'
+        contentTypeId: 'demo-blog',
       },
       {
         id: 'content',
@@ -118,7 +118,7 @@ function HomePage() {
         placeholder: 'Write your blog post content here...',
         helpText: 'The main content of your blog post with rich text formatting',
         order: 2,
-        contentTypeId: 'demo-blog'
+        contentTypeId: 'demo-blog',
       },
       {
         id: 'author_email',
@@ -130,7 +130,7 @@ function HomePage() {
         placeholder: 'author@example.com',
         helpText: 'Contact email for the author',
         order: 3,
-        contentTypeId: 'demo-blog'
+        contentTypeId: 'demo-blog',
       },
       {
         id: 'website',
@@ -142,7 +142,7 @@ function HomePage() {
         placeholder: 'https://example.com',
         helpText: 'Related website or source',
         order: 4,
-        contentTypeId: 'demo-blog'
+        contentTypeId: 'demo-blog',
       },
       {
         id: 'published_date',
@@ -153,7 +153,7 @@ function HomePage() {
         unique: false,
         helpText: 'When this post was originally published',
         order: 5,
-        contentTypeId: 'demo-blog'
+        contentTypeId: 'demo-blog',
       },
       {
         id: 'featured',
@@ -164,9 +164,9 @@ function HomePage() {
         unique: false,
         helpText: 'Mark this post as featured',
         order: 6,
-        contentTypeId: 'demo-blog'
-      }
-    ]
+        contentTypeId: 'demo-blog',
+      },
+    ],
   }
 
   const handlePreviewSave = async (data: any) => {
@@ -180,24 +180,19 @@ function HomePage() {
   // Show preview demo
   if (showPreviewDemo) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Content Preview System Demo
-            </h1>
-            <p className="text-gray-600 mb-4">
-              Test the preview functionality by filling out the form below. Try the "Preview" button and "Side by Side" mode!
+      <div className='min-h-screen bg-gray-50 py-8'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='mb-8 text-center'>
+            <h1 className='text-3xl font-bold text-gray-900 mb-2'>Content Preview System Demo</h1>
+            <p className='text-gray-600 mb-4'>
+              Test the preview functionality by filling out the form below. Try the "Preview" button
+              and "Side by Side" mode!
             </p>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowPreviewDemo(false)}
-              className="mb-4"
-            >
+            <Button variant='outline' onClick={() => setShowPreviewDemo(false)} className='mb-4'>
               ← Back to Homepage
             </Button>
           </div>
-          
+
           <ContentEntryForm
             contentType={mockContentType}
             onSave={handlePreviewSave}
@@ -216,7 +211,7 @@ function HomePage() {
       SCHEDULED: { color: 'bg-blue-100 text-blue-800', emoji: '⏰', label: 'Scheduled' },
       ARCHIVED: { color: 'bg-gray-100 text-gray-800', emoji: '📦', label: 'Archived' },
     }
-    
+
     const config = statusConfig[status as keyof typeof statusConfig]
     return (
       <Badge className={config.color}>
@@ -263,10 +258,10 @@ function HomePage() {
       header: 'Slug',
       accessorKey: 'slug',
       sortable: true,
-      cell: (entry) => (
+      cell: entry => (
         <div>
-          <div className="font-mono text-sm">{entry.slug}</div>
-          <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
+          <div className='font-mono text-sm'>{entry.slug}</div>
+          <div className='text-xs text-muted-foreground'>ID: {entry.id}</div>
         </div>
       ),
     },
@@ -275,7 +270,7 @@ function HomePage() {
       header: 'Status',
       accessorKey: 'status',
       sortable: true,
-      cell: (entry) => getStatusBadge(entry.status),
+      cell: entry => getStatusBadge(entry.status),
     },
     {
       id: 'title',
@@ -288,32 +283,22 @@ function HomePage() {
       header: 'Price',
       accessorKey: 'price',
       sortable: true,
-      cell: (entry) => (
-        <Badge variant="secondary">
-          ${entry.price}
-        </Badge>
-      ),
+      cell: entry => <Badge variant='secondary'>${entry.price}</Badge>,
     },
     {
       id: 'description',
       header: 'Description',
       accessorKey: 'description',
       sortable: true,
-      cell: (entry) => (
-        <div className="max-w-48 truncate">
-          {entry.description}
-        </div>
-      ),
+      cell: entry => <div className='max-w-48 truncate'>{entry.description}</div>,
     },
     {
       id: 'createdAt',
       header: 'Created',
       accessorKey: 'createdAt',
       sortable: true,
-      cell: (entry) => (
-        <span className="text-muted-foreground">
-          {entry.createdAt.toLocaleDateString()}
-        </span>
+      cell: entry => (
+        <span className='text-muted-foreground'>{entry.createdAt.toLocaleDateString()}</span>
       ),
     },
     {
@@ -321,39 +306,37 @@ function HomePage() {
       header: 'Updated',
       accessorKey: 'updatedAt',
       sortable: true,
-      cell: (entry) => (
-        <span className="text-muted-foreground">
-          {entry.updatedAt.toLocaleDateString()}
-        </span>
+      cell: entry => (
+        <span className='text-muted-foreground'>{entry.updatedAt.toLocaleDateString()}</span>
       ),
     },
     {
       id: 'actions',
       header: 'Actions',
       sortable: false,
-      cell: (entry) => (
-        <div className="flex justify-end space-x-2">
+      cell: entry => (
+        <div className='flex justify-end space-x-2'>
           <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
+            size='sm'
+            variant='outline'
+            onClick={e => {
               e.stopPropagation()
               alert(`Edit ${entry.title}`)
             }}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className='h-4 w-4' />
           </Button>
           <Button
-            size="sm"
-            variant="destructive"
-            onClick={(e) => {
+            size='sm'
+            variant='destructive'
+            onClick={e => {
               e.stopPropagation()
               if (confirm(`Delete ${entry.title}?`)) {
                 alert(`Deleted ${entry.title}`)
               }
             }}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className='h-4 w-4' />
           </Button>
         </div>
       ),
@@ -388,13 +371,16 @@ function HomePage() {
       icon: () => <span>🗑️</span>,
       variant: 'destructive',
       requiresConfirmation: true,
-      confirmationMessage: 'Are you sure you want to delete these entries? This action cannot be undone.',
+      confirmationMessage:
+        'Are you sure you want to delete these entries? This action cannot be undone.',
     },
   ]
 
   // Handle bulk actions
   const handleBulkAction = async (actionId: string, items: DemoEntry[]) => {
-    alert(`Bulk action "${actionId}" performed on ${items.length} items:\n${items.map(i => i.title).join(', ')}`)
+    alert(
+      `Bulk action "${actionId}" performed on ${items.length} items:\n${items.map(i => i.title).join(', ')}`
+    )
     setSelectedEntries([])
   }
 
@@ -413,69 +399,72 @@ function HomePage() {
 
   if (showDemo) {
     return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className='min-h-screen bg-background p-8'>
+        <div className='max-w-7xl mx-auto space-y-6'>
           {/* Demo Header */}
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <div>
-              <h1 className="text-3xl font-bold">Enhanced Content List Interface</h1>
-              <p className="text-muted-foreground">
+              <h1 className='text-3xl font-bold'>Enhanced Content List Interface</h1>
+              <p className='text-muted-foreground'>
                 Live demonstration of improved sorting, filtering, and bulk actions
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowDemo(false)}
-              >
-                <ChevronUp className="h-4 w-4 mr-2" />
+            <div className='flex gap-2'>
+              <Button variant='outline' onClick={() => setShowDemo(false)}>
+                <ChevronUp className='h-4 w-4 mr-2' />
                 Back to Homepage
               </Button>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className='h-4 w-4 mr-2' />
                 Create Product
               </Button>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="ml-0">
-                    <p className="text-sm font-medium text-muted-foreground">Total Entries</p>
-                    <p className="text-2xl font-bold">{entries.length}</p>
+              <CardContent className='p-6'>
+                <div className='flex items-center'>
+                  <div className='ml-0'>
+                    <p className='text-sm font-medium text-muted-foreground'>Total Entries</p>
+                    <p className='text-2xl font-bold'>{entries.length}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="ml-0">
-                    <p className="text-sm font-medium text-muted-foreground">Published</p>
-                    <p className="text-2xl font-bold">{entries.filter(e => e.status === 'PUBLISHED').length}</p>
+              <CardContent className='p-6'>
+                <div className='flex items-center'>
+                  <div className='ml-0'>
+                    <p className='text-sm font-medium text-muted-foreground'>Published</p>
+                    <p className='text-2xl font-bold'>
+                      {entries.filter(e => e.status === 'PUBLISHED').length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="ml-0">
-                    <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-                    <p className="text-2xl font-bold">{entries.filter(e => e.status === 'DRAFT').length}</p>
+              <CardContent className='p-6'>
+                <div className='flex items-center'>
+                  <div className='ml-0'>
+                    <p className='text-sm font-medium text-muted-foreground'>Drafts</p>
+                    <p className='text-2xl font-bold'>
+                      {entries.filter(e => e.status === 'DRAFT').length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="ml-0">
-                    <p className="text-sm font-medium text-muted-foreground">Scheduled</p>
-                    <p className="text-2xl font-bold">{entries.filter(e => e.status === 'SCHEDULED').length}</p>
+              <CardContent className='p-6'>
+                <div className='flex items-center'>
+                  <div className='ml-0'>
+                    <p className='text-sm font-medium text-muted-foreground'>Scheduled</p>
+                    <p className='text-2xl font-bold'>
+                      {entries.filter(e => e.status === 'SCHEDULED').length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -483,10 +472,7 @@ function HomePage() {
           </div>
 
           {/* Enhanced Filters */}
-          <ContentFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
+          <ContentFilters filters={filters} onFiltersChange={setFilters} />
 
           {/* Bulk Actions */}
           <BulkActions
@@ -502,38 +488,37 @@ function HomePage() {
           {/* Enhanced Data Table */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                Product Entries ({filteredEntries.length})
-              </CardTitle>
+              <CardTitle>Product Entries ({filteredEntries.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <DataTable
                 data={filteredEntries}
                 columns={columns}
                 searchValue={filters.search || ''}
-                onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value || undefined }))}
-                searchPlaceholder="Search entries..."
+                onSearchChange={value =>
+                  setFilters(prev => ({ ...prev, search: value || undefined }))
+                }
+                searchPlaceholder='Search entries...'
                 enableColumnToggle={true}
                 enableSorting={true}
                 enableSearch={false} // We handle search through filters
                 enableSelection={true}
                 selectedRows={selectedEntries}
                 onSelectionChange={setSelectedEntries}
-                getRowId={(row) => row.id}
+                getRowId={row => row.id}
               />
 
               {filteredEntries.length === 0 && (
-                <div className="text-center py-12">
-                  <h3 className="text-lg font-semibold mb-2">No entries found</h3>
-                  <p className="text-muted-foreground mb-4">
+                <div className='text-center py-12'>
+                  <h3 className='text-lg font-semibold mb-2'>No entries found</h3>
+                  <p className='text-muted-foreground mb-4'>
                     {Object.keys(filters).length > 0
                       ? 'No entries match your search criteria'
-                      : 'No product entries have been created yet'
-                    }
+                      : 'No product entries have been created yet'}
                   </p>
                   {Object.keys(filters).length === 0 && (
                     <Button>
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className='h-4 w-4 mr-2' />
                       Create Your First Product
                     </Button>
                   )}
@@ -547,39 +532,41 @@ function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">TanCMS</h1>
-        <p className="text-gray-600 mb-6">Welcome to your modern Content Management System!</p>
-        <p className="text-gray-500 mb-8">Built with TanStack Start, React, TypeScript, Prisma, and SQLite.</p>
-        
-        <div className="space-y-3">
+    <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+      <div className='bg-white p-8 rounded-lg shadow-md max-w-md w-full'>
+        <h1 className='text-3xl font-bold text-gray-900 mb-4'>TanCMS</h1>
+        <p className='text-gray-600 mb-6'>Welcome to your modern Content Management System!</p>
+        <p className='text-gray-500 mb-8'>
+          Built with TanStack Start, React, TypeScript, Prisma, and SQLite.
+        </p>
+
+        <div className='space-y-3'>
           <button
             onClick={() => setShowDemo(true)}
-            className="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-medium"
+            className='block w-full bg-green-600 text-white text-center py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-medium'
           >
             🚀 View Enhanced Content List Demo
           </button>
           <button
             onClick={() => setShowPreviewDemo(true)}
-            className="block w-full bg-purple-600 text-white text-center py-3 px-4 rounded-md hover:bg-purple-700 transition-colors font-medium"
+            className='block w-full bg-purple-600 text-white text-center py-3 px-4 rounded-md hover:bg-purple-700 transition-colors font-medium'
           >
             👁️ Try Content Preview System
           </button>
           <a
-            href="/admin"
-            className="block w-full bg-indigo-600 text-white text-center py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors font-medium"
+            href='/admin'
+            className='block w-full bg-indigo-600 text-white text-center py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors font-medium'
           >
             Go to Admin Dashboard
           </a>
           <a
-            href="/login"
-            className="block w-full bg-gray-600 text-white text-center py-3 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium"
+            href='/login'
+            className='block w-full bg-gray-600 text-white text-center py-3 px-4 rounded-md hover:bg-gray-700 transition-colors font-medium'
           >
             Admin Login
           </a>
-          <div className="text-center">
-            <a href="/blog" className="text-indigo-600 hover:text-indigo-700 text-sm">
+          <div className='text-center'>
+            <a href='/blog' className='text-indigo-600 hover:text-indigo-700 text-sm'>
               View Blog →
             </a>
           </div>

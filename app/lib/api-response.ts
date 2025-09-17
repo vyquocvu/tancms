@@ -3,7 +3,7 @@
  * Provides consistent response format and error handling for all API endpoints
  */
 
-export type ApiErrorCode = 
+export type ApiErrorCode =
   | 'VALIDATION_ERROR'
   | 'NOT_FOUND'
   | 'AUTHENTICATION_REQUIRED'
@@ -86,7 +86,7 @@ const DEFAULT_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
  */
 export class ApiResponseBuilder {
   private static version = '1.0.0'
-  
+
   private static get isProduction(): boolean {
     return process.env.NODE_ENV === 'production'
   }
@@ -120,7 +120,7 @@ export class ApiResponseBuilder {
    */
   static error(options: ApiErrorOptions): StandardApiResponse {
     const errorMessage = options.message || DEFAULT_ERROR_MESSAGES[options.code]
-    
+
     return {
       success: false,
       message: errorMessage,
@@ -172,9 +172,7 @@ export class ApiResponseBuilder {
     response: StandardApiResponse<T>,
     headers: Record<string, string> = {}
   ): Response {
-    const statusCode = response.success 
-      ? 200 
-      : this.getStatusCode(response.error!.code)
+    const statusCode = response.success ? 200 : this.getStatusCode(response.error!.code)
 
     const defaultHeaders = {
       'Content-Type': 'application/json',
@@ -203,10 +201,10 @@ export class ApiResponseBuilder {
    * Convenience method for not found errors
    */
   static notFound(resource: string, identifier?: string): StandardApiResponse {
-    const message = identifier 
+    const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`
-    
+
     return this.error({
       code: 'NOT_FOUND',
       message,

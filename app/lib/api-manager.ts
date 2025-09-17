@@ -35,7 +35,7 @@ export class ApiManager {
       enableAuth: false,
       enableLogging: true,
       corsEnabled: true,
-      ...config
+      ...config,
     }
 
     // Add built-in middlewares
@@ -97,7 +97,7 @@ export class ApiManager {
     return this.handleRequest({
       method: 'GET',
       path,
-      query
+      query,
     })
   }
 
@@ -108,7 +108,7 @@ export class ApiManager {
     return this.handleRequest({
       method: 'POST',
       path,
-      body
+      body,
     })
   }
 
@@ -119,7 +119,7 @@ export class ApiManager {
     return this.handleRequest({
       method: 'PUT',
       path,
-      body
+      body,
     })
   }
 
@@ -129,7 +129,7 @@ export class ApiManager {
   async delete(path: string): Promise<ApiResponse> {
     return this.handleRequest({
       method: 'DELETE',
-      path
+      path,
     })
   }
 
@@ -147,9 +147,9 @@ export class ApiManager {
         config: {
           enableAuth: this.config.enableAuth,
           enableLogging: this.config.enableLogging,
-          corsEnabled: this.config.corsEnabled
-        }
-      }
+          corsEnabled: this.config.corsEnabled,
+        },
+      },
     })
   }
 
@@ -159,23 +159,29 @@ export class ApiManager {
   private createLoggingMiddleware(): ApiMiddleware {
     return {
       name: 'logging',
-      handler: async (request: ApiRequest, next: () => Promise<ApiResponse>): Promise<ApiResponse> => {
+      handler: async (
+        request: ApiRequest,
+        next: () => Promise<ApiResponse>
+      ): Promise<ApiResponse> => {
         const startTime = Date.now()
         console.log(`[API] ${request.method} ${request.path}`, {
           query: request.query,
-          hasBody: !!request.body
+          hasBody: !!request.body,
         })
 
         const response = await next()
         const duration = Date.now() - startTime
 
-        console.log(`[API] ${request.method} ${request.path} - ${response.success ? 'SUCCESS' : 'ERROR'} (${duration}ms)`, {
-          success: response.success,
-          error: response.error
-        })
+        console.log(
+          `[API] ${request.method} ${request.path} - ${response.success ? 'SUCCESS' : 'ERROR'} (${duration}ms)`,
+          {
+            success: response.success,
+            error: response.error,
+          }
+        )
 
         return response
-      }
+      },
     }
   }
 
@@ -185,28 +191,33 @@ export class ApiManager {
   private createAuthMiddleware(): ApiMiddleware {
     return {
       name: 'auth',
-      handler: async (request: ApiRequest, next: () => Promise<ApiResponse>): Promise<ApiResponse> => {
+      handler: async (
+        request: ApiRequest,
+        next: () => Promise<ApiResponse>
+      ): Promise<ApiResponse> => {
         // Skip auth for status endpoint
         if (request.path === '/api/status') {
           return next()
         }
 
         const apiKey = request.query?.['api_key'] || request.query?.['apiKey']
-        
+
         if (!apiKey) {
-          return ApiResponseBuilder.authRequired('API key is required. Provide it as ?api_key=your_key')
+          return ApiResponseBuilder.authRequired(
+            'API key is required. Provide it as ?api_key=your_key'
+          )
         }
 
         if (!this.config.apiKeys?.includes(apiKey)) {
           return ApiResponseBuilder.error({
             code: 'AUTHENTICATION_FAILED',
             message: 'Invalid API key provided',
-            details: ['The provided API key is not valid']
+            details: ['The provided API key is not valid'],
           })
         }
 
         return next()
-      }
+      },
     }
   }
 
@@ -216,19 +227,22 @@ export class ApiManager {
   private createCorsMiddleware(): ApiMiddleware {
     return {
       name: 'cors',
-      handler: async (_request: ApiRequest, next: () => Promise<ApiResponse>): Promise<ApiResponse> => {
+      handler: async (
+        _request: ApiRequest,
+        next: () => Promise<ApiResponse>
+      ): Promise<ApiResponse> => {
         const response = await next()
-        
+
         // Add CORS headers to the response (these would be used in actual HTTP responses)
         return {
           ...response,
           headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          }
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
         } as ApiResponse & { headers: Record<string, string> }
-      }
+      },
     }
   }
 }
@@ -239,7 +253,7 @@ export class ApiManager {
 export const apiManager = new ApiManager({
   enableAuth: false, // Can be enabled by setting API keys
   enableLogging: true,
-  corsEnabled: true
+  corsEnabled: true,
 })
 
 /**
@@ -256,26 +270,33 @@ export const api = {
   /**
    * Handle any API request
    */
-  async request(method: HttpMethod, path: string, options: {
-    body?: unknown
-    query?: Record<string, string>
-  } = {}): Promise<ApiResponse> {
+  async request(
+    method: HttpMethod,
+    path: string,
+    options: {
+      body?: unknown
+      query?: Record<string, string>
+    } = {}
+  ): Promise<ApiResponse> {
     return apiManager.handleRequest({
       method,
       path,
       body: options.body,
-      query: options.query
+      query: options.query,
     })
   },
 
   /**
    * List entries for a content type
    */
-  async listEntries(contentTypeSlug: string, params?: {
-    page?: number
-    limit?: number
-    search?: string
-  }) {
+  async listEntries(
+    contentTypeSlug: string,
+    params?: {
+      page?: number
+      limit?: number
+      search?: string
+    }
+  ) {
     const query: Record<string, string> = {}
     if (params?.page) query.page = params.page.toString()
     if (params?.limit) query.limit = params.limit.toString()
@@ -294,20 +315,27 @@ export const api = {
   /**
    * Create a new entry
    */
-  async createEntry(contentTypeSlug: string, data: {
-    slug?: string
-    fieldValues: { fieldId: string; value: string }[]
-  }) {
+  async createEntry(
+    contentTypeSlug: string,
+    data: {
+      slug?: string
+      fieldValues: { fieldId: string; value: string }[]
+    }
+  ) {
     return apiManager.post(`/api/${contentTypeSlug}`, data)
   },
 
   /**
    * Update an entry
    */
-  async updateEntry(contentTypeSlug: string, entryId: string, data: {
-    slug?: string
-    fieldValues?: { fieldId: string; value: string }[]
-  }) {
+  async updateEntry(
+    contentTypeSlug: string,
+    entryId: string,
+    data: {
+      slug?: string
+      fieldValues?: { fieldId: string; value: string }[]
+    }
+  ) {
     return apiManager.put(`/api/${contentTypeSlug}/${entryId}`, data)
   },
 
@@ -323,5 +351,5 @@ export const api = {
    */
   async getStatus() {
     return apiManager.getStatus()
-  }
+  },
 }

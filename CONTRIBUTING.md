@@ -1,10 +1,14 @@
 # Contributing to TanCMS
 
-Thank you for your interest in contributing to TanCMS! This guide will help you get started with contributing to our modern CMS built with TanStack Start and Prisma.
+Thank you for your interest in contributing to TanCMS! This guide will help you
+get started with contributing to our modern CMS built with TanStack Start and
+Prisma.
 
 ## 🤝 Code of Conduct
 
-This project adheres to a code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+This project adheres to a code of conduct. By participating, you are expected to
+uphold this code. Please report unacceptable behavior to the project
+maintainers.
 
 ## 🚀 Quick Start for Contributors
 
@@ -18,23 +22,27 @@ This project adheres to a code of conduct. By participating, you are expected to
 ### Development Setup
 
 1. **Fork and Clone**
+
    ```bash
    git clone https://github.com/your-username/tancms.git
    cd tancms
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Setup**
+
    ```bash
    cp .env.example .env
    # Edit .env with your local configuration
    ```
 
 4. **Database Setup**
+
    ```bash
    npx prisma generate
    npx prisma migrate dev
@@ -58,7 +66,8 @@ This project adheres to a code of conduct. By participating, you are expected to
 
 ### Commit Convention
 
-We use [Conventional Commits](https://conventionalcommits.org/) for clear commit messages:
+We use [Conventional Commits](https://conventionalcommits.org/) for clear commit
+messages:
 
 ```
 <type>[optional scope]: <description>
@@ -69,6 +78,7 @@ We use [Conventional Commits](https://conventionalcommits.org/) for clear commit
 ```
 
 **Types:**
+
 - `feat:` New features
 - `fix:` Bug fixes
 - `docs:` Documentation changes
@@ -78,6 +88,7 @@ We use [Conventional Commits](https://conventionalcommits.org/) for clear commit
 - `chore:` Maintenance tasks
 
 **Examples:**
+
 ```bash
 feat(auth): add role-based access control
 fix(posts): resolve duplicate slug validation
@@ -87,6 +98,7 @@ docs(readme): update installation instructions
 ### Pull Request Process
 
 1. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -98,6 +110,7 @@ docs(readme): update installation instructions
    - Update documentation as needed
 
 3. **Test Your Changes**
+
    ```bash
    npm run lint       # Check code style
    npm run test       # Run unit tests
@@ -106,9 +119,11 @@ docs(readme): update installation instructions
    ```
 
 4. **Push and Create PR**
+
    ```bash
    git push origin feature/your-feature-name
    ```
+
    - Create a pull request on GitHub
    - Use the PR template
    - Link related issues
@@ -141,6 +156,7 @@ Follow the established project structure:
 4. **Styling**: Use Tailwind CSS classes
 
 Example:
+
 ```tsx
 // components/PostCard.tsx
 interface PostCardProps {
@@ -149,12 +165,16 @@ interface PostCardProps {
   publishedAt: Date
 }
 
-export default function PostCard({ title, excerpt, publishedAt }: PostCardProps) {
+export default function PostCard({
+  title,
+  excerpt,
+  publishedAt,
+}: PostCardProps) {
   return (
-    <article className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
-      {excerpt && <p className="text-gray-600 mb-4">{excerpt}</p>}
-      <time className="text-sm text-gray-500">
+    <article className='p-6 bg-white rounded-lg shadow-md'>
+      <h2 className='text-xl font-bold mb-2'>{title}</h2>
+      {excerpt && <p className='text-gray-600 mb-4'>{excerpt}</p>}
+      <time className='text-sm text-gray-500'>
         {publishedAt.toLocaleDateString()}
       </time>
     </article>
@@ -169,6 +189,7 @@ export default function PostCard({ title, excerpt, publishedAt }: PostCardProps)
 3. **Type Safety**: Ensure end-to-end type safety
 
 Example:
+
 ```tsx
 // routes/api/posts.ts
 import { z } from 'zod'
@@ -182,7 +203,7 @@ const CreatePostSchema = z.object({
 
 export async function createPost(input: unknown) {
   const data = CreatePostSchema.parse(input)
-  
+
   return await prisma.post.create({
     data: {
       ...data,
@@ -242,12 +263,12 @@ test('admin can create a new post', async ({ page }) => {
   await page.fill('[name="email"]', 'admin@example.com')
   await page.fill('[name="password"]', 'password')
   await page.click('button[type="submit"]')
-  
+
   await page.goto('/admin/posts/new')
   await page.fill('[name="title"]', 'Test Post')
   await page.fill('[name="content"]', 'This is a test post')
   await page.click('button[type="submit"]')
-  
+
   await expect(page.locator('text=Post created successfully')).toBeVisible()
 })
 ```
@@ -255,6 +276,7 @@ test('admin can create a new post', async ({ page }) => {
 ## 🎯 Areas for Contribution
 
 ### High Priority
+
 - [ ] Authentication system improvements
 - [ ] Media upload optimization
 - [ ] SEO enhancements
@@ -262,6 +284,7 @@ test('admin can create a new post', async ({ page }) => {
 - [ ] Accessibility improvements
 
 ### Medium Priority
+
 - [ ] Content revision system
 - [ ] Advanced search functionality
 - [ ] Email notifications
@@ -269,6 +292,7 @@ test('admin can create a new post', async ({ page }) => {
 - [ ] Multi-language support
 
 ### Documentation
+
 - [ ] API documentation
 - [ ] Deployment guides
 - [ ] Tutorial content
@@ -276,6 +300,7 @@ test('admin can create a new post', async ({ page }) => {
 - [ ] Migration guides
 
 ### Testing
+
 - [ ] Increase test coverage
 - [ ] Performance testing
 - [ ] Security testing
@@ -305,12 +330,14 @@ For feature requests:
 ## 📚 Resources
 
 ### Learning Resources
+
 - [TanStack Start Docs](https://tanstack.com/start)
 - [Prisma Docs](https://prisma.io/docs)
 - [React Docs](https://react.dev)
 - [TypeScript Handbook](https://typescriptlang.org/docs)
 
 ### Community
+
 - [GitHub Discussions](https://github.com/vyquocvu/tancms/discussions)
 - [Discord Server](#) (Coming Soon)
 - [Twitter](https://twitter.com/tancms) (Coming Soon)
@@ -318,6 +345,7 @@ For feature requests:
 ## 🙏 Recognition
 
 Contributors will be recognized in:
+
 - README.md contributors section
 - Release notes for significant contributions
 - GitHub repository insights

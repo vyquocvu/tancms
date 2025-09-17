@@ -10,7 +10,7 @@ import { api, ApiManager, configureApiManager } from '../app/lib/api-manager'
  */
 async function basicApiExample() {
   console.log('=== Basic API Operations ===')
-  
+
   try {
     // Get API status
     const status = await api.getStatus()
@@ -20,7 +20,7 @@ async function basicApiExample() {
     const productEntries = await api.listEntries('product', {
       page: 1,
       limit: 5,
-      search: 'laptop'
+      search: 'laptop',
     })
     console.log('Product entries:', productEntries.data?.entries?.length || 0)
 
@@ -30,8 +30,8 @@ async function basicApiExample() {
       fieldValues: [
         { fieldId: 'field1', value: 'Example Product' },
         { fieldId: 'field2', value: '199.99' },
-        { fieldId: 'field3', value: 'This is an example product created via the API manager' }
-      ]
+        { fieldId: 'field3', value: 'This is an example product created via the API manager' },
+      ],
     })
 
     if (newProduct.success) {
@@ -46,8 +46,8 @@ async function basicApiExample() {
         fieldValues: [
           { fieldId: 'field1', value: 'Updated Example Product' },
           { fieldId: 'field2', value: '299.99' },
-          { fieldId: 'field3', value: 'This product has been updated' }
-        ]
+          { fieldId: 'field3', value: 'This product has been updated' },
+        ],
       })
       console.log('Updated product:', updatedProduct.success)
 
@@ -55,7 +55,6 @@ async function basicApiExample() {
       const deletedProduct = await api.deleteEntry('product', newProduct.data!.entry!.id)
       console.log('Deleted product:', deletedProduct.success)
     }
-
   } catch (error) {
     console.error('Error in basic API example:', error)
   }
@@ -66,13 +65,13 @@ async function basicApiExample() {
  */
 async function authenticatedApiExample() {
   console.log('\n=== Authenticated API Operations ===')
-  
+
   // Create an API manager with authentication enabled
   const authApiManager = configureApiManager({
     enableAuth: true,
     apiKeys: ['demo-api-key', 'admin-key'],
     enableLogging: true,
-    corsEnabled: true
+    corsEnabled: true,
   })
 
   try {
@@ -87,7 +86,6 @@ async function authenticatedApiExample() {
     // Status endpoint should always work
     const statusResponse = await authApiManager.get('/api/status')
     console.log('Status without auth:', statusResponse.success) // Should be true
-
   } catch (error) {
     console.error('Error in authenticated API example:', error)
   }
@@ -98,11 +96,11 @@ async function authenticatedApiExample() {
  */
 async function customMiddlewareExample() {
   console.log('\n=== Custom Middleware Example ===')
-  
+
   const customApiManager = new ApiManager({
     enableAuth: false,
     enableLogging: false,
-    corsEnabled: true
+    corsEnabled: true,
   })
 
   // Add custom rate limiting middleware
@@ -110,12 +108,12 @@ async function customMiddlewareExample() {
     name: 'rate-limiter',
     handler: async (request, next) => {
       console.log(`Rate limiter: Processing ${request.method} ${request.path}`)
-      
+
       // For demo purposes, we'll allow all requests
       console.log(`Rate limit check passed for ${rateLimitKey}`)
-      
+
       return next()
-    }
+    },
   })
 
   // Add request timing middleware
@@ -125,11 +123,11 @@ async function customMiddlewareExample() {
       const startTime = Date.now()
       const response = await next()
       const duration = Date.now() - startTime
-      
+
       console.log(`Request ${request.method} ${request.path} took ${duration}ms`)
-      
+
       return response
-    }
+    },
   })
 
   try {
@@ -144,7 +142,6 @@ async function customMiddlewareExample() {
     // Test again without rate limiter
     const response2 = await customApiManager.get('/api/status')
     console.log('Without rate limiter:', response2.success)
-
   } catch (error) {
     console.error('Error in custom middleware example:', error)
   }
@@ -155,7 +152,7 @@ async function customMiddlewareExample() {
  */
 async function genericRequestExample() {
   console.log('\n=== Generic Request Example ===')
-  
+
   try {
     // Use the generic request method
     const getResponse = await api.request('GET', '/api/status')
@@ -167,30 +164,36 @@ async function genericRequestExample() {
         fieldValues: [
           { fieldId: 'field4', value: 'API Manager Tutorial' },
           { fieldId: 'field5', value: 'Learn how to use the TanCMS API Manager...' },
-          { fieldId: 'field6', value: 'true' }
-        ]
-      }
+          { fieldId: 'field6', value: 'true' },
+        ],
+      },
     })
     console.log('Generic POST:', postResponse.success)
 
     if (postResponse.success) {
       // Update using generic request
-      const putResponse = await api.request('PUT', `/api/blog-post/${postResponse.data!.entry!.id}`, {
-        body: {
-          fieldValues: [
-            { fieldId: 'field4', value: 'Updated API Manager Tutorial' },
-            { fieldId: 'field5', value: 'Updated content about the TanCMS API Manager...' },
-            { fieldId: 'field6', value: 'true' }
-          ]
+      const putResponse = await api.request(
+        'PUT',
+        `/api/blog-post/${postResponse.data!.entry!.id}`,
+        {
+          body: {
+            fieldValues: [
+              { fieldId: 'field4', value: 'Updated API Manager Tutorial' },
+              { fieldId: 'field5', value: 'Updated content about the TanCMS API Manager...' },
+              { fieldId: 'field6', value: 'true' },
+            ],
+          },
         }
-      })
+      )
       console.log('Generic PUT:', putResponse.success)
 
       // Delete using generic request
-      const deleteResponse = await api.request('DELETE', `/api/blog-post/${postResponse.data!.entry!.id}`)
+      const deleteResponse = await api.request(
+        'DELETE',
+        `/api/blog-post/${postResponse.data!.entry!.id}`
+      )
       console.log('Generic DELETE:', deleteResponse.success)
     }
-
   } catch (error) {
     console.error('Error in generic request example:', error)
   }
@@ -201,7 +204,7 @@ async function genericRequestExample() {
  */
 async function errorHandlingExample() {
   console.log('\n=== Error Handling Example ===')
-  
+
   try {
     // Try to access non-existent content type
     const invalidTypeResponse = await api.listEntries('nonexistent-type')
@@ -220,14 +223,13 @@ async function errorHandlingExample() {
     const validationErrorResponse = await api.createEntry('product', {
       fieldValues: [
         // Missing required fields
-        { fieldId: 'field3', value: 'Only description, missing title and price' }
-      ]
+        { fieldId: 'field3', value: 'Only description, missing title and price' },
+      ],
     })
     if (!validationErrorResponse.success) {
       console.log('Validation error:', validationErrorResponse.error)
       console.log('Validation details:', validationErrorResponse.details)
     }
-
   } catch (error) {
     console.error('Error in error handling example:', error)
   }
@@ -238,13 +240,13 @@ async function errorHandlingExample() {
  */
 async function runExamples() {
   console.log('TanCMS API Manager Examples\n')
-  
+
   await basicApiExample()
   await authenticatedApiExample()
   await customMiddlewareExample()
   await genericRequestExample()
   await errorHandlingExample()
-  
+
   console.log('\n=== Examples Complete ===')
 }
 
@@ -255,7 +257,7 @@ export {
   customMiddlewareExample,
   genericRequestExample,
   errorHandlingExample,
-  runExamples
+  runExamples,
 }
 
 // If running this file directly (for demonstration)

@@ -52,7 +52,7 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
@@ -64,9 +64,9 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
       const response = await fetch('/api/auth?action=login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await response.json()
@@ -87,86 +87,78 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-          <Lock className="w-6 h-6 text-primary" />
+    <Card className='w-full max-w-md mx-auto'>
+      <CardHeader className='text-center'>
+        <div className='mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4'>
+          <Lock className='w-6 h-6 text-primary' />
         </div>
-        <CardTitle className="text-2xl">Welcome Back</CardTitle>
-        <p className="text-muted-foreground">Sign in to your TanCMS account</p>
+        <CardTitle className='text-2xl'>Welcome Back</CardTitle>
+        <p className='text-muted-foreground'>Sign in to your TanCMS account</p>
       </CardHeader>
 
       <CardContent>
         {errors.general && (
-          <Alert className="mb-6" variant="destructive">
+          <Alert className='mb-6' variant='destructive'>
             <AlertDescription>{errors.general}</AlertDescription>
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        <form onSubmit={handleSubmit} className='space-y-4'>
+          <div className='space-y-2'>
+            <Label htmlFor='email'>Email</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
+              id='email'
+              type='email'
+              placeholder='Enter your email'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className={errors.email ? 'border-destructive' : ''}
               disabled={loading}
             />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
-            )}
+            {errors.email && <p className='text-sm text-destructive'>{errors.email}</p>}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
+          <div className='space-y-2'>
+            <Label htmlFor='password'>Password</Label>
+            <div className='relative'>
               <Input
-                id="password"
+                id='password'
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
+                placeholder='Enter your password'
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
                 disabled={loading}
               />
               <button
-                type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <EyeOff className='h-4 w-4 text-gray-400' />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <Eye className='h-4 w-4 text-gray-400' />
                 )}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
-            )}
+            {errors.password && <p className='text-sm text-destructive'>{errors.password}</p>}
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type='submit' className='w-full' disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
           </Button>
         </form>
 
         {onRegisterClick && (
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className='mt-6 text-center'>
+            <p className='text-sm text-muted-foreground'>
               Need an account?{' '}
               <button
-                type="button"
+                type='button'
                 onClick={onRegisterClick}
-                className="text-primary hover:underline font-medium"
+                className='text-primary hover:underline font-medium'
                 disabled={loading}
               >
                 Create one here

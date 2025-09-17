@@ -11,13 +11,15 @@ We currently support the following versions of TanCMS with security updates:
 
 ## Reporting a Vulnerability
 
-We take security seriously. If you discover a security vulnerability, please follow these steps:
+We take security seriously. If you discover a security vulnerability, please
+follow these steps:
 
 ### 🔒 Private Disclosure
 
 **DO NOT** create a public GitHub issue for security vulnerabilities.
 
-Instead, please email security issues to: **security@tancms.dev** (or create a private security advisory on GitHub)
+Instead, please email security issues to: **security@tancms.dev** (or create a
+private security advisory on GitHub)
 
 ### 📋 What to Include
 
@@ -50,7 +52,9 @@ TanCMS implements several security measures:
 
 ### 🏆 Recognition
 
-We appreciate security researchers who help keep TanCMS secure. Legitimate security reports will be acknowledged in our security advisories (with your permission).
+We appreciate security researchers who help keep TanCMS secure. Legitimate
+security reports will be acknowledged in our security advisories (with your
+permission).
 
 ### 📝 Disclosure Policy
 

@@ -30,7 +30,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 export async function authenticateUser(email: string, password: string): Promise<AuthUser | null> {
   try {
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+      where: { email: email.toLowerCase() },
     })
 
     if (!user) {
@@ -46,7 +46,7 @@ export async function authenticateUser(email: string, password: string): Promise
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
     }
   } catch (error) {
     console.error('Authentication error:', error)
@@ -58,12 +58,12 @@ export async function authenticateUser(email: string, password: string): Promise
 export async function createSession(userId: string): Promise<string> {
   // Create session that expires in 30 days
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-  
+
   const session = await prisma.session.create({
     data: {
       userId,
-      expiresAt
-    }
+      expiresAt,
+    },
   })
 
   return session.id
@@ -72,15 +72,15 @@ export async function createSession(userId: string): Promise<string> {
 export async function getSessionUser(sessionId: string): Promise<AuthUser | null> {
   try {
     const session = await prisma.session.findUnique({
-      where: { 
+      where: {
         id: sessionId,
         expiresAt: {
-          gt: new Date()
-        }
+          gt: new Date(),
+        },
       },
       include: {
-        user: true
-      }
+        user: true,
+      },
     })
 
     if (!session || !session.user) {
@@ -91,7 +91,7 @@ export async function getSessionUser(sessionId: string): Promise<AuthUser | null
       id: session.user.id,
       email: session.user.email,
       name: session.user.name,
-      role: session.user.role
+      role: session.user.role,
     }
   } catch (error) {
     console.error('Session validation error:', error)
@@ -102,7 +102,7 @@ export async function getSessionUser(sessionId: string): Promise<AuthUser | null
 export async function deleteSession(sessionId: string): Promise<void> {
   try {
     await prisma.session.delete({
-      where: { id: sessionId }
+      where: { id: sessionId },
     })
   } catch (error) {
     console.error('Session deletion error:', error)
@@ -114,9 +114,9 @@ export async function cleanupExpiredSessions(): Promise<void> {
     await prisma.session.deleteMany({
       where: {
         expiresAt: {
-          lt: new Date()
-        }
-      }
+          lt: new Date(),
+        },
+      },
     })
   } catch (error) {
     console.error('Session cleanup error:', error)
@@ -125,34 +125,34 @@ export async function cleanupExpiredSessions(): Promise<void> {
 
 // User management
 export async function createUser(
-  email: string, 
-  password: string, 
-  name?: string, 
+  email: string,
+  password: string,
+  name?: string,
   role: Role = 'VIEWER'
 ): Promise<AuthUser> {
   const hashedPassword = await hashPassword(password)
-  
+
   const user = await prisma.user.create({
     data: {
       email: email.toLowerCase(),
       password: hashedPassword,
       name: name || null,
-      role
-    }
+      role,
+    },
   })
 
   return {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role
+    role: user.role,
   }
 }
 
 export async function getUserById(userId: string): Promise<AuthUser | null> {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     })
 
     if (!user) {
@@ -163,7 +163,7 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
     }
   } catch (error) {
     console.error('Get user error:', error)
@@ -174,10 +174,10 @@ export async function getUserById(userId: string): Promise<AuthUser | null> {
 // Role checking utilities
 export function hasPermission(userRole: Role, requiredRole: Role): boolean {
   const roleHierarchy: Record<Role, number> = {
-    'VIEWER': 1,
-    'AUTHOR': 2,
-    'EDITOR': 3,
-    'ADMIN': 4
+    VIEWER: 1,
+    AUTHOR: 2,
+    EDITOR: 3,
+    ADMIN: 4,
   }
 
   return roleHierarchy[userRole] >= roleHierarchy[requiredRole]

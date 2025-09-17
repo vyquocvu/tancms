@@ -1,10 +1,12 @@
 # Deployment Guide
 
-This guide covers deploying TanCMS to various platforms. TanCMS is optimized for Vercel but can be deployed to any platform that supports Node.js.
+This guide covers deploying TanCMS to various platforms. TanCMS is optimized for
+Vercel but can be deployed to any platform that supports Node.js.
 
 ## 🚀 Vercel (Recommended)
 
-Vercel provides the best experience for TanStack Start applications with zero-config deployments.
+Vercel provides the best experience for TanStack Start applications with
+zero-config deployments.
 
 ### Prerequisites
 
@@ -20,61 +22,61 @@ Vercel provides the best experience for TanStack Start applications with zero-co
    - Import your TanCMS repository
 
 2. **Configure Environment Variables**
-   
+
    Add these environment variables in Vercel dashboard:
 
    ```bash
    # Database (required)
    DATABASE_URL=postgresql://username:password@host:port/database
-   
+
    # Authentication (required)
    AUTH_SECRET=your-32-character-secret-key-here
-   
+
    # Application (required)
    APP_URL=https://your-app.vercel.app
-   
+
    # S3 Storage (optional)
    S3_ENDPOINT=https://your-s3-endpoint.com
    S3_ACCESS_KEY_ID=your-access-key
    S3_SECRET_ACCESS_KEY=your-secret-key
    S3_BUCKET=your-bucket-name
-   
+
    # Prisma (optional)
    PRISMA_ACCELERATE_URL=your-accelerate-url
    ```
 
 3. **Configure Build Settings**
-   
+
    Vercel auto-detects these settings, but you can customize:
 
    ```bash
    # Build Command
    npm run build
-   
+
    # Output Directory
    .vercel/output
-   
+
    # Install Command
    npm install
    ```
 
 4. **Database Setup**
-   
+
    Before first deployment:
 
    ```bash
    # Generate Prisma client
    npx prisma generate
-   
+
    # Deploy migrations
    npx prisma migrate deploy
-   
+
    # Seed database (optional)
    npx prisma db seed
    ```
 
 5. **Deploy**
-   
+
    Push to your main branch or click "Deploy" in Vercel dashboard.
 
 ### Vercel Configuration
@@ -135,14 +137,14 @@ services:
   tancms:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/tancms
       - AUTH_SECRET=your-secret-key
       - APP_URL=http://localhost:3000
     depends_on:
       - db
-    
+
   db:
     image: postgres:15
     environment:
@@ -150,7 +152,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -185,23 +187,26 @@ Deploy to AWS for more control over infrastructure.
 ### Setup Steps
 
 1. **Launch EC2 Instance**
+
    ```bash
    # Amazon Linux 2
    sudo yum update -y
    sudo yum install -y nodejs npm git
-   
+
    # Clone repository
    git clone https://github.com/your-username/tancms.git
    cd tancms
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    npx prisma generate
    ```
 
 3. **Environment Configuration**
+
    ```bash
    # Create .env file
    cat > .env << EOF
@@ -216,12 +221,14 @@ Deploy to AWS for more control over infrastructure.
    ```
 
 4. **Database Migration**
+
    ```bash
    npx prisma migrate deploy
    npx prisma db seed
    ```
 
 5. **Build and Start**
+
    ```bash
    npm run build
    npm start
@@ -247,10 +254,10 @@ server {
 server {
     listen 443 ssl;
     server_name your-domain.com;
-    
+
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
@@ -276,29 +283,29 @@ Create `.do/app.yaml`:
 ```yaml
 name: tancms
 services:
-- name: web
-  source_dir: /
-  github:
-    repo: your-username/tancms
-    branch: main
-  run_command: npm start
-  build_command: npm run build
-  environment_slug: node-js
-  instance_count: 1
-  instance_size_slug: basic-xxs
-  env:
-  - key: DATABASE_URL
-    value: ${db.DATABASE_URL}
-  - key: AUTH_SECRET
-    value: your-secret-key
-  - key: APP_URL
-    value: ${APP_URL}
+  - name: web
+    source_dir: /
+    github:
+      repo: your-username/tancms
+      branch: main
+    run_command: npm start
+    build_command: npm run build
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    env:
+      - key: DATABASE_URL
+        value: ${db.DATABASE_URL}
+      - key: AUTH_SECRET
+        value: your-secret-key
+      - key: APP_URL
+        value: ${APP_URL}
 
 databases:
-- name: db
-  engine: PG
-  version: "15"
-  size_slug: db-s-1vcpu-1gb
+  - name: db
+    engine: PG
+    version: '15'
+    size_slug: db-s-1vcpu-1gb
 ```
 
 ### Deploy
@@ -340,23 +347,23 @@ Quick deployment with Railway's developer-friendly platform.
 
 ### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | `postgresql://user:pass@host:5432/db` |
-| `AUTH_SECRET` | Session encryption secret (32+ chars) | `your-32-character-secret-key` |
-| `APP_URL` | Application base URL | `https://your-app.vercel.app` |
+| Variable       | Description                           | Example                               |
+| -------------- | ------------------------------------- | ------------------------------------- |
+| `DATABASE_URL` | Database connection string            | `postgresql://user:pass@host:5432/db` |
+| `AUTH_SECRET`  | Session encryption secret (32+ chars) | `your-32-character-secret-key`        |
+| `APP_URL`      | Application base URL                  | `https://your-app.vercel.app`         |
 
 ### Optional Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `S3_ENDPOINT` | S3-compatible storage endpoint | - |
-| `S3_ACCESS_KEY_ID` | S3 access key | - |
-| `S3_SECRET_ACCESS_KEY` | S3 secret key | - |
-| `S3_BUCKET` | S3 bucket name | - |
-| `PRISMA_ACCELERATE_URL` | Prisma Accelerate connection | - |
-| `NODE_ENV` | Environment mode | `production` |
-| `PORT` | Server port | `3000` |
+| Variable                | Description                    | Default      |
+| ----------------------- | ------------------------------ | ------------ |
+| `S3_ENDPOINT`           | S3-compatible storage endpoint | -            |
+| `S3_ACCESS_KEY_ID`      | S3 access key                  | -            |
+| `S3_SECRET_ACCESS_KEY`  | S3 secret key                  | -            |
+| `S3_BUCKET`             | S3 bucket name                 | -            |
+| `PRISMA_ACCELERATE_URL` | Prisma Accelerate connection   | -            |
+| `NODE_ENV`              | Environment mode               | `production` |
+| `PORT`                  | Server port                    | `3000`       |
 
 ## 🗄️ Database Providers
 
@@ -501,29 +508,29 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Run tests
-      run: npm test
-    
-    - name: Build
-      run: npm run build
-    
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.ORG_ID }}
-        vercel-project-id: ${{ secrets.PROJECT_ID }}
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
 ```
 
 ## 🔐 Security Considerations
@@ -554,7 +561,7 @@ Configure rate limiting for API endpoints:
 // Add to server configuration
 const rateLimit = {
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
 }
 ```
 
@@ -616,12 +623,12 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`
     return new Response(JSON.stringify({ status: 'ok' }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     })
   } catch (error) {
     return new Response(JSON.stringify({ status: 'error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     })
   }
 }

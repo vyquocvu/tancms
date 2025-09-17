@@ -43,11 +43,26 @@ const WysiwygEditor = React.forwardRef<any, WysiwygEditorProps>(
             height: minHeight,
             menubar: false,
             plugins: [
-              'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-              'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-              'insertdatetime', 'media', 'table', 'help', 'wordcount'
+              'advlist',
+              'autolink',
+              'lists',
+              'link',
+              'image',
+              'charmap',
+              'preview',
+              'anchor',
+              'searchreplace',
+              'visualblocks',
+              'code',
+              'fullscreen',
+              'insertdatetime',
+              'media',
+              'table',
+              'help',
+              'wordcount',
             ],
-            toolbar: 'undo redo | blocks | ' +
+            toolbar:
+              'undo redo | blocks | ' +
               'bold italic forecolor | alignleft aligncenter ' +
               'alignright alignjustify | bullist numlist outdent indent | ' +
               'removeformat | help',
@@ -75,7 +90,7 @@ const WysiwygEditor = React.forwardRef<any, WysiwygEditorProps>(
                   container.style.transition = 'border-color 0.2s'
                 }
               })
-              
+
               editor.on('focus', () => {
                 const container = editor.getContainer()
                 if (container) {
@@ -85,7 +100,7 @@ const WysiwygEditor = React.forwardRef<any, WysiwygEditorProps>(
                   container.style.boxShadow = '0 0 0 2px hsl(var(--ring))'
                 }
               })
-              
+
               editor.on('blur', () => {
                 const container = editor.getContainer()
                 if (container) {
@@ -93,7 +108,7 @@ const WysiwygEditor = React.forwardRef<any, WysiwygEditorProps>(
                   container.style.boxShadow = 'none'
                 }
               })
-            }
+            },
           }}
         />
       </div>

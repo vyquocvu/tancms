@@ -11,7 +11,11 @@ interface AuthContextType {
   user: AuthUser | null
   loading: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  register: (email: string, password: string, name: string) => Promise<{ success: boolean; error?: string }>
+  register: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
 }
@@ -37,7 +41,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkAuth = async () => {
     try {
       const response = await fetch('/api/auth?action=me', {
-        credentials: 'include'
+        credentials: 'include',
       })
       const data = await response.json()
       setUser(data.user)
@@ -49,15 +53,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await fetch('/api/auth?action=login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: 'include'
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -73,15 +80,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const register = async (email: string, password: string, name: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (
+    email: string,
+    password: string,
+    name: string
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       const response = await fetch('/api/auth?action=register', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password, name, confirmPassword: password }),
-        credentials: 'include'
+        credentials: 'include',
       })
 
       const data = await response.json()
@@ -101,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await fetch('/api/auth?action=logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       })
     } catch (error) {
       console.error('Logout error:', error)
@@ -120,20 +131,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 // Role checking hooks
 export function useRequireAuth(redirectTo?: string) {
   const { user, loading } = useAuth()
-  
+
   useEffect(() => {
     if (!loading && !user && redirectTo) {
       window.location.href = redirectTo
@@ -145,15 +152,15 @@ export function useRequireAuth(redirectTo?: string) {
 
 export function useRequireRole(requiredRole: AuthUser['role']) {
   const { user } = useAuth()
-  
+
   const roleHierarchy: Record<AuthUser['role'], number> = {
-    'VIEWER': 1,
-    'AUTHOR': 2,
-    'EDITOR': 3,
-    'ADMIN': 4
+    VIEWER: 1,
+    AUTHOR: 2,
+    EDITOR: 3,
+    ADMIN: 4,
   }
 
   const hasPermission = user && roleHierarchy[user.role] >= roleHierarchy[requiredRole]
-  
+
   return { hasPermission, user }
 }

@@ -23,7 +23,7 @@ describe('Dynamic Content Type API', () => {
           fieldType: 'TEXT',
           required: true,
           unique: false,
-          order: 0
+          order: 0,
         },
         {
           name: 'price',
@@ -31,7 +31,7 @@ describe('Dynamic Content Type API', () => {
           fieldType: 'NUMBER',
           required: true,
           unique: false,
-          order: 1
+          order: 1,
         },
         {
           name: 'description',
@@ -39,9 +39,9 @@ describe('Dynamic Content Type API', () => {
           fieldType: 'TEXTAREA',
           required: false,
           unique: false,
-          order: 2
-        }
-      ]
+          order: 2,
+        },
+      ],
     })
   })
 
@@ -51,15 +51,15 @@ describe('Dynamic Content Type API', () => {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Test Product' },
           { fieldId: testContentType.fields[1].id, value: '99.99' },
-          { fieldId: testContentType.fields[2].id, value: 'A test product description' }
-        ]
+          { fieldId: testContentType.fields[2].id, value: 'A test product description' },
+        ],
       })
 
       expect(response.success).toBe(true)
       expect(response.data).toBeDefined()
       expect(response.data.entry).toBeDefined()
       expect(response.data.entry.fieldValues).toHaveLength(3)
-      
+
       // Store the entry ID for other tests
       testEntryId = response.data.entry.id
     })
@@ -67,8 +67,11 @@ describe('Dynamic Content Type API', () => {
     it('should fail to create entry with missing required fields', async () => {
       const response = await api.createEntry('test-product', {
         fieldValues: [
-          { fieldId: testContentType.fields[2].id, value: 'Only description, missing title and price' }
-        ]
+          {
+            fieldId: testContentType.fields[2].id,
+            value: 'Only description, missing title and price',
+          },
+        ],
       })
 
       expect(response.success).toBe(false)
@@ -80,9 +83,7 @@ describe('Dynamic Content Type API', () => {
 
     it('should fail for non-existent content type', async () => {
       const response = await api.createEntry('nonexistent', {
-        fieldValues: [
-          { fieldId: 'fake-id', value: 'test' }
-        ]
+        fieldValues: [{ fieldId: 'fake-id', value: 'test' }],
       })
 
       expect(response.success).toBe(false)
@@ -165,14 +166,14 @@ describe('Dynamic Content Type API', () => {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Updated Product Title' },
           { fieldId: testContentType.fields[1].id, value: '149.99' },
-          { fieldId: testContentType.fields[2].id, value: 'Updated description' }
-        ]
+          { fieldId: testContentType.fields[2].id, value: 'Updated description' },
+        ],
       })
 
       expect(response.success).toBe(true)
       expect(response.data).toBeDefined()
       expect(response.data.entry).toBeDefined()
-      
+
       // Verify the update
       const titleField = response.data.entry.fieldValues.find(
         (fv: any) => fv.fieldId === testContentType.fields[0].id
@@ -182,9 +183,7 @@ describe('Dynamic Content Type API', () => {
 
     it('should fail to update with missing required fields', async () => {
       const response = await api.updateEntry('test-product', testEntryId, {
-        fieldValues: [
-          { fieldId: testContentType.fields[2].id, value: 'Only description' }
-        ]
+        fieldValues: [{ fieldId: testContentType.fields[2].id, value: 'Only description' }],
       })
 
       expect(response.success).toBe(false)
@@ -194,9 +193,7 @@ describe('Dynamic Content Type API', () => {
 
     it('should fail for non-existent entry', async () => {
       const response = await api.updateEntry('test-product', 'nonexistent-id', {
-        fieldValues: [
-          { fieldId: testContentType.fields[0].id, value: 'Test' }
-        ]
+        fieldValues: [{ fieldId: testContentType.fields[0].id, value: 'Test' }],
       })
 
       expect(response.success).toBe(false)

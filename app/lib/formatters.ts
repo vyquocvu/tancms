@@ -20,7 +20,7 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
     return {
       displayValue: '(empty)',
       isHtml: false,
-      isLink: false
+      isLink: false,
     }
   }
 
@@ -30,7 +30,7 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
       return {
         displayValue: value,
         isHtml: true,
-        isLink: false
+        isLink: false,
       }
 
     case 'EMAIL':
@@ -38,24 +38,25 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
         displayValue: value,
         isHtml: false,
         isLink: true,
-        linkUrl: `mailto:${value}`
+        linkUrl: `mailto:${value}`,
       }
 
-    case 'URL':
+    case 'URL': {
       const url = value.startsWith('http') ? value : `https://${value}`
       return {
         displayValue: value,
         isHtml: false,
         isLink: true,
-        linkUrl: url
+        linkUrl: url,
       }
+    }
 
     case 'PHONE':
       return {
         displayValue: value,
         isHtml: false,
         isLink: true,
-        linkUrl: `tel:${value.replace(/\D/g, '')}`
+        linkUrl: `tel:${value.replace(/\D/g, '')}`,
       }
 
     case 'DATE':
@@ -64,13 +65,13 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
         return {
           displayValue: date.toLocaleDateString(),
           isHtml: false,
-          isLink: false
+          isLink: false,
         }
       } catch {
         return {
           displayValue: value,
           isHtml: false,
-          isLink: false
+          isLink: false,
         }
       }
 
@@ -80,13 +81,13 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
         return {
           displayValue: date.toLocaleString(),
           isHtml: false,
-          isLink: false
+          isLink: false,
         }
       } catch {
         return {
           displayValue: value,
           isHtml: false,
-          isLink: false
+          isLink: false,
         }
       }
 
@@ -94,7 +95,7 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
       return {
         displayValue: value === 'true' ? 'Yes ✅' : 'No ❌',
         isHtml: false,
-        isLink: false
+        isLink: false,
       }
 
     case 'NUMBER':
@@ -102,7 +103,7 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
       return {
         displayValue: parseFloat(value).toLocaleString(),
         isHtml: false,
-        isLink: false
+        isLink: false,
       }
 
     case 'COLOR':
@@ -114,7 +115,7 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
           </div>
         `,
         isHtml: true,
-        isLink: false
+        isLink: false,
       }
 
     case 'JSON':
@@ -123,13 +124,13 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
         return {
           displayValue: `<pre class="bg-gray-100 p-2 rounded text-sm overflow-auto">${JSON.stringify(parsed, null, 2)}</pre>`,
           isHtml: true,
-          isLink: false
+          isLink: false,
         }
       } catch {
         return {
           displayValue: value,
           isHtml: false,
-          isLink: false
+          isLink: false,
         }
       }
 
@@ -137,19 +138,20 @@ export function formatFieldValue(field: ContentField, value: string): FormattedV
       return {
         displayValue: `/${value}`,
         isHtml: false,
-        isLink: false
+        isLink: false,
       }
 
     case 'TEXT':
     case 'TEXTAREA':
-    default:
+    default: {
       // Basic text with line breaks preserved
       const formattedText = value.replace(/\n/g, '<br>')
       return {
         displayValue: formattedText,
         isHtml: true,
-        isLink: false
+        isLink: false,
       }
+    }
   }
 }
 
@@ -173,8 +175,8 @@ export function getFieldTypeLabel(fieldType: string): string {
     COLOR: 'Color',
     JSON: 'JSON',
     SLUG: 'URL Slug',
-    PASSWORD: 'Password'
+    PASSWORD: 'Password',
   }
-  
+
   return labels[fieldType] || fieldType
 }

@@ -16,40 +16,46 @@ interface Tag {
   createdAt: string
 }
 
-function TagCard({ tag, onEdit, onDelete }: { tag: Tag; onEdit: (tag: Tag) => void; onDelete: (tag: Tag) => void }) {
+function TagCard({
+  tag,
+  onEdit,
+  onDelete,
+}: {
+  tag: Tag
+  onEdit: (tag: Tag) => void
+  onDelete: (tag: Tag) => void
+}) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-md">
-              <TagIcon className="h-4 w-4 text-primary" />
+    <Card className='hover:shadow-md transition-shadow'>
+      <CardContent className='p-6'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <div className='p-2 bg-primary/10 rounded-md'>
+              <TagIcon className='h-4 w-4 text-primary' />
             </div>
             <div>
-              <h3 className="text-lg font-medium">{tag.name}</h3>
-              <p className="text-xs text-muted-foreground">
-                Created {tag.createdAt}
-              </p>
+              <h3 className='text-lg font-medium'>{tag.name}</h3>
+              <p className='text-xs text-muted-foreground'>Created {tag.createdAt}</p>
             </div>
           </div>
-          <div className="flex space-x-2">
+          <div className='flex space-x-2'>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={() => onEdit(tag)}
               aria-label={`Edit tag ${tag.name}`}
-              className="hover:bg-muted"
+              className='hover:bg-muted'
             >
-              <Edit className="h-4 w-4" />
+              <Edit className='h-4 w-4' />
             </Button>
             <Button
-              variant="ghost"
-              size="sm"
+              variant='ghost'
+              size='sm'
               onClick={() => onDelete(tag)}
               aria-label={`Delete tag ${tag.name}`}
-              className="hover:bg-destructive/10 hover:text-destructive"
+              className='hover:bg-destructive/10 hover:text-destructive'
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className='h-4 w-4' />
             </Button>
           </div>
         </div>
@@ -58,9 +64,13 @@ function TagCard({ tag, onEdit, onDelete }: { tag: Tag; onEdit: (tag: Tag) => vo
   )
 }
 
-function CreateTagModal({ isOpen, onClose, onSave }: { 
-  isOpen: boolean; 
-  onClose: () => void; 
+function CreateTagModal({
+  isOpen,
+  onClose,
+  onSave,
+}: {
+  isOpen: boolean
+  onClose: () => void
   onSave: (name: string) => Promise<void> | void
 }) {
   const [tagName, setTagName] = useState('')
@@ -116,59 +126,55 @@ function CreateTagModal({ isOpen, onClose, onSave }: {
   }
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+    <div
+      className='fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4'
       onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
+      role='dialog'
+      aria-modal='true'
+      aria-labelledby='modal-title'
     >
-      <Card className="w-full max-w-md">
+      <Card className='w-full max-w-md'>
         <CardHeader>
-          <CardTitle id="modal-title" className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+          <CardTitle id='modal-title' className='flex items-center gap-2'>
+            <Plus className='h-5 w-5' />
             Create New Tag
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className='space-y-4'>
             <div>
-              <label htmlFor="tagName" className="block text-sm font-medium mb-2">
+              <label htmlFor='tagName' className='block text-sm font-medium mb-2'>
                 Tag Name
               </label>
               <Input
-                type="text"
-                id="tagName"
+                type='text'
+                id='tagName'
                 value={tagName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTagName(e.target.value)}
-                placeholder="Enter tag name..."
+                placeholder='Enter tag name...'
                 autoFocus
                 disabled={isSubmitting}
-                className="w-full"
-                aria-describedby="tagName-help"
+                className='w-full'
+                aria-describedby='tagName-help'
               />
-              <p id="tagName-help" className="text-xs text-muted-foreground mt-1">
+              <p id='tagName-help' className='text-xs text-muted-foreground mt-1'>
                 Choose a descriptive name for your tag
               </p>
             </div>
-            <div className="flex gap-3 pt-4">
+            <div className='flex gap-3 pt-4'>
               <Button
-                type="button"
-                variant="outline"
+                type='button'
+                variant='outline'
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="flex-1"
+                className='flex-1'
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={!tagName.trim() || isSubmitting}
-                className="flex-1"
-              >
+              <Button type='submit' disabled={!tagName.trim() || isSubmitting} className='flex-1'>
                 {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className='flex items-center gap-2'>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
                     Creating...
                   </div>
                 ) : (
@@ -203,33 +209,33 @@ export default function TagsPage() {
           {
             id: '1',
             name: 'Technology',
-            createdAt: '2024-01-15'
+            createdAt: '2024-01-15',
           },
           {
             id: '2',
             name: 'Web Development',
-            createdAt: '2024-01-14'
+            createdAt: '2024-01-14',
           },
           {
             id: '3',
             name: 'React',
-            createdAt: '2024-01-13'
+            createdAt: '2024-01-13',
           },
           {
             id: '4',
             name: 'TypeScript',
-            createdAt: '2024-01-12'
+            createdAt: '2024-01-12',
           },
           {
             id: '5',
             name: 'Design',
-            createdAt: '2024-01-11'
+            createdAt: '2024-01-11',
           },
           {
             id: '6',
             name: 'Performance',
-            createdAt: '2024-01-10'
-          }
+            createdAt: '2024-01-10',
+          },
         ])
         setIsLoading(false)
       }, 1000)
@@ -238,16 +244,14 @@ export default function TagsPage() {
     loadTags()
   }, [])
 
-  const filteredTags = tags.filter(tag =>
-    tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredTags = tags.filter(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const handleCreateTag = async (name: string) => {
     try {
       const newTag: Tag = {
         id: (tags.length + 1).toString(),
         name,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
       }
       setTags([...tags, newTag])
       toast.showSuccess('Tag created', `"${name}" has been created successfully.`)
@@ -268,7 +272,7 @@ export default function TagsPage() {
 
   const confirmDelete = async () => {
     if (!tagToDelete) return
-    
+
     setIsDeleting(true)
     try {
       // Simulate API call
@@ -292,16 +296,14 @@ export default function TagsPage() {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
+        <div className='space-y-6'>
+          <div className='flex justify-between items-center'>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
-              <p className="text-muted-foreground">
-                Organize your content with tags
-              </p>
+              <h1 className='text-3xl font-bold tracking-tight'>Tags</h1>
+              <p className='text-muted-foreground'>Organize your content with tags</p>
             </div>
             <Button disabled>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className='mr-2 h-4 w-4' />
               New Tag
             </Button>
           </div>
@@ -314,16 +316,14 @@ export default function TagsPage() {
   if (tags.length === 0 && !isLoading) {
     return (
       <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
+        <div className='space-y-6'>
+          <div className='flex justify-between items-center'>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
-              <p className="text-muted-foreground">
-                Organize your content with tags
-              </p>
+              <h1 className='text-3xl font-bold tracking-tight'>Tags</h1>
+              <p className='text-muted-foreground'>Organize your content with tags</p>
             </div>
             <Button onClick={() => setIsModalOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className='mr-2 h-4 w-4' />
               New Tag
             </Button>
           </div>
@@ -340,35 +340,35 @@ export default function TagsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
-            <p className="text-muted-foreground">
-              Organize your content with tags
-            </p>
+            <h1 className='text-3xl font-bold tracking-tight'>Tags</h1>
+            <p className='text-muted-foreground'>Organize your content with tags</p>
           </div>
-          <Button onClick={() => setIsModalOpen(true)} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={() => setIsModalOpen(true)} className='w-full sm:w-auto'>
+            <Plus className='mr-2 h-4 w-4' />
             New Tag
           </Button>
         </div>
 
         {/* Stats Summary */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                    <TagIcon className="w-4 h-4 text-primary" />
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center'>
+                    <TagIcon className='w-4 h-4 text-primary' />
                   </div>
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className='ml-5 w-0 flex-1'>
                   <dl>
-                    <dt className="text-sm font-medium text-muted-foreground truncate">Total Tags</dt>
-                    <dd className="text-lg font-medium">{tags.length}</dd>
+                    <dt className='text-sm font-medium text-muted-foreground truncate'>
+                      Total Tags
+                    </dt>
+                    <dd className='text-lg font-medium'>{tags.length}</dd>
                   </dl>
                 </div>
               </div>
@@ -376,17 +376,17 @@ export default function TagsPage() {
           </Card>
 
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-500/10 rounded-full flex items-center justify-center">
-                    <Search className="w-4 h-4 text-green-600" />
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='flex-shrink-0'>
+                  <div className='w-8 h-8 bg-green-500/10 rounded-full flex items-center justify-center'>
+                    <Search className='w-4 h-4 text-green-600' />
                   </div>
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className='ml-5 w-0 flex-1'>
                   <dl>
-                    <dt className="text-sm font-medium text-muted-foreground truncate">Found</dt>
-                    <dd className="text-lg font-medium">{filteredTags.length}</dd>
+                    <dt className='text-sm font-medium text-muted-foreground truncate'>Found</dt>
+                    <dd className='text-lg font-medium'>{filteredTags.length}</dd>
                   </dl>
                 </div>
               </div>
@@ -397,19 +397,21 @@ export default function TagsPage() {
         {/* Search Bar */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Search Tags</CardTitle>
+            <CardTitle className='text-lg'>Search Tags</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="max-w-md">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className='max-w-md'>
+              <div className='relative'>
+                <Search className='absolute left-3 top-3 h-4 w-4 text-muted-foreground' />
                 <Input
-                  type="text"
+                  type='text'
                   value={searchTerm}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  placeholder="Search tags..."
-                  aria-label="Search tags"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchTerm(e.target.value)
+                  }
+                  className='pl-10'
+                  placeholder='Search tags...'
+                  aria-label='Search tags'
                 />
               </div>
             </div>
@@ -418,14 +420,9 @@ export default function TagsPage() {
 
         {/* Tags Grid */}
         {filteredTags.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredTags.map((tag) => (
-              <TagCard
-                key={tag.id}
-                tag={tag}
-                onEdit={handleEditTag}
-                onDelete={handleDeleteTag}
-              />
+          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+            {filteredTags.map(tag => (
+              <TagCard key={tag.id} tag={tag} onEdit={handleEditTag} onDelete={handleDeleteTag} />
             ))}
           </div>
         ) : (
@@ -444,9 +441,9 @@ export default function TagsPage() {
           onClose={handleCloseDeleteDialog}
           onConfirm={confirmDelete}
           itemName={tagToDelete?.name || ''}
-          itemType="tag"
+          itemType='tag'
           isLoading={isDeleting}
-          additionalInfo="This action cannot be undone. The tag will be removed from all associated content."
+          additionalInfo='This action cannot be undone. The tag will be removed from all associated content.'
         />
       </div>
     </AdminLayout>

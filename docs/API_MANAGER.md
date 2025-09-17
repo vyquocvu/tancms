@@ -1,12 +1,16 @@
 # API Manager Documentation
 
-The TanCMS API Manager provides a centralized, middleware-based system for handling REST API operations. It coordinates all API functionality with support for authentication, logging, CORS, and custom middleware.
+The TanCMS API Manager provides a centralized, middleware-based system for
+handling REST API operations. It coordinates all API functionality with support
+for authentication, logging, CORS, and custom middleware.
 
 ## Features
 
 - **Centralized API Management**: Single point of control for all API operations
-- **Middleware Support**: Extensible middleware system for cross-cutting concerns
-- **Built-in Authentication**: API key-based authentication with configurable keys
+- **Middleware Support**: Extensible middleware system for cross-cutting
+  concerns
+- **Built-in Authentication**: API key-based authentication with configurable
+  keys
 - **Request Logging**: Automatic request/response logging with timing
 - **CORS Support**: Cross-Origin Resource Sharing for browser clients
 - **Error Handling**: Consistent error responses across all endpoints
@@ -26,15 +30,15 @@ const status = await api.getStatus()
 const entries = await api.listEntries('product', {
   page: 1,
   limit: 10,
-  search: 'laptop'
+  search: 'laptop',
 })
 
 // Create a new entry
 const newEntry = await api.createEntry('product', {
   fieldValues: [
     { fieldId: 'title-field-id', value: 'New Product' },
-    { fieldId: 'price-field-id', value: '99.99' }
-  ]
+    { fieldId: 'price-field-id', value: '99.99' },
+  ],
 })
 ```
 
@@ -101,8 +105,8 @@ const apiManager = configureApiManager({
   corsEnabled: true,
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100
-  }
+    maxRequests: 100,
+  },
 })
 ```
 
@@ -150,17 +154,17 @@ apiManager.addMiddleware({
   handler: async (request, next) => {
     // Rate limiting logic here
     const allowed = await checkRateLimit(request)
-    
+
     if (!allowed) {
       return {
         success: false,
         error: 'Rate limit exceeded',
-        details: ['Too many requests. Please try again later.']
+        details: ['Too many requests. Please try again later.'],
       }
     }
-    
+
     return next()
-  }
+  },
 })
 ```
 
@@ -185,10 +189,7 @@ All API endpoints return a consistent response format:
 {
   "success": false,
   "error": "Brief error description",
-  "details": [
-    "Detailed error message",
-    "Additional context if needed"
-  ]
+  "details": ["Detailed error message", "Additional context if needed"]
 }
 ```
 
@@ -260,8 +261,8 @@ const response = await api.createEntry('product', {
   slug: 'custom-slug', // Optional
   fieldValues: [
     { fieldId: 'title-field', value: 'New Product' },
-    { fieldId: 'price-field', value: '99.99' }
-  ]
+    { fieldId: 'price-field', value: '99.99' },
+  ],
 })
 
 // Response format: Same as get single entry
@@ -272,9 +273,7 @@ const response = await api.createEntry('product', {
 ```typescript
 // PUT /api/{contentType}/{entryId}
 const response = await api.updateEntry('product', 'entry-123', {
-  fieldValues: [
-    { fieldId: 'title-field', value: 'Updated Title' }
-  ]
+  fieldValues: [{ fieldId: 'title-field', value: 'Updated Title' }],
 })
 
 // Response format: Same as get single entry
@@ -298,15 +297,15 @@ const response = await api.deleteEntry('product', 'entry-123')
 
 ## Error Codes
 
-| HTTP Status | Error Type | Description |
-|-------------|------------|-------------|
-| 200 | Success | Request successful |
-| 201 | Created | Resource created successfully |
-| 400 | Bad Request | Invalid request data or validation error |
-| 401 | Unauthorized | Authentication required or failed |
-| 404 | Not Found | Resource not found |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Server error |
+| HTTP Status | Error Type            | Description                              |
+| ----------- | --------------------- | ---------------------------------------- |
+| 200         | Success               | Request successful                       |
+| 201         | Created               | Resource created successfully            |
+| 400         | Bad Request           | Invalid request data or validation error |
+| 401         | Unauthorized          | Authentication required or failed        |
+| 404         | Not Found             | Resource not found                       |
+| 429         | Too Many Requests     | Rate limit exceeded                      |
+| 500         | Internal Server Error | Server error                             |
 
 ## Common Error Scenarios
 
@@ -326,10 +325,7 @@ const response = await api.deleteEntry('product', 'entry-123')
 {
   "success": false,
   "error": "Validation failed",
-  "details": [
-    "Field 'Title' is required",
-    "Field 'Price' is required"
-  ]
+  "details": ["Field 'Title' is required", "Field 'Price' is required"]
 }
 ```
 
@@ -361,7 +357,7 @@ Enable detailed logging in development:
 import { configureApiManager } from '~/lib/api-manager'
 
 const apiManager = configureApiManager({
-  enableLogging: true  // Will log all requests/responses
+  enableLogging: true, // Will log all requests/responses
 })
 ```
 
@@ -378,7 +374,8 @@ const apiManager = configureApiManager({
 
 1. **Pagination**: Use pagination for large datasets
 2. **Search Filtering**: Apply search filters to reduce response size
-3. **Caching**: Consider implementing response caching for frequently accessed data
+3. **Caching**: Consider implementing response caching for frequently accessed
+   data
 4. **Database Optimization**: Ensure proper database indexing for content fields
 
 ## Migration from Legacy API
@@ -396,4 +393,5 @@ import { api } from '~/lib/api-manager'
 const entries = await api.listEntries('product')
 ```
 
-The new API manager is backward compatible with the existing API interface while adding new features and better error handling.
+The new API manager is backward compatible with the existing API interface while
+adding new features and better error handling.
