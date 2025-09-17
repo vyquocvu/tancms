@@ -1,10 +1,11 @@
 import AdminLayout from './layout'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
-import { CheckCircle, Tag, Image, TrendingUp, Plus, ExternalLink } from 'lucide-react'
+import { CheckCircle, Tag, Image, TrendingUp, Plus, ExternalLink, Activity, AlertTriangle } from 'lucide-react'
 import { DashboardStatsSkeleton, RecentActivitySkeleton } from '~/components/ui/loading-states'
 import { EmptyActivity } from '~/components/ui/empty-states'
 import { useState, useEffect } from 'react'
+import { Badge } from '~/components/ui/badge'
 
 interface DashboardStatsProps {
   title: string
@@ -68,6 +69,129 @@ interface RecentActivityItem {
   title: string
   user: string
   time: string
+}
+
+interface HealthSummary {
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  uptime: number
+  checksCount: number
+  lastChecked: string
+}
+
+function HealthSummaryCard() {
+  const [healthData, setHealthData] = useState<HealthSummary | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchHealthSummary = async () => {
+      try {
+        const response = await fetch('/api/health')
+        const data = await response.json()
+        setHealthData({
+          status: data.status,
+          uptime: data.uptime,
+          checksCount: Object.keys(data.checks || {}).length,
+          lastChecked: data.timestamp
+        })
+      } catch (error) {
+        console.error('Failed to fetch health summary:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchHealthSummary()
+    // Refresh health summary every 60 seconds
+    const interval = setInterval(fetchHealthSummary, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="h-6 w-24 bg-muted rounded mb-2" />
+            <div className="h-4 w-16 bg-muted rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!healthData) {
+    return null
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'degraded':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case 'unhealthy':
+        return 'bg-red-100 text-red-800 border-red-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'healthy':
+        return <CheckCircle className="h-4 w-4" />
+      case 'degraded':
+      case 'unhealthy':
+        return <AlertTriangle className="h-4 w-4" />
+      default:
+        return <Activity className="h-4 w-4" />
+    }
+  }
+
+  const formatUptime = (seconds: number) => {
+    const days = Math.floor(seconds / 86400)
+    const hours = Math.floor((seconds % 86400) / 3600)
+    
+    if (days > 0) {
+      return `${days}d ${hours}h`
+    } else {
+      return `${hours}h`
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Activity className="h-5 w-5" />
+            System Health
+          </CardTitle>
+          <Badge className={getStatusColor(healthData.status)}>
+            {getStatusIcon(healthData.status)}
+            <span className="ml-1 capitalize">{healthData.status}</span>
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Uptime:</span>
+            <span className="font-medium">{formatUptime(healthData.uptime)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Health Checks:</span>
+            <span className="font-medium">{healthData.checksCount}</span>
+          </div>
+          <div className="mt-4">
+            <Button asChild variant="outline" size="sm" className="w-full">
+              <a href="#/admin/health">View Detailed Health Monitor</a>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function RecentActivity() {
@@ -224,48 +348,54 @@ export default function AdminDashboard() {
           {/* Recent Activity */}
           <RecentActivity />
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Plus className='h-5 w-5' aria-hidden='true' />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-3'>
-                <Button asChild className='w-full justify-start'>
-                  <a href='/admin/content-types' className='flex items-center gap-2'>
-                    <Plus className='h-4 w-4' />
-                    Create Content Type
-                  </a>
-                </Button>
-                <Button asChild variant='outline' className='w-full justify-start'>
-                  <a href='/admin/tags' className='flex items-center gap-2'>
-                    <Tag className='h-4 w-4' />
-                    Manage Tags
-                  </a>
-                </Button>
-                <Button asChild variant='outline' className='w-full justify-start'>
-                  <a href='/admin/media' className='flex items-center gap-2'>
-                    <Image className='h-4 w-4' />
-                    Upload Media
-                  </a>
-                </Button>
-                <hr className='my-4' />
-                <Button
-                  asChild
-                  variant='ghost'
-                  className='w-full justify-start text-muted-foreground'
-                >
-                  <a href='/' className='flex items-center gap-2'>
-                    <ExternalLink className='h-4 w-4' />
-                    View Site
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Health Summary and Quick Actions */}
+          <div className="space-y-6">
+            {/* Health Summary */}
+            <HealthSummaryCard />
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <Plus className='h-5 w-5' aria-hidden='true' />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-3'>
+                  <Button asChild className='w-full justify-start'>
+                    <a href='/admin/content-types' className='flex items-center gap-2'>
+                      <Plus className='h-4 w-4' />
+                      Create Content Type
+                    </a>
+                  </Button>
+                  <Button asChild variant='outline' className='w-full justify-start'>
+                    <a href='/admin/tags' className='flex items-center gap-2'>
+                      <Tag className='h-4 w-4' />
+                      Manage Tags
+                    </a>
+                  </Button>
+                  <Button asChild variant='outline' className='w-full justify-start'>
+                    <a href='/admin/media' className='flex items-center gap-2'>
+                      <Image className='h-4 w-4' />
+                      Upload Media
+                    </a>
+                  </Button>
+                  <hr className='my-4' />
+                  <Button
+                    asChild
+                    variant='ghost'
+                    className='w-full justify-start text-muted-foreground'
+                  >
+                    <a href='/' className='flex items-center gap-2'>
+                      <ExternalLink className='h-4 w-4' />
+                      View Site
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </AdminLayout>

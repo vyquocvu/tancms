@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  Activity,
 } from 'lucide-react'
 import { mockApi, type ContentType } from '~/lib/mock-api'
 import { useAuth } from '~/lib/auth-context'
@@ -247,6 +248,17 @@ function AdminLayoutContent({
                 >
                   <Settings className='mr-3 h-5 w-5' aria-hidden='true' />
                   API Manager
+                </a>
+              </li>
+              <li role='none'>
+                <a
+                  href='#/admin/health'
+                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  role='menuitem'
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Activity className='mr-3 h-5 w-5' aria-hidden='true' />
+                  Health Monitor
                 </a>
               </li>
 
