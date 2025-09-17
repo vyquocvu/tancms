@@ -72,9 +72,10 @@ describe('Dynamic Content Type API', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Validation failed')
-      expect(response.details).toContain("Field 'Title' is required")
-      expect(response.details).toContain("Field 'Price' is required")
+      expect(response.error?.code).toBe('VALIDATION_ERROR')
+      expect(response.error?.message).toBe('Validation failed')
+      expect(response.error?.details).toContain("Field 'Title' is required")
+      expect(response.error?.details).toContain("Field 'Price' is required")
     })
 
     it('should fail for non-existent content type', async () => {
@@ -85,7 +86,9 @@ describe('Dynamic Content Type API', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent')
     })
   })
 
@@ -120,7 +123,9 @@ describe('Dynamic Content Type API', () => {
       const response = await api.listEntries('nonexistent')
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent')
     })
   })
 
@@ -139,14 +144,18 @@ describe('Dynamic Content Type API', () => {
       const response = await api.getEntry('test-product', 'nonexistent-id')
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Entry not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Entry')
+      expect(response.message).toContain('nonexistent-id')
     })
 
     it('should fail for non-existent content type', async () => {
       const response = await api.getEntry('nonexistent', testEntryId)
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent')
     })
   })
 
@@ -179,7 +188,8 @@ describe('Dynamic Content Type API', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Validation failed')
+      expect(response.error?.code).toBe('VALIDATION_ERROR')
+      expect(response.error?.message).toBe('Validation failed')
     })
 
     it('should fail for non-existent entry', async () => {
@@ -190,7 +200,9 @@ describe('Dynamic Content Type API', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Entry not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Entry')
+      expect(response.message).toContain('nonexistent-id')
     })
   })
 
@@ -208,14 +220,18 @@ describe('Dynamic Content Type API', () => {
       const response = await api.deleteEntry('test-product', 'nonexistent-id')
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Entry not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Entry')
+      expect(response.message).toContain('nonexistent-id')
     })
 
     it('should fail for non-existent content type', async () => {
       const response = await api.deleteEntry('nonexistent', testEntryId)
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent')
     })
   })
 })

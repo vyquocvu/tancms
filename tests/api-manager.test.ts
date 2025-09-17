@@ -182,7 +182,8 @@ describe('API Manager', () => {
       const response = await apiManager.get('/api/status')
       
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Internal server error')
+      expect(response.error?.code).toBe('INTERNAL_SERVER_ERROR')
+      expect(response.error?.message).toBe('Internal server error')
     })
   })
 
@@ -291,19 +292,24 @@ describe('API Manager', () => {
     it('should handle invalid content type gracefully', async () => {
       const response = await apiManager.get('/api/nonexistent-type')
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent-type')
     })
 
     it('should handle invalid entry ID gracefully', async () => {
       const response = await apiManager.get(`/api/${testContentType.slug}/nonexistent-id`)
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Entry not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Entry')
+      expect(response.message).toContain('nonexistent-id')
     })
 
     it('should handle invalid API paths gracefully', async () => {
       const response = await apiManager.get('/invalid/path')
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Invalid API path')
+      expect(response.error?.code).toBe('BAD_REQUEST')
+      expect(response.message).toContain('Invalid API path')
     })
 
     it('should handle validation errors', async () => {
@@ -315,7 +321,8 @@ describe('API Manager', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Validation failed')
+      expect(response.error?.code).toBe('VALIDATION_ERROR')
+      expect(response.error?.message).toBe('Validation failed')
     })
   })
 })

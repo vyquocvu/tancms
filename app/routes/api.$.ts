@@ -5,6 +5,7 @@
 
 import { createAPIFileRoute } from '@tanstack/start/api'
 import { apiManager, type ApiConfig } from '~/lib/api-manager'
+import { ApiResponseBuilder } from '~/lib/api-response'
 
 /**
  * Initialize API manager with configuration from environment
@@ -31,19 +32,15 @@ function initializeApiManager(): void {
           const apiKey = request.query?.['api_key'] || request.query?.['apiKey']
           
           if (!apiKey) {
-            return {
-              success: false,
-              error: 'Authentication required',
-              details: ['API key is required. Provide it as ?api_key=your_key']
-            }
+            return ApiResponseBuilder.authRequired('API key is required. Provide it as ?api_key=your_key')
           }
 
           if (!config.apiKeys?.includes(apiKey)) {
-            return {
-              success: false,
-              error: 'Authentication failed',
-              details: ['Invalid API key']
-            }
+            return ApiResponseBuilder.error({
+              code: 'AUTHENTICATION_FAILED',
+              message: 'Invalid API key provided',
+              details: ['The provided API key is not valid']
+            })
           }
 
           return next()
@@ -84,20 +81,15 @@ export const Route = createAPIFileRoute('/api/$')({
         query
       })
 
-      return new Response(JSON.stringify(response), {
-        status: response.success ? 200 : 400,
-        headers: getResponseHeaders(response as { headers?: Record<string, string> })
+      return ApiResponseBuilder.createHttpResponse(response, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       })
     } catch (apiError) {
       console.error('API GET error:', apiError)
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Internal server error',
-        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const errorResponse = ApiResponseBuilder.internalError(apiError)
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
   },
 
@@ -116,14 +108,12 @@ export const Route = createAPIFileRoute('/api/$')({
       const text = await request.text()
       body = text ? JSON.parse(text) : undefined
     } catch {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Invalid JSON body',
-        details: ['Request body must be valid JSON']
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
+      const errorResponse = ApiResponseBuilder.error({
+        code: 'BAD_REQUEST',
+        message: 'Invalid JSON in request body',
+        details: ['Request body must contain valid JSON']
       })
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
 
     try {
@@ -134,20 +124,15 @@ export const Route = createAPIFileRoute('/api/$')({
         query
       })
 
-      return new Response(JSON.stringify(response), {
-        status: response.success ? 201 : 400,
-        headers: getResponseHeaders(response as { headers?: Record<string, string> })
+      return ApiResponseBuilder.createHttpResponse(response, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       })
     } catch (apiError) {
       console.error('API POST error:', apiError)
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Internal server error',
-        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const errorResponse = ApiResponseBuilder.internalError(apiError)
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
   },
 
@@ -166,14 +151,12 @@ export const Route = createAPIFileRoute('/api/$')({
       const text = await request.text()
       body = text ? JSON.parse(text) : undefined
     } catch {
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Invalid JSON body',
-        details: ['Request body must be valid JSON']
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
+      const errorResponse = ApiResponseBuilder.error({
+        code: 'BAD_REQUEST',
+        message: 'Invalid JSON in request body',
+        details: ['Request body must contain valid JSON']
       })
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
 
     try {
@@ -184,20 +167,15 @@ export const Route = createAPIFileRoute('/api/$')({
         query
       })
 
-      return new Response(JSON.stringify(response), {
-        status: response.success ? 200 : 400,
-        headers: getResponseHeaders(response as { headers?: Record<string, string> })
+      return ApiResponseBuilder.createHttpResponse(response, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       })
     } catch (apiError) {
       console.error('API PUT error:', apiError)
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Internal server error',
-        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const errorResponse = ApiResponseBuilder.internalError(apiError)
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
   },
 
@@ -218,20 +196,15 @@ export const Route = createAPIFileRoute('/api/$')({
         query
       })
 
-      return new Response(JSON.stringify(response), {
-        status: response.success ? 200 : 400,
-        headers: getResponseHeaders(response as { headers?: Record<string, string> })
+      return ApiResponseBuilder.createHttpResponse(response, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
       })
     } catch (apiError) {
       console.error('API DELETE error:', apiError)
-      return new Response(JSON.stringify({
-        success: false,
-        error: 'Internal server error',
-        details: [apiError instanceof Error ? apiError.message : 'Unknown error']
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const errorResponse = ApiResponseBuilder.internalError(apiError)
+      return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
   },
 
