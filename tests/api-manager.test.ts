@@ -28,7 +28,7 @@ describe('API Manager', () => {
           fieldType: 'TEXT',
           required: true,
           unique: false,
-          order: 0
+          order: 0,
         },
         {
           name: 'price',
@@ -36,9 +36,9 @@ describe('API Manager', () => {
           fieldType: 'NUMBER',
           required: true,
           unique: false,
-          order: 1
-        }
-      ]
+          order: 1,
+        },
+      ],
     })
   })
 
@@ -46,7 +46,7 @@ describe('API Manager', () => {
     apiManager = new ApiManager({
       enableAuth: false,
       enableLogging: false,
-      corsEnabled: true
+      corsEnabled: true,
     })
   })
 
@@ -75,14 +75,14 @@ describe('API Manager', () => {
       const response = await apiManager.post(`/api/${testContentType.slug}`, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Test Product' },
-          { fieldId: testContentType.fields[1].id, value: '99.99' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '99.99' },
+        ],
       })
 
       expect(response.success).toBe(true)
       expect(response.data).toBeDefined()
       expect(response.data.entry).toBeDefined()
-      
+
       testEntryId = response.data.entry.id
     })
 
@@ -91,8 +91,8 @@ describe('API Manager', () => {
       const createResponse = await apiManager.post(`/api/${testContentType.slug}`, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Original Title' },
-          { fieldId: testContentType.fields[1].id, value: '50.00' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '50.00' },
+        ],
       })
 
       const entryId = createResponse.data.entry.id
@@ -101,13 +101,13 @@ describe('API Manager', () => {
       const response = await apiManager.put(`/api/${testContentType.slug}/${entryId}`, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Updated Title' },
-          { fieldId: testContentType.fields[1].id, value: '75.00' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '75.00' },
+        ],
       })
 
       expect(response.success).toBe(true)
       expect(response.data.entry).toBeDefined()
-      
+
       const titleField = response.data.entry.fieldValues.find(
         (fv: { fieldId: string; value: string }) => fv.fieldId === testContentType.fields[0].id
       )
@@ -119,8 +119,8 @@ describe('API Manager', () => {
       const createResponse = await apiManager.post(`/api/${testContentType.slug}`, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'To Delete' },
-          { fieldId: testContentType.fields[1].id, value: '25.00' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '25.00' },
+        ],
       })
 
       const entryId = createResponse.data.entry.id
@@ -143,11 +143,11 @@ describe('API Manager', () => {
 
       apiManager.addMiddleware({
         name: 'test-middleware',
-        handler: mockMiddleware
+        handler: mockMiddleware,
       })
 
       const response = await apiManager.get('/api/status')
-      
+
       expect(mockMiddleware).toHaveBeenCalled()
       expect((response as { middlewareExecuted?: boolean }).middlewareExecuted).toBe(true)
     })
@@ -160,13 +160,13 @@ describe('API Manager', () => {
 
       apiManager.addMiddleware({
         name: 'removable-middleware',
-        handler: mockMiddleware
+        handler: mockMiddleware,
       })
 
       apiManager.removeMiddleware('removable-middleware')
 
       const response = await apiManager.get('/api/status')
-      
+
       expect(mockMiddleware).not.toHaveBeenCalled()
       expect((response as { middlewareExecuted?: boolean }).middlewareExecuted).toBeUndefined()
     })
@@ -176,11 +176,11 @@ describe('API Manager', () => {
         name: 'error-middleware',
         handler: async () => {
           throw new Error('Middleware error')
-        }
+        },
       })
 
       const response = await apiManager.get('/api/status')
-      
+
       expect(response.success).toBe(false)
       expect(response.error?.code).toBe('INTERNAL_SERVER_ERROR')
       expect(response.error?.message).toBe('Internal server error')
@@ -192,7 +192,7 @@ describe('API Manager', () => {
       const authManager = configureApiManager({
         enableAuth: true,
         enableLogging: false,
-        apiKeys: ['test-key']
+        apiKeys: ['test-key'],
       })
 
       // Should fail without API key
@@ -216,7 +216,7 @@ describe('API Manager', () => {
       const authManager = configureApiManager({
         enableAuth: true,
         enableLogging: false,
-        apiKeys: ['test-key']
+        apiKeys: ['test-key'],
       })
 
       const response = await authManager.get('/api/status')
@@ -229,13 +229,15 @@ describe('API Manager', () => {
       const corsManager = configureApiManager({
         enableAuth: false,
         enableLogging: false,
-        corsEnabled: true
+        corsEnabled: true,
       })
 
       const response = await corsManager.get('/api/status')
       expect(response.success).toBe(true)
       expect((response as { headers?: Record<string, string> }).headers).toBeDefined()
-      expect((response as { headers?: Record<string, string> }).headers?.['Access-Control-Allow-Origin']).toBe('*')
+      expect(
+        (response as { headers?: Record<string, string> }).headers?.['Access-Control-Allow-Origin']
+      ).toBe('*')
     })
   })
 
@@ -251,8 +253,8 @@ describe('API Manager', () => {
       const createResponse = await api.createEntry(testContentType.slug, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Convenience API Test' },
-          { fieldId: testContentType.fields[1].id, value: '123.45' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '123.45' },
+        ],
       })
 
       expect(createResponse.success).toBe(true)
@@ -272,8 +274,8 @@ describe('API Manager', () => {
       const updateResponse = await api.updateEntry(testContentType.slug, entryId, {
         fieldValues: [
           { fieldId: testContentType.fields[0].id, value: 'Updated Convenience API Test' },
-          { fieldId: testContentType.fields[1].id, value: '543.21' }
-        ]
+          { fieldId: testContentType.fields[1].id, value: '543.21' },
+        ],
       })
 
       expect(updateResponse.success).toBe(true)
@@ -318,8 +320,8 @@ describe('API Manager', () => {
       const response = await apiManager.post(`/api/${testContentType.slug}`, {
         fieldValues: [
           // Missing required fields
-          { fieldId: 'nonexistent', value: 'test' }
-        ]
+          { fieldId: 'nonexistent', value: 'test' },
+        ],
       })
 
       expect(response.success).toBe(false)

@@ -1,7 +1,9 @@
 # API Response Format Documentation
 
 ## Overview
-TanCMS now uses a standardized API response format across all endpoints for improved consistency, error handling, and developer experience.
+
+TanCMS now uses a standardized API response format across all endpoints for
+improved consistency, error handling, and developer experience.
 
 ## Response Structure
 
@@ -31,22 +33,23 @@ All API responses follow this standardized structure:
 
 The API uses standardized error codes with appropriate HTTP status codes:
 
-| Error Code | HTTP Status | Description |
-|------------|-------------|-------------|
-| `VALIDATION_ERROR` | 400 | Input validation failed |
-| `BAD_REQUEST` | 400 | Invalid request format or missing required data |
-| `AUTHENTICATION_REQUIRED` | 401 | Authentication is required but not provided |
-| `AUTHENTICATION_FAILED` | 401 | Invalid credentials provided |
-| `AUTHORIZATION_FAILED` | 403 | Insufficient permissions for the requested operation |
-| `NOT_FOUND` | 404 | Requested resource was not found |
-| `METHOD_NOT_ALLOWED` | 405 | HTTP method not supported for this endpoint |
-| `CONFLICT` | 409 | Resource conflict (e.g., duplicate data) |
-| `RATE_LIMITED` | 429 | Rate limit exceeded |
-| `INTERNAL_SERVER_ERROR` | 500 | Unexpected server error |
+| Error Code                | HTTP Status | Description                                          |
+| ------------------------- | ----------- | ---------------------------------------------------- |
+| `VALIDATION_ERROR`        | 400         | Input validation failed                              |
+| `BAD_REQUEST`             | 400         | Invalid request format or missing required data      |
+| `AUTHENTICATION_REQUIRED` | 401         | Authentication is required but not provided          |
+| `AUTHENTICATION_FAILED`   | 401         | Invalid credentials provided                         |
+| `AUTHORIZATION_FAILED`    | 403         | Insufficient permissions for the requested operation |
+| `NOT_FOUND`               | 404         | Requested resource was not found                     |
+| `METHOD_NOT_ALLOWED`      | 405         | HTTP method not supported for this endpoint          |
+| `CONFLICT`                | 409         | Resource conflict (e.g., duplicate data)             |
+| `RATE_LIMITED`            | 429         | Rate limit exceeded                                  |
+| `INTERNAL_SERVER_ERROR`   | 500         | Unexpected server error                              |
 
 ## Response Examples
 
 ### Success Response
+
 ```json
 {
   "success": true,
@@ -78,6 +81,7 @@ The API uses standardized error codes with appropriate HTTP status codes:
 ```
 
 ### Error Response
+
 ```json
 {
   "success": false,
@@ -119,6 +123,7 @@ The new response format maintains backward compatibility:
 ## Environment-Specific Features
 
 ### Debug Information
+
 In non-production environments, error responses may include debug information:
 
 ```json
@@ -138,11 +143,13 @@ In non-production environments, error responses may include debug information:
 }
 ```
 
-In production environments, the `debug` field is automatically excluded for security.
+In production environments, the `debug` field is automatically excluded for
+security.
 
 ## Usage in Client Applications
 
 ### JavaScript/TypeScript
+
 ```typescript
 // Type-safe response handling
 interface ProductEntry {
@@ -154,10 +161,11 @@ interface ProductEntry {
 const response = await fetch('/api/products', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(newProduct)
+  body: JSON.stringify(newProduct),
 })
 
-const apiResponse: StandardApiResponse<{ entry: ProductEntry }> = await response.json()
+const apiResponse: StandardApiResponse<{ entry: ProductEntry }> =
+  await response.json()
 
 if (apiResponse.success) {
   console.log('Created product:', apiResponse.data.entry)
@@ -169,6 +177,7 @@ if (apiResponse.success) {
 ```
 
 ### Error Handling Best Practices
+
 ```typescript
 function handleApiError(response: StandardApiResponse) {
   if (!response.success && response.error) {
@@ -198,11 +207,14 @@ function handleApiError(response: StandardApiResponse) {
 For existing client applications, minimal changes are required:
 
 1. **Success responses**: Continue using `response.success` and `response.data`
-2. **Error handling**: Update to use `response.error.code` instead of `response.error` for error type checking
+2. **Error handling**: Update to use `response.error.code` instead of
+   `response.error` for error type checking
 3. **Error messages**: Use `response.message` for user-facing messages
-4. **Error details**: Access detailed errors via `response.error.details` instead of `response.details`
+4. **Error details**: Access detailed errors via `response.error.details`
+   instead of `response.details`
 
 ### Before (Legacy)
+
 ```typescript
 if (!response.success) {
   console.error('Error:', response.error)
@@ -211,6 +223,7 @@ if (!response.success) {
 ```
 
 ### After (Standardized)
+
 ```typescript
 if (!response.success) {
   console.error('Error:', response.error?.code)
@@ -222,9 +235,12 @@ if (!response.success) {
 ## Benefits
 
 1. **Consistency**: All endpoints use the same response structure
-2. **Better Error Handling**: Categorized error codes with appropriate HTTP status codes
+2. **Better Error Handling**: Categorized error codes with appropriate HTTP
+   status codes
 3. **Request Tracking**: Unique request IDs for debugging and monitoring
 4. **Type Safety**: Full TypeScript support for error handling
 5. **Security**: Environment-aware debug information
-6. **Developer Experience**: Predictable responses and comprehensive error information
-7. **Integration Reliability**: Standardized structure makes client integration easier
+6. **Developer Experience**: Predictable responses and comprehensive error
+   information
+7. **Integration Reliability**: Standardized structure makes client integration
+   easier

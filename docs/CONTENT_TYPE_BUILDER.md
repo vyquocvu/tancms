@@ -1,13 +1,17 @@
 # Content Type Builder
 
-The Content Type Builder is a powerful feature inspired by Strapi that allows you to create custom content types with configurable fields, similar to how you would design database schemas or API endpoints dynamically.
+The Content Type Builder is a powerful feature inspired by Strapi that allows
+you to create custom content types with configurable fields, similar to how you
+would design database schemas or API endpoints dynamically.
 
 ## Overview
 
 This feature enables administrators to:
 
-- **Create Custom Content Types**: Define new content structures beyond the default Post model
-- **Configure Fields**: Add various field types (text, number, boolean, date, etc.) with validation rules
+- **Create Custom Content Types**: Define new content structures beyond the
+  default Post model
+- **Configure Fields**: Add various field types (text, number, boolean, date,
+  etc.) with validation rules
 - **Manage Content**: Create, edit, and delete entries for each content type
 - **Generate APIs**: Automatically create REST endpoints for each content type
 
@@ -16,6 +20,7 @@ This feature enables administrators to:
 The content type builder introduces four new models:
 
 ### ContentType
+
 - `id`: Unique identifier
 - `name`: Machine-readable name (e.g., "product")
 - `displayName`: Human-readable name (e.g., "Product")
@@ -25,6 +30,7 @@ The content type builder introduces four new models:
 - `entries`: Content entries of this type
 
 ### ContentField
+
 - `id`: Unique identifier
 - `name`: Field name (e.g., "title")
 - `displayName`: Human-readable field name (e.g., "Title")
@@ -37,12 +43,14 @@ The content type builder introduces four new models:
 - `order`: Display order of the field
 
 ### ContentEntry
+
 - `id`: Unique identifier
 - `contentTypeId`: Reference to the content type
 - `slug`: Optional URL-friendly identifier
 - `fieldValues`: Related field values
 
 ### ContentFieldValue
+
 - `id`: Unique identifier
 - `fieldId`: Reference to the content field definition
 - `entryId`: Reference to the content entry
@@ -116,9 +124,9 @@ const newProduct = await fetch('/api/product', {
     fieldValues: [
       { fieldId: 'title-field-id', value: 'New Product' },
       { fieldId: 'price-field-id', value: 29.99 },
-      { fieldId: 'description-field-id', value: 'Product description' }
-    ]
-  })
+      { fieldId: 'description-field-id', value: 'Product description' },
+    ],
+  }),
 })
 ```
 
@@ -128,9 +136,12 @@ const newProduct = await fetch('/api/product', {
 
 The `content-type-utils.ts` file provides comprehensive functions for:
 
-- **Content Type Management**: `createContentType`, `updateContentType`, `deleteContentType`
-- **Field Management**: `addFieldToContentType`, `updateContentField`, `deleteContentField`
-- **Entry Management**: `createContentEntry`, `updateContentEntry`, `deleteContentEntry`
+- **Content Type Management**: `createContentType`, `updateContentType`,
+  `deleteContentType`
+- **Field Management**: `addFieldToContentType`, `updateContentField`,
+  `deleteContentField`
+- **Entry Management**: `createContentEntry`, `updateContentEntry`,
+  `deleteContentEntry`
 - **Data Retrieval**: `getContentTypes`, `getContentEntries`, etc.
 
 ### UI Components
@@ -208,4 +219,6 @@ CREATE TABLE "ContentFieldValue" ( ... );
 - **XSS Protection**: Content sanitization before rendering
 - **RBAC Integration**: Role-based access to content type management
 
-This content type builder provides a flexible foundation for creating complex content structures while maintaining type safety and good performance characteristics.
+This content type builder provides a flexible foundation for creating complex
+content structures while maintaining type safety and good performance
+characteristics.

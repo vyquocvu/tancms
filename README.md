@@ -1,22 +1,26 @@
 # TanCMS
 
-A modern, type-safe Content Management System built with TanStack Start, Prisma, and React. Designed for performance, developer experience, and scalability.
+A modern, type-safe Content Management System built with TanStack Start, Prisma,
+and React. Designed for performance, developer experience, and scalability.
 
 ## 🚀 Features
 
-- **Modern Tech Stack**: Built with TanStack Start (React SSR), Prisma ORM, and TypeScript
-- **Role-Based Access Control**: Admin, Editor, Author, and Viewer roles with granular permissions
+- **Modern Tech Stack**: Built with TanStack Start (React SSR), Prisma ORM, and
+  TypeScript
+- **Role-Based Access Control**: Admin, Editor, Author, and Viewer roles with
+  granular permissions
 - **Content Management**: Full CRUD operations for posts, tags, and media
 - **File Uploads**: S3-compatible storage with signed uploads
 - **SEO Optimized**: Server-side rendering with metadata management
 - **Type Safety**: End-to-end type safety with TypeScript and Zod validation
 - **Authentication**: Secure session-based auth with Lucia or Auth.js
 - **Responsive Design**: Built with Tailwind CSS and modern UI components
-- **Production Ready**: Optimized for Vercel deployment with excellent performance
+- **Production Ready**: Optimized for Vercel deployment with excellent
+  performance
 
 ## 📋 Prerequisites
 
-- **Node.js** 18+ 
+- **Node.js** 18+
 - **npm** or **yarn**
 - **Database**: PostgreSQL, MySQL, or SQLite (for development)
 - **S3-compatible storage** (optional, for file uploads)
@@ -77,10 +81,14 @@ Visit `http://localhost:3000` to see your CMS in action!
 ## 📚 Documentation
 
 ### Getting Started
+
 - **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Complete development setup and workflow
 - **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and usage
+- **[Troubleshooting](./docs/DEVELOPER_GUIDE.md#-troubleshooting)** - Common issues and solutions
 
 ### Technical Documentation
+
 - [Architecture Overview](./docs/ARCHITECTURE.md) - Technical deep dive
 - [API Reference](./docs/API.md) - Complete API documentation
 - [API Manager](./docs/API_MANAGER.md) - REST API management and middleware
@@ -89,12 +97,18 @@ Visit `http://localhost:3000` to see your CMS in action!
 - [Authentication](./docs/AUTHENTICATION.md) - Auth system and security
 
 ### Feature Analysis & Roadmap
-- **[Executive Summary](./docs/EXECUTIVE_SUMMARY.md)** - TanCMS vs Strapi analysis overview
-- **[Feature Comparison](./docs/STRAPI_COMPARISON.md)** - Detailed comparison with Strapi
-- **[Implementation Tasks](./docs/FEATURE_TASKS.md)** - Detailed roadmap for missing features
-- **[Quick Wins](./docs/QUICK_WINS.md)** - Immediate improvements (1-2 weeks each)
+
+- **[Executive Summary](./docs/EXECUTIVE_SUMMARY.md)** - TanCMS vs Strapi
+  analysis overview
+- **[Feature Comparison](./docs/STRAPI_COMPARISON.md)** - Detailed comparison
+  with Strapi
+- **[Implementation Tasks](./docs/FEATURE_TASKS.md)** - Detailed roadmap for
+  missing features
+- **[Quick Wins](./docs/QUICK_WINS.md)** - Immediate improvements (1-2 weeks
+  each)
 
 ### Development & Deployment
+
 - [Deployment Guide](./docs/DEPLOYMENT.md) - Deploy to any platform
 - [Contributing Guide](./CONTRIBUTING.md) - Development workflow
 - [Development Playbook](./Agents.md) - For AI agents and detailed development
@@ -154,28 +168,121 @@ The CMS uses a relational database with the following main entities:
 
 ## 🔧 Development
 
+### Quick Setup
+
+For new contributors, use our automated setup:
+
+```bash
+# One-command setup (recommended)
+make setup
+
+# Or using npm
+npm run setup
+npm run dev:setup  # Fix common configuration issues
+```
+
 ### Available Scripts
+
+#### Core Development
 
 ```bash
 npm run dev        # Start development server
 npm run build      # Build for production
 npm run preview    # Preview production build
-npm run lint       # Run ESLint
-npm test           # Run unit tests
+npm run test       # Run unit tests
 npm run test:e2e   # Run end-to-end tests
 ```
 
+#### Code Quality
+
+```bash
+npm run lint       # Run ESLint
+npm run lint:fix   # Fix ESLint issues automatically
+npm run format     # Format code with Prettier
+npm run format:check # Check if code is formatted
+```
+
+#### Development Utilities
+
+```bash
+npm run check-env  # Validate environment configuration
+npm run dev:status # Show development environment status
+npm run dev:fix-env # Fix common .env issues
+npm run doctor     # Run full health check
+```
+
+#### Database Management
+
+```bash
+npm run db:generate # Generate Prisma client
+npm run db:migrate  # Run database migrations
+npm run db:seed     # Seed with sample data
+npm run db:studio   # Open database browser
+npm run db:reset    # Reset database completely
+```
+
+### Using Make (Alternative)
+
+If you have `make` available, you can use the Makefile for convenience:
+
+```bash
+make help          # Show all available commands
+make setup         # Complete project setup
+make dev           # Start development server
+make test          # Run tests
+make lint          # Run linter
+make db-reset      # Reset database
+make doctor        # Full health check
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Environment not configured**
+
+   ```bash
+   npm run dev:fix-env  # Automatically fix .env issues
+   ```
+
+2. **Database issues**
+
+   ```bash
+   npm run db:reset     # Reset and reinitialize database
+   npm run db:seed      # Add sample data
+   ```
+
+3. **Dependency issues**
+
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+4. **Code formatting issues**
+   ```bash
+   npm run format       # Format all code
+   npm run lint:fix     # Fix linting issues
+   ```
+
+#### Getting Help
+
+- Run `npm run doctor` for a comprehensive health check
+- Check `npm run dev:status` for current environment status
+- Review logs in the console for specific error messages
+- See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed development guidelines
+
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | Database connection string | Yes |
-| `AUTH_SECRET` | Secret for session encryption (32+ chars) | Yes |
-| `APP_URL` | Application URL | Yes |
-| `S3_ENDPOINT` | S3-compatible storage endpoint | No |
-| `S3_ACCESS_KEY_ID` | S3 access key | No |
-| `S3_SECRET_ACCESS_KEY` | S3 secret key | No |
-| `S3_BUCKET` | S3 bucket name | No |
+| Variable               | Description                               | Required |
+| ---------------------- | ----------------------------------------- | -------- |
+| `DATABASE_URL`         | Database connection string                | Yes      |
+| `AUTH_SECRET`          | Secret for session encryption (32+ chars) | Yes      |
+| `APP_URL`              | Application URL                           | Yes      |
+| `S3_ENDPOINT`          | S3-compatible storage endpoint            | No       |
+| `S3_ACCESS_KEY_ID`     | S3 access key                             | No       |
+| `S3_SECRET_ACCESS_KEY` | S3 secret key                             | No       |
+| `S3_BUCKET`            | S3 bucket name                            | No       |
 
 ### Database Commands
 
@@ -195,7 +302,8 @@ npx prisma generate
 
 ## 🚢 Deployment
 
-TanCMS is optimized for deployment on Vercel but can be deployed anywhere that supports Node.js.
+TanCMS is optimized for deployment on Vercel but can be deployed anywhere that
+supports Node.js.
 
 ### Vercel (Recommended)
 
@@ -214,7 +322,8 @@ See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details on:
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
+for details on:
 
 - Code of conduct
 - Development workflow
@@ -223,7 +332,8 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ## 🔗 Links
 

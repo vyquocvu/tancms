@@ -37,32 +37,27 @@ interface FieldRendererProps {
   className?: string
 }
 
-export function FieldRenderer({ 
-  field, 
-  value, 
-  onChange, 
-  error, 
-  className = '' 
+export function FieldRenderer({
+  field,
+  value,
+  onChange,
+  error,
+  className = '',
 }: FieldRendererProps) {
   const commonProps = {
     id: field.id,
     value,
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => 
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       onChange(e.target.value),
     className: `${error ? 'border-red-500' : ''} ${className}`,
-    placeholder: field.placeholder || `Enter ${field.displayName.toLowerCase()}`
+    placeholder: field.placeholder || `Enter ${field.displayName.toLowerCase()}`,
   }
 
   const renderFieldInput = () => {
     switch (field.fieldType) {
       case 'TEXT':
-        return (
-          <Input
-            type="text"
-            {...commonProps}
-          />
-        )
-      
+        return <Input type='text' {...commonProps} />
+
       case 'TEXTAREA':
         return (
           <WysiwygEditor
@@ -73,59 +68,47 @@ export function FieldRenderer({
             rows={4}
           />
         )
-      
+
       case 'NUMBER':
         return (
           <Input
-            type="number"
-            step="any"
+            type='number'
+            step='any'
             {...commonProps}
             min={field.validation?.min}
             max={field.validation?.max}
           />
         )
-      
+
       case 'EMAIL':
-        return (
-          <Input
-            type="email"
-            {...commonProps}
-          />
-        )
-      
+        return <Input type='email' {...commonProps} />
+
       case 'URL':
-        return (
-          <Input
-            type="url"
-            {...commonProps}
-          />
-        )
-      
+        return <Input type='url' {...commonProps} />
+
       case 'DATE':
         return (
           <Input
-            type="date"
+            type='date'
             id={field.id}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={e => onChange(e.target.value)}
             className={error ? 'border-red-500' : ''}
           />
         )
-      
+
       case 'BOOLEAN':
         return (
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <Switch
               id={field.id}
               checked={value === 'true'}
-              onCheckedChange={(checked) => onChange(checked ? 'true' : 'false')}
+              onCheckedChange={checked => onChange(checked ? 'true' : 'false')}
             />
-            <Label htmlFor={field.id}>
-              {value === 'true' ? 'Yes' : 'No'}
-            </Label>
+            <Label htmlFor={field.id}>{value === 'true' ? 'Yes' : 'No'}</Label>
           </div>
         )
-      
+
       case 'PHONE':
         return (
           <PhoneField
@@ -135,16 +118,10 @@ export function FieldRenderer({
             error={error}
           />
         )
-      
+
       case 'COLOR':
-        return (
-          <ColorField
-            value={value}
-            onChange={onChange}
-            error={error}
-          />
-        )
-      
+        return <ColorField value={value} onChange={onChange} error={error} />
+
       case 'SLUG':
         return (
           <SlugField
@@ -155,7 +132,7 @@ export function FieldRenderer({
             sourceText={field.options?.sourceField ? '' : undefined}
           />
         )
-      
+
       case 'PASSWORD':
         return (
           <PasswordField
@@ -165,60 +142,49 @@ export function FieldRenderer({
             error={error}
           />
         )
-      
+
       case 'JSON':
         return (
           <Textarea
             rows={6}
-            placeholder={field.placeholder || "Enter valid JSON"}
+            placeholder={field.placeholder || 'Enter valid JSON'}
             className={`font-mono ${error ? 'border-red-500' : ''}`}
             value={value}
-            onChange={(e) => {
+            onChange={e => {
               onChange(e.target.value)
             }}
           />
         )
-      
+
       default:
-        return (
-          <Input
-            type="text"
-            {...commonProps}
-          />
-        )
+        return <Input type='text' {...commonProps} />
     }
   }
 
   return (
-    <div className="space-y-2">
+    <div className='space-y-2'>
       <Label htmlFor={field.id}>
         {field.displayName}
-        {field.required && <span className="text-red-500 ml-1">*</span>}
+        {field.required && <span className='text-red-500 ml-1'>*</span>}
       </Label>
-      
+
       {renderFieldInput()}
-      
+
       {/* Help text */}
-      {field.helpText && (
-        <p className="text-xs text-muted-foreground">
-          {field.helpText}
-        </p>
-      )}
-      
+      {field.helpText && <p className='text-xs text-muted-foreground'>{field.helpText}</p>}
+
       {/* Error message */}
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
-      
+      {error && <p className='text-sm text-red-500'>{error}</p>}
+
       {/* Special help text for certain field types */}
       {field.fieldType === 'JSON' && !error && (
-        <p className="text-xs text-muted-foreground">
+        <p className='text-xs text-muted-foreground'>
           Enter valid JSON format, e.g., {`{"key": "value"}`}
         </p>
       )}
-      
+
       {field.fieldType === 'SLUG' && !error && (
-        <p className="text-xs text-muted-foreground">
+        <p className='text-xs text-muted-foreground'>
           Use lowercase letters, numbers, and hyphens only
         </p>
       )}
@@ -233,8 +199,8 @@ export function validateFieldValue(field: ContentField, value: string) {
   const validationOptions = {
     required: field.required,
     unique: field.unique,
-    ...field.validation
+    ...field.validation,
   }
-  
+
   return validateField(field.fieldType, value, validationOptions)
 }

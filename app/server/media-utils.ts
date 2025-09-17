@@ -27,8 +27,8 @@ export async function createMedia(prisma: PrismaClient, data: CreateMediaData) {
       filename: data.filename,
       size: data.size,
       mimeType: data.mimeType,
-      altText: data.altText
-    }
+      altText: data.altText,
+    },
   })
 }
 
@@ -43,17 +43,17 @@ export async function getMedia(
   type?: string
 ) {
   const skip = (page - 1) * pageSize
-  
+
   // Build where clause for filtering
   const where: any = {}
-  
+
   if (searchTerm) {
     where.filename = {
       contains: searchTerm,
-      mode: 'insensitive'
+      mode: 'insensitive',
     }
   }
-  
+
   if (type && type !== 'all') {
     switch (type) {
       case 'image':
@@ -63,13 +63,10 @@ export async function getMedia(
         where.mimeType = { startsWith: 'video/' }
         break
       case 'document':
-        where.mimeType = { 
-          not: { 
-            OR: [
-              { startsWith: 'image/' },
-              { startsWith: 'video/' }
-            ]
-          }
+        where.mimeType = {
+          not: {
+            OR: [{ startsWith: 'image/' }, { startsWith: 'video/' }],
+          },
         }
         break
     }
@@ -80,9 +77,9 @@ export async function getMedia(
       where,
       orderBy: { createdAt: 'desc' },
       skip,
-      take: pageSize
+      take: pageSize,
     }),
-    prisma.media.count({ where })
+    prisma.media.count({ where }),
   ])
 
   return {
@@ -91,8 +88,8 @@ export async function getMedia(
       page,
       pageSize,
       total,
-      totalPages: Math.ceil(total / pageSize)
-    }
+      totalPages: Math.ceil(total / pageSize),
+    },
   }
 }
 
@@ -101,7 +98,7 @@ export async function getMedia(
  */
 export async function getMediaById(prisma: PrismaClient, id: string) {
   return await prisma.media.findUnique({
-    where: { id }
+    where: { id },
   })
 }
 
@@ -110,10 +107,10 @@ export async function getMediaById(prisma: PrismaClient, id: string) {
  */
 export async function updateMedia(prisma: PrismaClient, data: UpdateMediaData) {
   const { id, ...updateData } = data
-  
+
   return await prisma.media.update({
     where: { id },
-    data: updateData
+    data: updateData,
   })
 }
 
@@ -122,7 +119,7 @@ export async function updateMedia(prisma: PrismaClient, data: UpdateMediaData) {
  */
 export async function deleteMedia(prisma: PrismaClient, id: string) {
   return await prisma.media.delete({
-    where: { id }
+    where: { id },
   })
 }
 
@@ -130,22 +127,17 @@ export async function deleteMedia(prisma: PrismaClient, id: string) {
  * Get media statistics
  */
 export async function getMediaStats(prisma: PrismaClient) {
-  const [
-    totalCount,
-    imageCount,
-    videoCount,
-    totalSize
-  ] = await Promise.all([
+  const [totalCount, imageCount, videoCount, totalSize] = await Promise.all([
     prisma.media.count(),
     prisma.media.count({
-      where: { mimeType: { startsWith: 'image/' } }
+      where: { mimeType: { startsWith: 'image/' } },
     }),
     prisma.media.count({
-      where: { mimeType: { startsWith: 'video/' } }
+      where: { mimeType: { startsWith: 'video/' } },
     }),
     prisma.media.aggregate({
-      _sum: { size: true }
-    })
+      _sum: { size: true },
+    }),
   ])
 
   return {
@@ -153,7 +145,7 @@ export async function getMediaStats(prisma: PrismaClient) {
     images: imageCount,
     videos: videoCount,
     documents: totalCount - imageCount - videoCount,
-    totalSize: totalSize._sum.size || 0
+    totalSize: totalSize._sum.size || 0,
   }
 }
 
@@ -173,7 +165,7 @@ export function generateUniqueFilename(originalFilename: string): string {
   const timestamp = Date.now()
   const randomId = generateId()
   const extension = originalFilename.split('.').pop()
-  const baseName = originalFilename.replace(/\.[^/.]+$/, "")
-  
+  const baseName = originalFilename.replace(/\.[^/.]+$/, '')
+
   return `${baseName}-${timestamp}-${randomId}.${extension}`
 }

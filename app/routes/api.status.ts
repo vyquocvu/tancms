@@ -15,7 +15,7 @@ export const Route = createAPIFileRoute('/api/status')({
       return ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
     } catch (error) {
       console.error('API status error:', error)
@@ -32,8 +32,8 @@ export const Route = createAPIFileRoute('/api/status')({
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400'
-      }
+        'Access-Control-Max-Age': '86400',
+      },
     })
-  }
+  },
 })

@@ -1,15 +1,19 @@
 # TanCMS SQLite Database Setup
 
-This document provides comprehensive information about the SQLite database implementation in TanCMS.
+This document provides comprehensive information about the SQLite database
+implementation in TanCMS.
 
 ## Database Overview
 
-TanCMS uses **SQLite** for development and **PostgreSQL/MySQL** for production, managed through **Prisma ORM**. The database is designed to support a full-featured Content Management System with the following entities:
+TanCMS uses **SQLite** for development and **PostgreSQL/MySQL** for production,
+managed through **Prisma ORM**. The database is designed to support a
+full-featured Content Management System with the following entities:
 
 ### Core Models
 
-- **User**: Admin users with role-based permissions (ADMIN, EDITOR, AUTHOR, VIEWER)
-- **Tag**: Categorization system for content organization  
+- **User**: Admin users with role-based permissions (ADMIN, EDITOR, AUTHOR,
+  VIEWER)
+- **Tag**: Categorization system for content organization
 - **Media**: File uploads and media management
 - **Session**: Authentication sessions for user security
 - **ContentType**: Dynamic content type definitions
@@ -20,11 +24,13 @@ TanCMS uses **SQLite** for development and **PostgreSQL/MySQL** for production, 
 ### 1. Environment Setup
 
 Copy the environment template:
+
 ```bash
 cp .env.example .env
 ```
 
 The default configuration uses SQLite for development:
+
 ```env
 DATABASE_URL="file:./dev.db"
 ```
@@ -57,7 +63,8 @@ npm run db:studio
 ### Content Type System
 
 - **Dynamic Content Types**: Define custom content structures
-- **Field Types**: Support for text, numbers, booleans, dates, relations, and media
+- **Field Types**: Support for text, numbers, booleans, dates, relations, and
+  media
 - **Validation**: Built-in required and unique field constraints
 - **Relationships**: Link content types together
 
@@ -71,8 +78,9 @@ npm run db:studio
 ### Performance Optimizations
 
 The schema includes strategic indexes for:
+
 - Content type filtering
-- Creation date sorting  
+- Creation date sorting
 - User-based queries
 - Session management
 - User role filtering
@@ -98,10 +106,12 @@ npm run test          # Run tests
 
 The database includes helper functions for common operations:
 
-### Tag Management  
+### Tag Management
+
 - `upsertTag()` - Create or get existing tags
 
 ### Session Management
+
 - `cleanupExpiredSessions()` - Remove expired authentication sessions
 
 ## Sample Data
@@ -109,10 +119,12 @@ The database includes helper functions for common operations:
 The seed script creates:
 
 ### Users
+
 - **Admin User**: admin@tancms.dev / admin123
 - **Editor User**: editor@tancms.dev / editor123
 
 ### Content
+
 - **Tags**: Technology, Web Development, React
 - **Sample Media**: Placeholder images
 
@@ -139,11 +151,13 @@ npm run db:deploy
 ### Common Issues
 
 1. **Prisma Client Generation Fails**
+
    ```bash
    npx prisma generate --force
    ```
 
 2. **Migration Conflicts**
+
    ```bash
    npm run db:reset
    npm run db:seed
@@ -163,7 +177,7 @@ SQLite database file: `./dev.db` (created automatically)
 # Backup
 cp dev.db backup-$(date +%Y%m%d).db
 
-# Restore  
+# Restore
 cp backup-20240101.db dev.db
 ```
 
@@ -175,7 +189,7 @@ For production, update your environment variables:
 # PostgreSQL example
 DATABASE_URL="postgresql://username:password@localhost:5432/tancms"
 
-# MySQL example  
+# MySQL example
 DATABASE_URL="mysql://username:password@localhost:3306/tancms"
 ```
 
@@ -199,6 +213,7 @@ Then update the Prisma schema provider accordingly.
 ## Support
 
 For issues or questions:
+
 1. Check the [troubleshooting section](#troubleshooting)
 2. Review Prisma documentation
 3. Open an issue on the project repository

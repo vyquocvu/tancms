@@ -24,7 +24,7 @@ export class ApiRouter {
    */
   static async route(request: ApiRequest): Promise<ApiResponse> {
     const { method, path, body, query } = request
-    
+
     // Handle special status endpoint
     if (path === '/api/status') {
       if (method === 'GET') {
@@ -33,23 +33,23 @@ export class ApiRouter {
           data: {
             status: 'healthy',
             timestamp: new Date().toISOString(),
-            version: '1.0.0'
-          }
+            version: '1.0.0',
+          },
         })
       } else {
         return ApiResponseBuilder.methodNotAllowed(method, path)
       }
     }
-    
+
     // Parse the path to extract content type and entry ID
     const pathParts = path.split('/').filter(Boolean) // Remove empty parts
-    
+
     // Expected format: ['api', contentTypeSlug] or ['api', contentTypeSlug, entryId]
     if (pathParts.length < 2 || pathParts[0] !== 'api') {
       return ApiResponseBuilder.error({
         code: 'BAD_REQUEST',
         message: 'Invalid API path format',
-        details: ['API path must start with /api/ and include a content type slug']
+        details: ['API path must start with /api/ and include a content type slug'],
       })
     }
 
@@ -67,7 +67,7 @@ export class ApiRouter {
             const params = {
               page: query?.page ? parseInt(query.page, 10) : undefined,
               limit: query?.limit ? parseInt(query.limit, 10) : undefined,
-              search: query?.search
+              search: query?.search,
             }
             return await ContentAPI.listEntries(contentTypeSlug, params)
           }
@@ -81,20 +81,23 @@ export class ApiRouter {
             return ApiResponseBuilder.error({
               code: 'BAD_REQUEST',
               message: 'Request body is required',
-              details: ['POST requests must include a valid JSON body']
+              details: ['POST requests must include a valid JSON body'],
             })
           }
-          return await ContentAPI.createEntry(contentTypeSlug, body as {
-          slug?: string
-          fieldValues: { fieldId: string; value: string }[]
-        })
+          return await ContentAPI.createEntry(
+            contentTypeSlug,
+            body as {
+              slug?: string
+              fieldValues: { fieldId: string; value: string }[]
+            }
+          )
 
         case 'PUT':
           if (!entryId) {
             return ApiResponseBuilder.error({
               code: 'BAD_REQUEST',
               message: 'Entry ID is required for PUT requests',
-              details: ['PUT requests must include an entry ID in the path']
+              details: ['PUT requests must include an entry ID in the path'],
             })
           }
           // PUT /api/{contentType}/:id - Update entry
@@ -102,20 +105,24 @@ export class ApiRouter {
             return ApiResponseBuilder.error({
               code: 'BAD_REQUEST',
               message: 'Request body is required',
-              details: ['PUT requests must include a valid JSON body']
+              details: ['PUT requests must include a valid JSON body'],
             })
           }
-          return await ContentAPI.updateEntry(contentTypeSlug, entryId, body as {
-          slug?: string
-          fieldValues?: { fieldId: string; value: string }[]
-        })
+          return await ContentAPI.updateEntry(
+            contentTypeSlug,
+            entryId,
+            body as {
+              slug?: string
+              fieldValues?: { fieldId: string; value: string }[]
+            }
+          )
 
         case 'DELETE':
           if (!entryId) {
             return ApiResponseBuilder.error({
               code: 'BAD_REQUEST',
               message: 'Entry ID is required for DELETE requests',
-              details: ['DELETE requests must include an entry ID in the path']
+              details: ['DELETE requests must include an entry ID in the path'],
             })
           }
           // DELETE /api/{contentType}/:id - Delete entry
@@ -133,18 +140,21 @@ export class ApiRouter {
   /**
    * Helper method to create a fetch-like API client
    */
-  static async fetch(path: string, options: {
-    method?: HttpMethod
-    body?: unknown
-    query?: Record<string, string>
-  } = {}): Promise<ApiResponse> {
+  static async fetch(
+    path: string,
+    options: {
+      method?: HttpMethod
+      body?: unknown
+      query?: Record<string, string>
+    } = {}
+  ): Promise<ApiResponse> {
     const { method = 'GET', body, query } = options
-    
+
     return await this.route({
       method,
       path,
       body,
-      query
+      query,
     })
   }
 }
@@ -157,11 +167,14 @@ export const api = {
   /**
    * List entries for a content type
    */
-  async listEntries(contentTypeSlug: string, params?: {
-    page?: number
-    limit?: number
-    search?: string
-  }) {
+  async listEntries(
+    contentTypeSlug: string,
+    params?: {
+      page?: number
+      limit?: number
+      search?: string
+    }
+  ) {
     const query: Record<string, string> = {}
     if (params?.page) query.page = params.page.toString()
     if (params?.limit) query.limit = params.limit.toString()
@@ -180,26 +193,33 @@ export const api = {
   /**
    * Create a new entry
    */
-  async createEntry(contentTypeSlug: string, data: {
-    slug?: string
-    fieldValues: { fieldId: string; value: string }[]
-  }) {
+  async createEntry(
+    contentTypeSlug: string,
+    data: {
+      slug?: string
+      fieldValues: { fieldId: string; value: string }[]
+    }
+  ) {
     return await ApiRouter.fetch(`/api/${contentTypeSlug}`, {
       method: 'POST',
-      body: data
+      body: data,
     })
   },
 
   /**
    * Update an entry
    */
-  async updateEntry(contentTypeSlug: string, entryId: string, data: {
-    slug?: string
-    fieldValues?: { fieldId: string; value: string }[]
-  }) {
+  async updateEntry(
+    contentTypeSlug: string,
+    entryId: string,
+    data: {
+      slug?: string
+      fieldValues?: { fieldId: string; value: string }[]
+    }
+  ) {
     return await ApiRouter.fetch(`/api/${contentTypeSlug}/${entryId}`, {
       method: 'PUT',
-      body: data
+      body: data,
     })
   },
 
@@ -208,7 +228,7 @@ export const api = {
    */
   async deleteEntry(contentTypeSlug: string, entryId: string) {
     return await ApiRouter.fetch(`/api/${contentTypeSlug}/${entryId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     })
-  }
+  },
 }

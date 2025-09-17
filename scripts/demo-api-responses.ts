@@ -15,8 +15,8 @@ const successResponse = ApiResponseBuilder.success({
   data: {
     id: 'entry_123',
     title: 'Sample Entry',
-    status: 'published'
-  }
+    status: 'published',
+  },
 })
 console.log(JSON.stringify(successResponse, null, 2))
 console.log('')
@@ -25,7 +25,7 @@ console.log('')
 console.log('❌ Validation Error Example:')
 const validationError = ApiResponseBuilder.validationError([
   "Field 'title' is required",
-  "Field 'email' must be a valid email address"
+  "Field 'email' must be a valid email address",
 ])
 console.log(JSON.stringify(validationError, null, 2))
 console.log('')
@@ -57,7 +57,7 @@ console.log('🔄 Legacy Compatibility Example:')
 const legacyResponse = {
   success: false,
   error: 'Something went wrong',
-  details: ['Database connection failed']
+  details: ['Database connection failed'],
 }
 const standardizedLegacy = ApiResponseBuilder.fromLegacy(legacyResponse)
 console.log(JSON.stringify(standardizedLegacy, null, 2))

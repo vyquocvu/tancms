@@ -1,10 +1,13 @@
 # API Reference
 
-TanCMS provides a comprehensive API for managing content, users, and media. All API endpoints are built using TanStack Start server functions with full type safety.
+TanCMS provides a comprehensive API for managing content, users, and media. All
+API endpoints are built using TanStack Start server functions with full type
+safety.
 
 ## Authentication
 
-All admin API endpoints require authentication. Users must be logged in with appropriate role permissions.
+All admin API endpoints require authentication. Users must be logged in with
+appropriate role permissions.
 
 ### Session Management
 
@@ -207,10 +210,10 @@ interface User {
 }
 
 enum Role {
-  ADMIN = "ADMIN",
-  EDITOR = "EDITOR", 
-  AUTHOR = "AUTHOR",
-  VIEWER = "VIEWER"
+  ADMIN = 'ADMIN',
+  EDITOR = 'EDITOR',
+  AUTHOR = 'AUTHOR',
+  VIEWER = 'VIEWER',
 }
 ```
 
@@ -323,6 +326,7 @@ GET /api/media?sort=createdAt&order=desc
 ```
 
 Available sort fields vary by endpoint:
+
 - `createdAt`
 - `updatedAt`
 - `name`
@@ -373,7 +377,7 @@ import { TanCMSClient } from '@tancms/client'
 
 const client = new TanCMSClient({
   baseUrl: 'https://your-cms.vercel.app',
-  apiKey: 'your-api-key'
+  apiKey: 'your-api-key',
 })
 
 // Get tags
@@ -381,7 +385,7 @@ const tags = await client.tags.list()
 
 // Create tag
 const newTag = await client.tags.create({
-  name: 'Technology'
+  name: 'Technology',
 })
 
 // Upload media

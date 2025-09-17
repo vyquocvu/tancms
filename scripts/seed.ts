@@ -8,7 +8,7 @@ async function main() {
 
   // Create admin user
   const hashedPassword = await bcrypt.hash('admin123', 12)
-  
+
   const admin = await prisma.user.upsert({
     where: { email: 'admin@tancms.dev' },
     update: {},
@@ -24,7 +24,7 @@ async function main() {
 
   // Create editor user
   const editorPassword = await bcrypt.hash('editor123', 12)
-  
+
   const editor = await prisma.user.upsert({
     where: { email: 'editor@tancms.dev' },
     update: {},
@@ -85,7 +85,7 @@ main()
   .then(async () => {
     await prisma.$disconnect()
   })
-  .catch(async (e) => {
+  .catch(async e => {
     console.error('❌ Error seeding database:', e)
     await prisma.$disconnect()
     process.exit(1)

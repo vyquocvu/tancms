@@ -1,6 +1,6 @@
 /**
  * Example: How to integrate the Dynamic Content Type API with the admin UI
- * 
+ *
  * This shows how to replace mockApi calls with the new dynamic API
  */
 
@@ -31,12 +31,12 @@ export function useContentEntries(contentTypeSlug: string) {
   }
 
   // Create entry using the new API
-  const createEntry = async (formData) => {
+  const createEntry = async formData => {
     const response = await api.createEntry(contentTypeSlug, {
       slug: formData.slug,
-      fieldValues: formData.fieldValues
+      fieldValues: formData.fieldValues,
     })
-    
+
     if (response.success) {
       await loadEntries() // Refresh the list
       return response.data.entry
@@ -49,9 +49,9 @@ export function useContentEntries(contentTypeSlug: string) {
   const updateEntry = async (entryId, formData) => {
     const response = await api.updateEntry(contentTypeSlug, entryId, {
       slug: formData.slug,
-      fieldValues: formData.fieldValues
+      fieldValues: formData.fieldValues,
     })
-    
+
     if (response.success) {
       await loadEntries() // Refresh the list
       return response.data.entry
@@ -61,9 +61,9 @@ export function useContentEntries(contentTypeSlug: string) {
   }
 
   // Delete entry using the new API
-  const deleteEntry = async (entryId) => {
+  const deleteEntry = async entryId => {
     const response = await api.deleteEntry(contentTypeSlug, entryId)
-    
+
     if (response.success) {
       await loadEntries() // Refresh the list
       return true
@@ -79,33 +79,26 @@ export function useContentEntries(contentTypeSlug: string) {
     loadEntries,
     createEntry,
     updateEntry,
-    deleteEntry
+    deleteEntry,
   }
 }
 
 // Example: Updated Content Entries Page component
 export default function ContentEntriesPageWithAPI() {
   const contentTypeSlug = getContentTypeSlugFromUrl()
-  const {
-    entries,
-    loading,
-    error,
-    loadEntries,
-    createEntry,
-    updateEntry,
-    deleteEntry
-  } = useContentEntries(contentTypeSlug)
+  const { entries, loading, error, loadEntries, createEntry, updateEntry, deleteEntry } =
+    useContentEntries(contentTypeSlug)
 
   // Search functionality
   const [searchTerm, setSearchTerm] = useState('')
-  const handleSearch = (term) => {
+  const handleSearch = term => {
     setSearchTerm(term)
     loadEntries({ search: term })
   }
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const handlePageChange = (page) => {
+  const handlePageChange = page => {
     setCurrentPage(page)
     loadEntries({ page, search: searchTerm })
   }
@@ -120,33 +113,24 @@ export default function ContentEntriesPageWithAPI() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className='space-y-6'>
+        <div className='flex justify-between items-center'>
           <h1>Content Entries</h1>
-          <button onClick={() => setShowCreateForm(true)}>
-            Add New Entry
-          </button>
+          <button onClick={() => setShowCreateForm(true)}>Add New Entry</button>
         </div>
 
         {/* Search */}
-        <SearchInput 
-          value={searchTerm}
-          onChange={handleSearch}
-          placeholder="Search entries..."
-        />
+        <SearchInput value={searchTerm} onChange={handleSearch} placeholder='Search entries...' />
 
         {/* Entries Table */}
-        <EntriesTable 
+        <EntriesTable
           entries={entries}
-          onEdit={(entry) => handleEdit(entry)}
-          onDelete={(entry) => deleteEntry(entry.id)}
+          onEdit={entry => handleEdit(entry)}
+          onDelete={entry => deleteEntry(entry.id)}
         />
 
         {/* Pagination */}
-        <Pagination 
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-        />
+        <Pagination currentPage={currentPage} onPageChange={handlePageChange} />
       </div>
     </AdminLayout>
   )
@@ -156,10 +140,10 @@ export default function ContentEntriesPageWithAPI() {
 export function ContentEntryForm({ entry, contentType, onSubmit }) {
   const [formData, setFormData] = useState({
     slug: entry?.slug || '',
-    fieldValues: entry?.fieldValues || []
+    fieldValues: entry?.fieldValues || [],
   })
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault()
     try {
       if (entry) {
@@ -177,11 +161,7 @@ export function ContentEntryForm({ entry, contentType, onSubmit }) {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Form fields here */}
-    </form>
-  )
+  return <form onSubmit={handleSubmit}>{/* Form fields here */}</form>
 }
 
 // Example: Migration guide for existing components

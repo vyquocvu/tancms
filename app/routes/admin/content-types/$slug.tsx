@@ -32,25 +32,25 @@ export default function ContentEntries() {
   // Load content type and entries
   useEffect(() => {
     loadData()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadData = async () => {
     setLoading(true)
     try {
       const slug = getContentTypeSlug()
-      
+
       // Get content types and find the one with matching slug
       const contentTypes = await mockApi.getContentTypes()
       const foundContentType = contentTypes.find(ct => ct.slug === slug)
-      
+
       if (!foundContentType) {
         console.error('Content type not found:', slug)
         return
       }
 
       setContentType(foundContentType)
-      
+
       // Load entries for this content type
       const entries = await mockApi.getContentEntries(foundContentType.id)
       setEntries(entries)
@@ -105,10 +105,10 @@ export default function ContentEntries() {
         await mockApi.createContentEntry({
           contentTypeId: contentType.id,
           authorId: 'user1', // In real app, get from auth context
-          ...data
+          ...data,
         })
       }
-      
+
       setShowForm(false)
       setEditingEntry(null)
       await loadData() // Reload entries
@@ -141,21 +141,24 @@ export default function ContentEntries() {
       SCHEDULED: { color: 'bg-blue-100 text-blue-800', emoji: '⏰', label: 'Scheduled' },
       ARCHIVED: { color: 'bg-gray-100 text-gray-800', emoji: '📦', label: 'Archived' },
     }
-    
+
     const config = statusConfig[entry.status]
     return (
-      <div className="flex flex-col gap-1">
+      <div className='flex flex-col gap-1'>
         <Badge className={config.color}>
           {config.emoji} {config.label}
         </Badge>
         {entry.status === 'SCHEDULED' && entry.scheduledAt && (
-          <div className="text-xs text-muted-foreground">
+          <div className='text-xs text-muted-foreground'>
             {new Date(entry.scheduledAt).toLocaleDateString()} at{' '}
-            {new Date(entry.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {new Date(entry.scheduledAt).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </div>
         )}
         {entry.status === 'PUBLISHED' && entry.publishedAt && (
-          <div className="text-xs text-muted-foreground">
+          <div className='text-xs text-muted-foreground'>
             {new Date(entry.publishedAt).toLocaleDateString()}
           </div>
         )}
@@ -207,10 +210,10 @@ export default function ContentEntries() {
         header: 'Slug',
         accessorKey: 'slug',
         sortable: true,
-        cell: (entry) => (
+        cell: entry => (
           <div>
-            <div className="font-mono text-sm">{entry.slug}</div>
-            <div className="text-xs text-muted-foreground">ID: {entry.id}</div>
+            <div className='font-mono text-sm'>{entry.slug}</div>
+            <div className='text-xs text-muted-foreground'>ID: {entry.id}</div>
           </div>
         ),
       },
@@ -219,34 +222,36 @@ export default function ContentEntries() {
         header: 'Status',
         accessorKey: 'status',
         sortable: true,
-        cell: (entry) => getStatusBadge(entry),
+        cell: entry => getStatusBadge(entry),
       },
     ]
 
     // Add dynamic field columns
     const fieldColumns = contentType.fields
       .sort((a, b) => a.order - b.order)
-      .map((field): DataTableColumn<ContentEntry> => ({
-        id: field.id,
-        header: field.displayName + (field.required ? ' *' : ''),
-        accessorFn: (entry) => getFieldValue(entry, field.name),
-        sortable: true,
-        cell: (entry) => (
-          <div className="max-w-48 truncate">
-            {field.fieldType === 'NUMBER' ? (
-              <Badge variant="secondary">
-                ${getFieldValue(entry, field.name)}
-              </Badge>
-            ) : field.fieldType === 'BOOLEAN' ? (
-              <Badge variant={getFieldValue(entry, field.name) === 'true' ? 'default' : 'secondary'}>
-                {getFieldValue(entry, field.name) === 'true' ? 'Yes' : 'No'}
-              </Badge>
-            ) : (
-              getFieldValue(entry, field.name)
-            )}
-          </div>
-        ),
-      }))
+      .map(
+        (field): DataTableColumn<ContentEntry> => ({
+          id: field.id,
+          header: field.displayName + (field.required ? ' *' : ''),
+          accessorFn: entry => getFieldValue(entry, field.name),
+          sortable: true,
+          cell: entry => (
+            <div className='max-w-48 truncate'>
+              {field.fieldType === 'NUMBER' ? (
+                <Badge variant='secondary'>${getFieldValue(entry, field.name)}</Badge>
+              ) : field.fieldType === 'BOOLEAN' ? (
+                <Badge
+                  variant={getFieldValue(entry, field.name) === 'true' ? 'default' : 'secondary'}
+                >
+                  {getFieldValue(entry, field.name) === 'true' ? 'Yes' : 'No'}
+                </Badge>
+              ) : (
+                getFieldValue(entry, field.name)
+              )}
+            </div>
+          ),
+        })
+      )
 
     const endColumns: DataTableColumn<ContentEntry>[] = [
       {
@@ -254,10 +259,8 @@ export default function ContentEntries() {
         header: 'Created',
         accessorKey: 'createdAt',
         sortable: true,
-        cell: (entry) => (
-          <span className="text-muted-foreground">
-            {entry.createdAt.toLocaleDateString()}
-          </span>
+        cell: entry => (
+          <span className='text-muted-foreground'>{entry.createdAt.toLocaleDateString()}</span>
         ),
       },
       {
@@ -265,37 +268,35 @@ export default function ContentEntries() {
         header: 'Updated',
         accessorKey: 'updatedAt',
         sortable: true,
-        cell: (entry) => (
-          <span className="text-muted-foreground">
-            {entry.updatedAt.toLocaleDateString()}
-          </span>
+        cell: entry => (
+          <span className='text-muted-foreground'>{entry.updatedAt.toLocaleDateString()}</span>
         ),
       },
       {
         id: 'actions',
         header: 'Actions',
         sortable: false,
-        cell: (entry) => (
-          <div className="flex justify-end space-x-2">
+        cell: entry => (
+          <div className='flex justify-end space-x-2'>
             <Button
-              size="sm"
-              variant="outline"
-              onClick={(e) => {
+              size='sm'
+              variant='outline'
+              onClick={e => {
                 e.stopPropagation()
                 handleEdit(entry.id)
               }}
             >
-              <Edit className="h-4 w-4" />
+              <Edit className='h-4 w-4' />
             </Button>
             <Button
-              size="sm"
-              variant="destructive"
-              onClick={(e) => {
+              size='sm'
+              variant='destructive'
+              onClick={e => {
                 e.stopPropagation()
                 handleDelete(entry.id)
               }}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className='h-4 w-4' />
             </Button>
           </div>
         ),
@@ -333,7 +334,8 @@ export default function ContentEntries() {
       icon: () => <span>🗑️</span>,
       variant: 'destructive',
       requiresConfirmation: true,
-      confirmationMessage: 'Are you sure you want to delete these entries? This action cannot be undone.',
+      confirmationMessage:
+        'Are you sure you want to delete these entries? This action cannot be undone.',
     },
   ]
 
@@ -378,9 +380,9 @@ export default function ContentEntries() {
   if (loading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+        <div className='flex items-center justify-center h-64'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4'></div>
             <p>Loading...</p>
           </div>
         </div>
@@ -391,14 +393,14 @@ export default function ContentEntries() {
   if (!contentType) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2">Content Type Not Found</h3>
-            <p className="text-muted-foreground mb-4">
+        <div className='flex items-center justify-center h-64'>
+          <div className='text-center'>
+            <h3 className='text-lg font-semibold mb-2'>Content Type Not Found</h3>
+            <p className='text-muted-foreground mb-4'>
               The requested content type could not be found.
             </p>
             <Button onClick={handleBackToContentTypes}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className='h-4 w-4 mr-2' />
               Back to Content Types
             </Button>
           </div>
@@ -410,7 +412,7 @@ export default function ContentEntries() {
   if (showForm) {
     return (
       <AdminLayout>
-        <div className="p-6">
+        <div className='p-6'>
           <ContentEntryForm
             contentType={contentType}
             entry={editingEntry}
@@ -425,65 +427,71 @@ export default function ContentEntries() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {/* Page Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm" onClick={handleBackToContentTypes}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center space-x-4'>
+            <Button variant='outline' size='sm' onClick={handleBackToContentTypes}>
+              <ArrowLeft className='h-4 w-4 mr-2' />
               Back to Content Types
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">{contentType.displayName} Entries</h1>
-              <p className="text-muted-foreground">
+              <h1 className='text-3xl font-bold'>{contentType.displayName} Entries</h1>
+              <p className='text-muted-foreground'>
                 Manage content entries for {contentType.displayName.toLowerCase()}
               </p>
             </div>
           </div>
           <Button onClick={handleCreateNew}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className='h-4 w-4 mr-2' />
             Create {contentType.displayName}
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Total Entries</p>
-                  <p className="text-2xl font-bold">{entries.length}</p>
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='ml-0'>
+                  <p className='text-sm font-medium text-muted-foreground'>Total Entries</p>
+                  <p className='text-2xl font-bold'>{entries.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Published</p>
-                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'PUBLISHED').length}</p>
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='ml-0'>
+                  <p className='text-sm font-medium text-muted-foreground'>Published</p>
+                  <p className='text-2xl font-bold'>
+                    {entries.filter(e => e.status === 'PUBLISHED').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'DRAFT').length}</p>
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='ml-0'>
+                  <p className='text-sm font-medium text-muted-foreground'>Drafts</p>
+                  <p className='text-2xl font-bold'>
+                    {entries.filter(e => e.status === 'DRAFT').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="ml-0">
-                  <p className="text-sm font-medium text-muted-foreground">Scheduled</p>
-                  <p className="text-2xl font-bold">{entries.filter(e => e.status === 'SCHEDULED').length}</p>
+            <CardContent className='p-6'>
+              <div className='flex items-center'>
+                <div className='ml-0'>
+                  <p className='text-sm font-medium text-muted-foreground'>Scheduled</p>
+                  <p className='text-2xl font-bold'>
+                    {entries.filter(e => e.status === 'SCHEDULED').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -491,10 +499,7 @@ export default function ContentEntries() {
         </div>
 
         {/* Enhanced Filters */}
-        <ContentFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-        />
+        <ContentFilters filters={filters} onFiltersChange={setFilters} />
 
         {/* Bulk Actions */}
         <BulkActions
@@ -520,29 +525,30 @@ export default function ContentEntries() {
               data={paginatedEntries}
               columns={columns}
               searchValue={filters.search || ''}
-              onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value || undefined }))}
-              searchPlaceholder="Search entries..."
+              onSearchChange={value =>
+                setFilters(prev => ({ ...prev, search: value || undefined }))
+              }
+              searchPlaceholder='Search entries...'
               enableColumnToggle={true}
               enableSorting={true}
               enableSearch={false} // We handle search through filters
               enableSelection={true}
               selectedRows={selectedEntries}
               onSelectionChange={setSelectedEntries}
-              getRowId={(row) => row.id}
+              getRowId={row => row.id}
             />
 
             {filteredEntries.length === 0 && (
-              <div className="text-center py-12">
-                <h3 className="text-lg font-semibold mb-2">No entries found</h3>
-                <p className="text-muted-foreground mb-4">
+              <div className='text-center py-12'>
+                <h3 className='text-lg font-semibold mb-2'>No entries found</h3>
+                <p className='text-muted-foreground mb-4'>
                   {Object.keys(filters).length > 0
                     ? 'No entries match your search criteria'
-                    : `No ${contentType.displayName.toLowerCase()} entries have been created yet`
-                  }
+                    : `No ${contentType.displayName.toLowerCase()} entries have been created yet`}
                 </p>
                 {Object.keys(filters).length === 0 && (
                   <Button onClick={handleCreateNew}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className='h-4 w-4 mr-2' />
                     Create Your First {contentType.displayName}
                   </Button>
                 )}
@@ -551,25 +557,27 @@ export default function ContentEntries() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6">
-                <p className="text-sm text-muted-foreground">
-                  Showing {startIndex + 1} to {Math.min(startIndex + entriesPerPage, filteredEntries.length)} of {filteredEntries.length} entries
+              <div className='flex items-center justify-between mt-6'>
+                <p className='text-sm text-muted-foreground'>
+                  Showing {startIndex + 1} to{' '}
+                  {Math.min(startIndex + entriesPerPage, filteredEntries.length)} of{' '}
+                  {filteredEntries.length} entries
                 </p>
-                <div className="flex space-x-2">
+                <div className='flex space-x-2'>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant='outline'
+                    size='sm'
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage(currentPage - 1)}
                   >
                     Previous
                   </Button>
-                  <span className="flex items-center px-4 text-sm">
+                  <span className='flex items-center px-4 text-sm'>
                     Page {currentPage} of {totalPages}
                   </span>
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant='outline'
+                    size='sm'
                     disabled={currentPage === totalPages}
                     onClick={() => setCurrentPage(currentPage + 1)}
                   >

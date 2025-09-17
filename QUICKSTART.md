@@ -17,11 +17,13 @@ That's it! Your CMS is running at `http://localhost:3000`
 ## 🔑 Default Credentials
 
 **Admin Access**: `http://localhost:3000/admin`
+
 - Email: `admin@tancms.dev`
 - Password: `admin123`
 
 **Editor Access**:
-- Email: `editor@tancms.dev`  
+
+- Email: `editor@tancms.dev`
 - Password: `editor123`
 
 ⚠️ **Change these in production!**

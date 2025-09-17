@@ -11,7 +11,7 @@ export async function upsertTag(prisma: PrismaClient, name: string) {
   return await prisma.tag.upsert({
     where: { name },
     update: {},
-    create: { name }
+    create: { name },
   })
 }
 
@@ -22,10 +22,10 @@ export async function cleanupExpiredSessions(prisma: PrismaClient) {
   const result = await prisma.session.deleteMany({
     where: {
       expiresAt: {
-        lt: new Date()
-      }
-    }
+        lt: new Date(),
+      },
+    },
   })
-  
+
   return result.count
 }

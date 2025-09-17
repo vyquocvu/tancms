@@ -21,7 +21,7 @@ async function runDemo() {
         fieldType: 'TEXT',
         required: true,
         unique: true,
-        order: 0
+        order: 0,
       },
       {
         name: 'content',
@@ -29,7 +29,7 @@ async function runDemo() {
         fieldType: 'TEXTAREA',
         required: true,
         unique: false,
-        order: 1
+        order: 1,
       },
       {
         name: 'published',
@@ -38,7 +38,7 @@ async function runDemo() {
         required: false,
         unique: false,
         defaultValue: 'false',
-        order: 2
+        order: 2,
       },
       {
         name: 'tags',
@@ -46,11 +46,13 @@ async function runDemo() {
         fieldType: 'TEXT',
         required: false,
         unique: false,
-        order: 3
-      }
-    ]
+        order: 3,
+      },
+    ],
   })
-  console.log(`✅ Created content type: ${blogContentType.displayName} (slug: ${blogContentType.slug})`)
+  console.log(
+    `✅ Created content type: ${blogContentType.displayName} (slug: ${blogContentType.slug})`
+  )
 
   // Create a blog post entry
   console.log('\n2. Creating a blog post entry...')
@@ -58,12 +60,15 @@ async function runDemo() {
     slug: 'my-first-post',
     fieldValues: [
       { fieldId: blogContentType.fields[0].id, value: 'My First Blog Post' },
-      { fieldId: blogContentType.fields[1].id, value: 'This is the content of my first blog post. It talks about dynamic content types!' },
+      {
+        fieldId: blogContentType.fields[1].id,
+        value: 'This is the content of my first blog post. It talks about dynamic content types!',
+      },
       { fieldId: blogContentType.fields[2].id, value: 'true' },
-      { fieldId: blogContentType.fields[3].id, value: 'api, cms, dynamic' }
-    ]
+      { fieldId: blogContentType.fields[3].id, value: 'api, cms, dynamic' },
+    ],
   })
-  
+
   if (createResponse.success) {
     console.log(`✅ Created blog post: "${createResponse.data.entry.slug}"`)
     const entryId = createResponse.data.entry.id
@@ -95,14 +100,19 @@ async function runDemo() {
     const updateResponse = await api.updateEntry('blog-post', entryId, {
       fieldValues: [
         { fieldId: blogContentType.fields[0].id, value: 'My Updated Blog Post Title' },
-        { fieldId: blogContentType.fields[1].id, value: 'This is the updated content with more details about the API!' },
+        {
+          fieldId: blogContentType.fields[1].id,
+          value: 'This is the updated content with more details about the API!',
+        },
         { fieldId: blogContentType.fields[2].id, value: 'true' },
-        { fieldId: blogContentType.fields[3].id, value: 'api, cms, dynamic, updated' }
-      ]
+        { fieldId: blogContentType.fields[3].id, value: 'api, cms, dynamic, updated' },
+      ],
     })
-    
+
     if (updateResponse.success) {
-      const titleField = updateResponse.data.entry.fieldValues.find((fv: any) => fv.field.name === 'title')
+      const titleField = updateResponse.data.entry.fieldValues.find(
+        (fv: any) => fv.field.name === 'title'
+      )
       console.log(`✅ Updated title to: "${titleField?.value}"`)
     }
 
@@ -126,7 +136,6 @@ async function runDemo() {
     if (finalListResponse.success) {
       console.log(`✅ Remaining blog posts: ${finalListResponse.data.entries.length}`)
     }
-
   } else {
     console.log('❌ Failed to create blog post:', createResponse.error)
     console.log('   Details:', createResponse.details)
