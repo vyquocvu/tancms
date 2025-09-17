@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Edit, Trash2, Plus, ChevronUp } from 'lucide-react'
+import ContentEntryForm from '~/components/content-entry-form'
+import type { ContentType } from '~/lib/mock-api'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -79,9 +81,132 @@ const mockEntries: DemoEntry[] = [
 
 function HomePage() {
   const [showDemo, setShowDemo] = useState(false)
+  const [showPreviewDemo, setShowPreviewDemo] = useState(false)
   const [entries] = useState<DemoEntry[]>(mockEntries)
   const [filters, setFilters] = useState<ContentFilter>({})
   const [selectedEntries, setSelectedEntries] = useState<DemoEntry[]>([])
+
+  // Mock content type for preview demonstration
+  const mockContentType: ContentType = {
+    id: 'demo-blog',
+    name: 'demo_blog',
+    displayName: 'Demo Blog Post',
+    description: 'A demo blog post content type to showcase the preview system',
+    slug: 'demo-blog',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    fields: [
+      {
+        id: 'title',
+        name: 'title',
+        displayName: 'Title',
+        fieldType: 'TEXT',
+        required: true,
+        unique: false,
+        placeholder: 'Enter the blog post title',
+        helpText: 'The main title of your blog post',
+        order: 1,
+        contentTypeId: 'demo-blog'
+      },
+      {
+        id: 'content',
+        name: 'content',
+        displayName: 'Content',
+        fieldType: 'RICH_TEXT',
+        required: true,
+        unique: false,
+        placeholder: 'Write your blog post content here...',
+        helpText: 'The main content of your blog post with rich text formatting',
+        order: 2,
+        contentTypeId: 'demo-blog'
+      },
+      {
+        id: 'author_email',
+        name: 'author_email',
+        displayName: 'Author Email',
+        fieldType: 'EMAIL',
+        required: false,
+        unique: false,
+        placeholder: 'author@example.com',
+        helpText: 'Contact email for the author',
+        order: 3,
+        contentTypeId: 'demo-blog'
+      },
+      {
+        id: 'website',
+        name: 'website',
+        displayName: 'Website URL',
+        fieldType: 'URL',
+        required: false,
+        unique: false,
+        placeholder: 'https://example.com',
+        helpText: 'Related website or source',
+        order: 4,
+        contentTypeId: 'demo-blog'
+      },
+      {
+        id: 'published_date',
+        name: 'published_date',
+        displayName: 'Published Date',
+        fieldType: 'DATE',
+        required: false,
+        unique: false,
+        helpText: 'When this post was originally published',
+        order: 5,
+        contentTypeId: 'demo-blog'
+      },
+      {
+        id: 'featured',
+        name: 'featured',
+        displayName: 'Featured Post',
+        fieldType: 'BOOLEAN',
+        required: false,
+        unique: false,
+        helpText: 'Mark this post as featured',
+        order: 6,
+        contentTypeId: 'demo-blog'
+      }
+    ]
+  }
+
+  const handlePreviewSave = async (data: any) => {
+    alert('Preview Demo - Form data submitted!\n\n' + JSON.stringify(data, null, 2))
+  }
+
+  const handlePreviewCancel = () => {
+    setShowPreviewDemo(false)
+  }
+
+  // Show preview demo
+  if (showPreviewDemo) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Content Preview System Demo
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Test the preview functionality by filling out the form below. Try the "Preview" button and "Side by Side" mode!
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPreviewDemo(false)}
+              className="mb-4"
+            >
+              ← Back to Homepage
+            </Button>
+          </div>
+          
+          <ContentEntryForm
+            contentType={mockContentType}
+            onSave={handlePreviewSave}
+            onCancel={handlePreviewCancel}
+          />
+        </div>
+      </div>
+    )
+  }
 
   // Status badge component
   const getStatusBadge = (status: string) => {
@@ -434,6 +559,12 @@ function HomePage() {
             className="block w-full bg-green-600 text-white text-center py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-medium"
           >
             🚀 View Enhanced Content List Demo
+          </button>
+          <button
+            onClick={() => setShowPreviewDemo(true)}
+            className="block w-full bg-purple-600 text-white text-center py-3 px-4 rounded-md hover:bg-purple-700 transition-colors font-medium"
+          >
+            👁️ Try Content Preview System
           </button>
           <a
             href="/admin"
