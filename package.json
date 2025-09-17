@@ -27,7 +27,11 @@
     "doctor": "npm run check-env && npm run lint && npm run test --run && npm run build",
     "dev:setup": "node scripts/dev-tools.js full-setup",
     "dev:status": "node scripts/dev-tools.js status",
-    "dev:fix-env": "node scripts/dev-tools.js fix-env"
+    "dev:fix-env": "node scripts/dev-tools.js fix-env",
+    "env:validate": "node scripts/env-manager.js validate",
+    "env:templates": "node scripts/env-manager.js templates",
+    "env:init": "node scripts/env-manager.js init",
+    "env:compare": "node scripts/env-manager.js compare"
   },
   "prisma": {
     "seed": "tsx scripts/seed.ts"
