@@ -6,6 +6,14 @@
 import { createAPIFileRoute } from '@tanstack/start/api'
 import { apiManager, type ApiConfig } from '~/lib/api-manager'
 import { ApiResponseBuilder } from '~/lib/api-response'
+import { 
+  generateSecurityHeaders, 
+  applySecurityHeaders, 
+  createRateLimitMiddleware,
+  validateRequestSize 
+} from '~/server/security-headers'
+import { sanitizeApiInput } from '~/lib/security/sanitization'
+import { createComprehensiveCSRFProtection, applyCSRFTokenToResponse } from '~/lib/security/csrf'
 
 /**
  * Initialize API manager with configuration from environment
@@ -52,11 +60,81 @@ function initializeApiManager(): void {
   }
 }
 
+/**
+ * Create rate limiter for API endpoints
+ */
+const rateLimiter = createRateLimitMiddleware({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100,
+  message: 'Too many API requests, please try again later.',
+})
+
+/**
+ * Create CSRF protection
+ */
+const csrfProtection = createComprehensiveCSRFProtection()
+
+/**
+ * Apply security middleware to request
+ */
+function applySecurityMiddleware(request: Request): Response | null {
+  // Validate request size
+  if (!validateRequestSize(request, 10 * 1024 * 1024)) { // 10MB limit
+    return new Response(
+      JSON.stringify({
+        error: 'Request too large',
+        message: 'Request payload exceeds maximum allowed size',
+      }),
+      {
+        status: 413,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
+  }
+
+  // Apply rate limiting
+  const rateLimitResponse = rateLimiter(request)
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
+  // Apply CSRF protection
+  const csrfResult = csrfProtection(request)
+  if (csrfResult.response) {
+    return csrfResult.response
+  }
+
+  return null
+}
+
+/**
+ * Process and sanitize request body
+ */
+async function processRequestBody(request: Request): Promise<unknown> {
+  try {
+    const text = await request.text()
+    if (!text) return undefined
+
+    const body = JSON.parse(text)
+    
+    // Sanitize the request body
+    return sanitizeApiInput(body)
+  } catch {
+    throw new Error('Invalid JSON in request body')
+  }
+}
+
 // Initialize API manager
 initializeApiManager()
 
 export const Route = createAPIFileRoute('/api/$')({
   GET: async ({ request, params }) => {
+    // Apply security middleware
+    const securityResponse = applySecurityMiddleware(request)
+    if (securityResponse) {
+      return applySecurityHeaders(securityResponse)
+    }
+
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
@@ -73,19 +151,29 @@ export const Route = createAPIFileRoute('/api/$')({
         query,
       })
 
-      return ApiResponseBuilder.createHttpResponse(response, {
+      const httpResponse = ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
+
+      // Apply security headers
+      return applySecurityHeaders(httpResponse)
     } catch (apiError) {
       console.error('API GET error:', apiError)
       const errorResponse = ApiResponseBuilder.internalError(apiError)
-      return ApiResponseBuilder.createHttpResponse(errorResponse)
+      const httpResponse = ApiResponseBuilder.createHttpResponse(errorResponse)
+      return applySecurityHeaders(httpResponse)
     }
   },
 
   POST: async ({ request, params }) => {
+    // Apply security middleware
+    const securityResponse = applySecurityMiddleware(request)
+    if (securityResponse) {
+      return applySecurityHeaders(securityResponse)
+    }
+
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
@@ -97,15 +185,15 @@ export const Route = createAPIFileRoute('/api/$')({
 
     let body: unknown
     try {
-      const text = await request.text()
-      body = text ? JSON.parse(text) : undefined
-    } catch {
+      body = await processRequestBody(request)
+    } catch (error) {
       const errorResponse = ApiResponseBuilder.error({
         code: 'BAD_REQUEST',
-        message: 'Invalid JSON in request body',
+        message: error instanceof Error ? error.message : 'Invalid JSON in request body',
         details: ['Request body must contain valid JSON'],
       })
-      return ApiResponseBuilder.createHttpResponse(errorResponse)
+      const httpResponse = ApiResponseBuilder.createHttpResponse(errorResponse)
+      return applySecurityHeaders(httpResponse)
     }
 
     try {
@@ -116,15 +204,19 @@ export const Route = createAPIFileRoute('/api/$')({
         query,
       })
 
-      return ApiResponseBuilder.createHttpResponse(response, {
+      const httpResponse = ApiResponseBuilder.createHttpResponse(response, {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       })
+
+      // Apply security headers
+      return applySecurityHeaders(httpResponse)
     } catch (apiError) {
       console.error('API POST error:', apiError)
       const errorResponse = ApiResponseBuilder.internalError(apiError)
-      return ApiResponseBuilder.createHttpResponse(errorResponse)
+      const httpResponse = ApiResponseBuilder.createHttpResponse(errorResponse)
+      return applySecurityHeaders(httpResponse)
     }
   },
 
