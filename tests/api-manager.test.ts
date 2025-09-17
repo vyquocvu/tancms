@@ -182,7 +182,8 @@ describe('API Manager', () => {
       const response = await apiManager.get('/api/status')
       
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Internal server error')
+      expect(response.error?.code).toBe('INTERNAL_SERVER_ERROR')
+      expect(response.error?.message).toBe('Internal server error')
     })
   })
 
@@ -197,7 +198,8 @@ describe('API Manager', () => {
       // Should fail without API key
       const response1 = await authManager.get('/api/test-api-manager')
       expect(response1.success).toBe(false)
-      expect(response1.error).toBe('Authentication required')
+      expect(response1.error?.code).toBe('AUTHENTICATION_REQUIRED')
+      expect(response1.message).toContain('API key is required')
 
       // Should succeed with valid API key
       const response2 = await authManager.get('/api/test-api-manager', { api_key: 'test-key' })
@@ -206,7 +208,8 @@ describe('API Manager', () => {
       // Should fail with invalid API key
       const response3 = await authManager.get('/api/test-api-manager', { api_key: 'invalid-key' })
       expect(response3.success).toBe(false)
-      expect(response3.error).toBe('Authentication failed')
+      expect(response3.error?.code).toBe('AUTHENTICATION_FAILED')
+      expect(response3.message).toContain('Invalid API key')
     })
 
     it('should allow status endpoint without auth', async () => {
@@ -291,19 +294,24 @@ describe('API Manager', () => {
     it('should handle invalid content type gracefully', async () => {
       const response = await apiManager.get('/api/nonexistent-type')
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Content type not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Content type')
+      expect(response.message).toContain('nonexistent-type')
     })
 
     it('should handle invalid entry ID gracefully', async () => {
       const response = await apiManager.get(`/api/${testContentType.slug}/nonexistent-id`)
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Entry not found')
+      expect(response.error?.code).toBe('NOT_FOUND')
+      expect(response.message).toContain('Entry')
+      expect(response.message).toContain('nonexistent-id')
     })
 
     it('should handle invalid API paths gracefully', async () => {
       const response = await apiManager.get('/invalid/path')
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Invalid API path')
+      expect(response.error?.code).toBe('BAD_REQUEST')
+      expect(response.message).toContain('Invalid API path')
     })
 
     it('should handle validation errors', async () => {
@@ -315,7 +323,8 @@ describe('API Manager', () => {
       })
 
       expect(response.success).toBe(false)
-      expect(response.error).toBe('Validation failed')
+      expect(response.error?.code).toBe('VALIDATION_ERROR')
+      expect(response.error?.message).toBe('Validation failed')
     })
   })
 })

@@ -5,6 +5,7 @@
 
 import { ApiRouter, type ApiRequest, type HttpMethod } from '~/routes/api'
 import { type ApiResponse } from '~/routes/api/content-api'
+import { ApiResponseBuilder } from '~/lib/api-response'
 
 export type ApiMiddleware = {
   name: string
@@ -85,11 +86,7 @@ export class ApiManager {
       return await next()
     } catch (error) {
       console.error('API Manager error:', error)
-      return {
-        success: false,
-        error: 'Internal server error',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 
@@ -140,8 +137,8 @@ export class ApiManager {
    * Get API status and health information
    */
   async getStatus(): Promise<ApiResponse> {
-    return {
-      success: true,
+    return ApiResponseBuilder.success({
+      message: 'API is healthy and operational',
       data: {
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -153,7 +150,7 @@ export class ApiManager {
           corsEnabled: this.config.corsEnabled
         }
       }
-    }
+    })
   }
 
   /**
@@ -197,19 +194,15 @@ export class ApiManager {
         const apiKey = request.query?.['api_key'] || request.query?.['apiKey']
         
         if (!apiKey) {
-          return {
-            success: false,
-            error: 'Authentication required',
-            details: ['API key is required. Provide it as ?api_key=your_key']
-          }
+          return ApiResponseBuilder.authRequired('API key is required. Provide it as ?api_key=your_key')
         }
 
         if (!this.config.apiKeys?.includes(apiKey)) {
-          return {
-            success: false,
-            error: 'Authentication failed',
-            details: ['Invalid API key']
-          }
+          return ApiResponseBuilder.error({
+            code: 'AUTHENTICATION_FAILED',
+            message: 'Invalid API key provided',
+            details: ['The provided API key is not valid']
+          })
         }
 
         return next()

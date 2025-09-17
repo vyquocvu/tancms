@@ -4,13 +4,10 @@
  */
 
 import { mockApi } from '~/lib/mock-api'
+import { ApiResponseBuilder, type StandardApiResponse } from '~/lib/api-response'
 
-export type ApiResponse<T = unknown> = {
-  success: boolean
-  data?: T
-  error?: string
-  details?: string[]
-}
+// Keep legacy type for backward compatibility
+export type ApiResponse<T = unknown> = StandardApiResponse<T>
 
 export type ContentEntryRequest = {
   slug?: string
@@ -36,11 +33,7 @@ export class ContentAPI {
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
       
       if (!contentType) {
-        return {
-          success: false,
-          error: 'Content type not found',
-          details: [`Content type with slug '${contentTypeSlug}' does not exist`]
-        }
+        return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Get entries for this content type
@@ -63,8 +56,8 @@ export class ContentAPI {
       const startIndex = (page - 1) * limit
       const paginatedEntries = filteredEntries.slice(startIndex, startIndex + limit)
 
-      return {
-        success: true,
+      return ApiResponseBuilder.success({
+        message: `Retrieved ${paginatedEntries.length} entries for content type '${contentTypeSlug}'`,
         data: {
           entries: paginatedEntries,
           contentType,
@@ -77,14 +70,10 @@ export class ContentAPI {
             hasPrev: page > 1
           }
         }
-      }
+      })
     } catch (error) {
       console.error('Error listing entries:', error)
-      return {
-        success: false,
-        error: 'Failed to list entries',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 
@@ -99,38 +88,26 @@ export class ContentAPI {
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
       
       if (!contentType) {
-        return {
-          success: false,
-          error: 'Content type not found',
-          details: [`Content type with slug '${contentTypeSlug}' does not exist`]
-        }
+        return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Get the specific entry
       const entry = await mockApi.getContentEntry(entryId)
       
       if (!entry || entry.contentTypeId !== contentType.id) {
-        return {
-          success: false,
-          error: 'Entry not found',
-          details: [`Entry with ID '${entryId}' not found in content type '${contentTypeSlug}'`]
-        }
+        return ApiResponseBuilder.notFound('Entry', entryId)
       }
 
-      return {
-        success: true,
+      return ApiResponseBuilder.success({
+        message: `Retrieved entry '${entryId}' from content type '${contentTypeSlug}'`,
         data: {
           entry,
           contentType
         }
-      }
+      })
     } catch (error) {
       console.error('Error getting entry:', error)
-      return {
-        success: false,
-        error: 'Failed to get entry',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 
@@ -145,11 +122,7 @@ export class ContentAPI {
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
       
       if (!contentType) {
-        return {
-          success: false,
-          error: 'Content type not found',
-          details: [`Content type with slug '${contentTypeSlug}' does not exist`]
-        }
+        return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Validate required fields
@@ -164,11 +137,7 @@ export class ContentAPI {
       }
 
       if (validationErrors.length > 0) {
-        return {
-          success: false,
-          error: 'Validation failed',
-          details: validationErrors
-        }
+        return ApiResponseBuilder.validationError(validationErrors)
       }
 
       // Create the entry
@@ -178,20 +147,16 @@ export class ContentAPI {
         fieldValues: data.fieldValues
       })
 
-      return {
-        success: true,
+      return ApiResponseBuilder.success({
+        message: `Entry created successfully in content type '${contentTypeSlug}'`,
         data: {
           entry,
           contentType
         }
-      }
+      })
     } catch (error) {
       console.error('Error creating entry:', error)
-      return {
-        success: false,
-        error: 'Failed to create entry',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 
@@ -206,21 +171,13 @@ export class ContentAPI {
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
       
       if (!contentType) {
-        return {
-          success: false,
-          error: 'Content type not found',
-          details: [`Content type with slug '${contentTypeSlug}' does not exist`]
-        }
+        return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Check if entry exists
       const existingEntry = await mockApi.getContentEntry(entryId)
       if (!existingEntry || existingEntry.contentTypeId !== contentType.id) {
-        return {
-          success: false,
-          error: 'Entry not found',
-          details: [`Entry with ID '${entryId}' not found in content type '${contentTypeSlug}'`]
-        }
+        return ApiResponseBuilder.notFound('Entry', entryId)
       }
 
       // Validate required fields if fieldValues are being updated
@@ -236,11 +193,7 @@ export class ContentAPI {
         }
 
         if (validationErrors.length > 0) {
-          return {
-            success: false,
-            error: 'Validation failed',
-            details: validationErrors
-          }
+          return ApiResponseBuilder.validationError(validationErrors)
         }
       }
 
@@ -251,27 +204,23 @@ export class ContentAPI {
       })
 
       if (!entry) {
-        return {
-          success: false,
-          error: 'Failed to update entry',
+        return ApiResponseBuilder.error({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to update entry',
           details: ['Entry could not be updated']
-        }
+        })
       }
 
-      return {
-        success: true,
+      return ApiResponseBuilder.success({
+        message: `Entry '${entryId}' updated successfully`,
         data: {
           entry,
           contentType
         }
-      }
+      })
     } catch (error) {
       console.error('Error updating entry:', error)
-      return {
-        success: false,
-        error: 'Failed to update entry',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 
@@ -286,48 +235,36 @@ export class ContentAPI {
       const contentType = contentTypes.find(ct => ct.slug === contentTypeSlug)
       
       if (!contentType) {
-        return {
-          success: false,
-          error: 'Content type not found',
-          details: [`Content type with slug '${contentTypeSlug}' does not exist`]
-        }
+        return ApiResponseBuilder.notFound('Content type', contentTypeSlug)
       }
 
       // Check if entry exists
       const existingEntry = await mockApi.getContentEntry(entryId)
       if (!existingEntry || existingEntry.contentTypeId !== contentType.id) {
-        return {
-          success: false,
-          error: 'Entry not found',
-          details: [`Entry with ID '${entryId}' not found in content type '${contentTypeSlug}'`]
-        }
+        return ApiResponseBuilder.notFound('Entry', entryId)
       }
 
       // Delete the entry
       const success = await mockApi.deleteContentEntry(entryId)
 
       if (!success) {
-        return {
-          success: false,
-          error: 'Failed to delete entry',
+        return ApiResponseBuilder.error({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Failed to delete entry',
           details: ['Entry could not be deleted']
-        }
+        })
       }
 
-      return {
-        success: true,
+      return ApiResponseBuilder.success({
+        message: `Entry '${entryId}' deleted successfully`,
         data: {
           message: 'Entry deleted successfully',
           deletedEntryId: entryId
         }
-      }
+      })
     } catch (error) {
       console.error('Error deleting entry:', error)
-      return {
-        success: false,
-        error: 'Failed to delete entry',
-        details: [error instanceof Error ? error.message : 'Unknown error']
-      }
+      return ApiResponseBuilder.internalError(error)
     }
   }
 }
