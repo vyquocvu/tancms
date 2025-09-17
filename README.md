@@ -37,6 +37,21 @@ npm install
 
 ### 2. Environment Setup
 
+TanCMS provides comprehensive environment configuration management for different deployment scenarios.
+
+**Quick Setup (Recommended):**
+```bash
+# Initialize development environment
+npm run env:init development
+
+# Validate configuration
+npm run env:validate
+
+# Auto-fix common issues
+npm run dev:fix-env
+```
+
+**Manual Setup:**
 Create a `.env` file in the root directory:
 
 ```bash
@@ -47,15 +62,30 @@ DATABASE_URL="file:./dev.db"  # SQLite for development
 # Authentication
 AUTH_SECRET="your-32-character-secret-key-here"
 
+# Application
+APP_URL="http://localhost:3000"
+
 # Optional: S3-compatible storage
 S3_ENDPOINT="https://your-s3-endpoint.com"
 S3_ACCESS_KEY_ID="your-access-key"
 S3_SECRET_ACCESS_KEY="your-secret-key"
 S3_BUCKET="your-bucket-name"
-
-# Application
-APP_URL="http://localhost:3000"
 ```
+
+**Environment Management Commands:**
+```bash
+# Available commands
+npm run env:validate          # Validate current configuration
+npm run env:templates         # Show available environment templates  
+npm run env:init <env>        # Initialize environment (development/staging/production/test)
+npm run env:compare <e1> <e2> # Compare two environments
+
+# Development tools
+npm run check-env             # Basic environment check
+npm run dev:fix-env          # Auto-fix configuration issues
+```
+
+For detailed configuration options, see [Environment Configuration Guide](./docs/ENVIRONMENT_CONFIGURATION.md).
 
 ### 3. Database Setup
 
