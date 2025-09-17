@@ -15,13 +15,15 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   bold: '\x1b[1m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
 }
 
 function log(message, color = '') {
   console.log(`${color}${message}${colors.reset}`)
 }
 
-function checkEnvironment() {
+async function checkEnvironment() {
   log(`${colors.bold}🔍 TanCMS Environment Check${colors.reset}\n`)
 
   let errors = 0
@@ -55,10 +57,24 @@ function checkEnvironment() {
     warnings++
   }
 
+  // Environment detection and validation
+  const currentEnv = process.env.NODE_ENV || 'development'
+  log(`🌍 Environment: ${currentEnv}`, colors.cyan)
+
+  // Check for environment-specific template
+  const envTemplate = `.env.${currentEnv}`
+  if (existsSync(envTemplate)) {
+    log(`✅ Environment template found: ${envTemplate}`, colors.green)
+  } else {
+    log(`ℹ️  No environment template: ${envTemplate}`, colors.blue)
+  }
+
   // Check environment file
   if (existsSync('.env')) {
     log(`✅ .env file found`, colors.green)
-    checkEnvVariables()
+    const envResult = checkEnvVariables()
+    errors += envResult.errors
+    warnings += envResult.warnings
   } else if (existsSync('.env.example')) {
     log(`⚠️  .env file missing - copy from .env.example`, colors.yellow)
     log(`   Run: cp .env.example .env`, colors.blue)
@@ -66,6 +82,13 @@ function checkEnvironment() {
   } else {
     log(`❌ .env.example file missing`, colors.red)
     errors++
+  }
+
+  // Advanced configuration validation using the new env-config system
+  try {
+    await checkAdvancedConfiguration()
+  } catch (error) {
+    log(`ℹ️  Advanced configuration check skipped (${error.message})`, colors.blue)
   }
 
   // Check database setup
@@ -142,18 +165,26 @@ function checkEnvironment() {
       log(`development tasks. Database operations may be limited but tests and build`, colors.blue)
       log(`will continue to function normally.`, colors.blue)
     }
+
+    // Environment-specific suggestions
+    log(`\n${colors.bold}Environment Configuration Tips:${colors.reset}`)
+    log(`• Use 'npm run env:validate' for comprehensive configuration validation`, colors.magenta)
+    log(`• Check '.env.${currentEnv}' for environment-specific configuration`, colors.magenta)
+    log(`• Run 'npm run dev:fix-env' to auto-fix common configuration issues`, colors.magenta)
   }
 
   return { errors, warnings }
 }
 
 function checkEnvVariables() {
+  let errors = 0
+  let warnings = 0
+
   try {
     const envContent = readFileSync('.env', 'utf8')
     const lines = envContent.split('\n').filter(line => line.trim() && !line.startsWith('#'))
 
     const requiredVars = ['DATABASE_URL', 'AUTH_SECRET', 'APP_URL']
-
     const recommendedVars = ['NODE_ENV']
 
     let foundVars = {}
@@ -174,11 +205,13 @@ function checkEnvVariables() {
           foundVars[varName].includes('change-me')
         ) {
           log(`⚠️  ${varName} needs to be updated from default value`, colors.yellow)
+          warnings++
         } else {
           log(`✅ ${varName} configured`, colors.green)
         }
       } else {
         log(`❌ ${varName} missing from .env`, colors.red)
+        errors++
       }
     })
 
@@ -190,8 +223,11 @@ function checkEnvVariables() {
         log(`ℹ️  ${varName} not set (recommended for development)`, colors.blue)
       }
     })
+
+    return { errors, warnings }
   } catch (error) {
     log(`❌ Error reading .env file: ${error.message}`, colors.red)
+    return { errors: 1, warnings: 0 }
   }
 }
 
@@ -212,11 +248,79 @@ async function checkSystemRequirements() {
   log(`✅ npm available (running through npm scripts)`, colors.green)
 }
 
+// Advanced configuration validation using env-config
+async function checkAdvancedConfiguration() {
+  log(`\n${colors.bold}🔧 Advanced Configuration Validation${colors.reset}`)
+
+  try {
+    // Import the environment configuration manager
+    const { EnvironmentConfigManager } = await import('./env-config.js')
+    const envManager = new EnvironmentConfigManager()
+    const validation = envManager.validate()
+
+    // Display critical errors
+    const criticalErrors = validation.errors.filter(e => e.severity === 'critical')
+    if (criticalErrors.length > 0) {
+      log(`\n${colors.bold}🚨 Critical Security Issues:${colors.reset}`)
+      criticalErrors.forEach(error => {
+        log(`❌ ${error.key}: ${error.message}`, colors.red)
+        if (error.suggestion) {
+          log(`   💡 ${error.suggestion}`, colors.yellow)
+        }
+      })
+    }
+
+    // Display regular errors
+    const regularErrors = validation.errors.filter(e => e.severity === 'error')
+    if (regularErrors.length > 0) {
+      log(`\n${colors.bold}❌ Configuration Errors:${colors.reset}`)
+      regularErrors.forEach(error => {
+        log(`❌ ${error.key}: ${error.message}`, colors.red)
+        if (error.suggestion) {
+          log(`   💡 ${error.suggestion}`, colors.blue)
+        }
+      })
+    }
+
+    // Display warnings
+    if (validation.warnings.length > 0) {
+      log(`\n${colors.bold}⚠️  Configuration Warnings:${colors.reset}`)
+      validation.warnings.forEach(warning => {
+        log(`⚠️  ${warning.key}: ${warning.message}`, colors.yellow)
+        if (warning.suggestion) {
+          log(`   💡 ${warning.suggestion}`, colors.blue)
+        }
+      })
+    }
+
+    // Display suggestions
+    if (validation.suggestions.length > 0) {
+      log(`\n${colors.bold}💡 Suggestions:${colors.reset}`)
+      validation.suggestions.forEach(suggestion => {
+        log(`• ${suggestion}`, colors.magenta)
+      })
+    }
+
+    // Overall status
+    if (validation.isValid) {
+      log(`\n✅ Configuration validation passed!`, colors.green)
+    } else {
+      log(`\n❌ Configuration validation failed`, colors.red)
+      log(`   Use 'npm run env:validate' for detailed validation`, colors.blue)
+    }
+
+    return validation
+  } catch (error) {
+    // Gracefully handle if the env-config module is not available
+    throw new Error(`env-config module not available: ${error.message}`)
+  }
+}
+
 // Main execution
 if (import.meta.url === `file://${resolve(process.argv[1])}`) {
   ;(async () => {
     await checkSystemRequirements()
-    const result = checkEnvironment()
+    const result = await checkEnvironment()
 
     // Exit with error code if there are errors
     process.exit(result.errors > 0 ? 1 : 0)
