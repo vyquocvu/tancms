@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { ApiResponseBuilder, type ApiErrorCode, type StandardApiResponse } from '../app/lib/api-response'
+import { ApiResponseBuilder } from '../app/lib/api-response'
 
 describe('ApiResponseBuilder', () => {
   beforeEach(() => {
@@ -276,7 +276,6 @@ describe('ApiResponseBuilder', () => {
     })
 
     it('should include processing time when provided', () => {
-      const startTime = Date.now()
       const processingTime = 150
       
       const response = ApiResponseBuilder.success({
