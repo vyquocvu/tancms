@@ -198,7 +198,8 @@ describe('API Manager', () => {
       // Should fail without API key
       const response1 = await authManager.get('/api/test-api-manager')
       expect(response1.success).toBe(false)
-      expect(response1.error).toBe('Authentication required')
+      expect(response1.error?.code).toBe('AUTHENTICATION_REQUIRED')
+      expect(response1.message).toContain('API key is required')
 
       // Should succeed with valid API key
       const response2 = await authManager.get('/api/test-api-manager', { api_key: 'test-key' })
@@ -207,7 +208,8 @@ describe('API Manager', () => {
       // Should fail with invalid API key
       const response3 = await authManager.get('/api/test-api-manager', { api_key: 'invalid-key' })
       expect(response3.success).toBe(false)
-      expect(response3.error).toBe('Authentication failed')
+      expect(response3.error?.code).toBe('AUTHENTICATION_FAILED')
+      expect(response3.message).toContain('Invalid API key')
     })
 
     it('should allow status endpoint without auth', async () => {

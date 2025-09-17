@@ -53,16 +53,6 @@ function initializeApiManager(): void {
 // Initialize API manager
 initializeApiManager()
 
-function getResponseHeaders(response: { headers?: Record<string, string> }): Record<string, string> {
-  return {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    ...(response.headers || {})
-  }
-}
-
 export const Route = createAPIFileRoute('/api/$')({
   GET: async ({ request, params }) => {
     const url = new URL(request.url)

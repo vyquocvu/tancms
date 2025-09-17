@@ -194,19 +194,15 @@ export class ApiManager {
         const apiKey = request.query?.['api_key'] || request.query?.['apiKey']
         
         if (!apiKey) {
-          return {
-            success: false,
-            error: 'Authentication required',
-            details: ['API key is required. Provide it as ?api_key=your_key']
-          }
+          return ApiResponseBuilder.authRequired('API key is required. Provide it as ?api_key=your_key')
         }
 
         if (!this.config.apiKeys?.includes(apiKey)) {
-          return {
-            success: false,
-            error: 'Authentication failed',
-            details: ['Invalid API key']
-          }
+          return ApiResponseBuilder.error({
+            code: 'AUTHENTICATION_FAILED',
+            message: 'Invalid API key provided',
+            details: ['The provided API key is not valid']
+          })
         }
 
         return next()
