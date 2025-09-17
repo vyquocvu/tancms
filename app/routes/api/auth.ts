@@ -1,11 +1,14 @@
 import { createAPIFileRoute } from '@tanstack/start/api'
 import {
-  authenticateUser,
   createSession,
   deleteSession,
   getSessionUser,
   createUser,
 } from '~/server/auth'
+import { authenticateUserSecure, securityAudit } from '~/server/security-auth'
+import { validatePasswordStrength } from '~/server/security-auth'
+import { sanitizeApiInput } from '~/lib/security/sanitization'
+import { applySecurityHeaders } from '~/server/security-headers'
 import { z } from 'zod'
 
 // Validation schemas
@@ -17,13 +20,20 @@ const loginSchema = z.object({
 const registerSchema = z
   .object({
     email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
     name: z.string().min(1, 'Name is required'),
     confirmPassword: z.string(),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ['confirmPassword'],
+  })
+  .refine(data => {
+    const validation = validatePasswordStrength(data.password)
+    return validation.isValid
+  }, {
+    message: "Password must contain uppercase, lowercase, numbers, and special characters",
+    path: ['password'],
   })
 
 // Helper functions
@@ -56,11 +66,17 @@ export const Route = createAPIFileRoute('/api/auth')({
     try {
       switch (action) {
         case 'login': {
-          const body = await request.json()
+          const rawBody = await request.json()
+          const body = sanitizeApiInput(rawBody)
           const result = loginSchema.safeParse(body)
 
           if (!result.success) {
-            return new Response(
+            securityAudit.log('LOGIN_ATTEMPT', request, undefined, false, {
+              error: 'Validation failed',
+              details: result.error.flatten(),
+            })
+
+            const response = new Response(
               JSON.stringify({
                 error: 'Validation failed',
                 details: result.error.flatten(),
@@ -70,32 +86,45 @@ export const Route = createAPIFileRoute('/api/auth')({
                 headers: { 'Content-Type': 'application/json' },
               }
             )
+            return applySecurityHeaders(response)
           }
 
           const { email, password } = result.data
-          const user = await authenticateUser(email, password)
+          const authResult = await authenticateUserSecure(email, password, request)
 
-          if (!user) {
-            return new Response(
+          if (!authResult.user) {
+            securityAudit.log('LOGIN_ATTEMPT', request, undefined, false, {
+              email,
+              error: authResult.error,
+            })
+
+            const response = new Response(
               JSON.stringify({
-                error: 'Invalid email or password',
+                error: authResult.error || 'Authentication failed',
+                ...(authResult.lockoutTime && { lockoutTime: authResult.lockoutTime }),
               }),
               {
                 status: 401,
                 headers: { 'Content-Type': 'application/json' },
               }
             )
+            return applySecurityHeaders(response)
           }
 
-          const sessionId = await createSession(user.id)
+          securityAudit.log('LOGIN_SUCCESS', request, authResult.user.id, true, {
+            email,
+            role: authResult.user.role,
+          })
 
-          return new Response(
+          const sessionId = await createSession(authResult.user.id)
+
+          const response = new Response(
             JSON.stringify({
               user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
+                id: authResult.user.id,
+                email: authResult.user.email,
+                name: authResult.user.name,
+                role: authResult.user.role,
               },
             }),
             {
@@ -106,10 +135,12 @@ export const Route = createAPIFileRoute('/api/auth')({
               },
             }
           )
+          return applySecurityHeaders(response)
         }
 
         case 'register': {
-          const body = await request.json()
+          const rawBody = await request.json()
+          const body = sanitizeApiInput(rawBody)
           const result = registerSchema.safeParse(body)
 
           if (!result.success) {
@@ -150,8 +181,8 @@ export const Route = createAPIFileRoute('/api/auth')({
                 },
               }
             )
-          } catch (error: any) {
-            if (error.code === 'P2002') {
+          } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
               // Prisma unique constraint error
               return new Response(
                 JSON.stringify({
