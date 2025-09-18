@@ -554,6 +554,12 @@ function HomePage() {
             👁️ Try Content Preview System
           </button>
           <a
+            href='/analytics'
+            className='block w-full bg-orange-600 text-white text-center py-3 px-4 rounded-md hover:bg-orange-700 transition-colors font-medium'
+          >
+            📊 View Analytics Dashboard
+          </a>
+          <a
             href='/admin'
             className='block w-full bg-indigo-600 text-white text-center py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors font-medium'
           >
