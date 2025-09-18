@@ -20,8 +20,10 @@ export function EmptyState({ icon, title, description, action, className }: Empt
   return (
     <div
       className={cn('flex flex-col items-center justify-center text-center p-6 md:p-12', className)}
+      role="status"
+      aria-live="polite"
     >
-      <div className='rounded-full bg-muted p-3 mb-4'>{icon}</div>
+      <div className='rounded-full bg-muted p-3 mb-4' aria-hidden="true">{icon}</div>
       <h3 className='text-lg font-medium mb-2'>{title}</h3>
       <p className='text-muted-foreground mb-6 max-w-md'>{description}</p>
       {action && (
@@ -29,10 +31,14 @@ export function EmptyState({ icon, title, description, action, className }: Empt
           asChild={!!action.href}
           onClick={action.onClick}
           className='flex items-center gap-2'
+          aria-describedby="empty-state-description"
         >
           {action.href ? <a href={action.href}>{action.label}</a> : action.label}
         </Button>
       )}
+      <span id="empty-state-description" className="sr-only">
+        {description}
+      </span>
     </div>
   )
 }

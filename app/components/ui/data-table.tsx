@@ -1,6 +1,12 @@
 import * as React from 'react'
 import { useState, useMemo } from 'react'
 import { cn } from '~/lib/utils'
+import { 
+  getSortAriaLabel, 
+  getTableCellA11yProps, 
+  handleKeyboardNavigation,
+  announceToScreenReader 
+} from '~/lib/accessibility'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table'
 import { Button } from './button'
 import { Input } from './input'
@@ -120,8 +126,16 @@ export function DataTable<T>({
         // Cycle through: asc -> desc -> none
         const newDirection =
           prev.direction === 'asc' ? 'desc' : prev.direction === 'desc' ? null : 'asc'
+        
+        // Announce sort change to screen readers
+        const sortMessage = newDirection 
+          ? `Table sorted by ${column.header} ${newDirection === 'asc' ? 'ascending' : 'descending'}`
+          : `Sort removed from ${column.header}`
+        announceToScreenReader(sortMessage)
+        
         return { column: newDirection ? columnId : null, direction: newDirection }
       } else {
+        announceToScreenReader(`Table sorted by ${column.header} ascending`)
         return { column: columnId, direction: 'asc' }
       }
     })
@@ -193,12 +207,14 @@ export function DataTable<T>({
         <div className='flex items-center justify-between'>
           {enableSearch && (
             <div className='relative flex-1 max-w-sm'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' />
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' aria-hidden="true" />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={e => onSearchChange?.(e.target.value)}
                 className='pl-10'
+                aria-label={`Search ${data.length} items`}
+                description={`Use this field to search through ${data.length} table items`}
               />
             </div>
           )}
@@ -209,8 +225,11 @@ export function DataTable<T>({
                 variant='outline'
                 size='sm'
                 onClick={() => setShowColumnSettings(!showColumnSettings)}
+                aria-expanded={showColumnSettings}
+                aria-haspopup="menu"
+                aria-label="Configure visible columns"
               >
-                <Settings className='h-4 w-4 mr-2' />
+                <Settings className='h-4 w-4 mr-2' aria-hidden="true" />
                 Columns
               </Button>
 
@@ -255,31 +274,56 @@ export function DataTable<T>({
                     }}
                     onChange={toggleSelectAll}
                     className='rounded'
+                    aria-label={isAllSelected ? 'Deselect all rows' : 'Select all rows'}
+                    aria-describedby={`select-all-description`}
                   />
+                  <span id="select-all-description" className="sr-only">
+                    {isAllSelected 
+                      ? `All ${data.length} rows selected`
+                      : isIndeterminate 
+                        ? `${selectedRows?.length} of ${data.length} rows selected`
+                        : 'No rows selected'
+                    }
+                  </span>
                 </TableHead>
               )}
-              {visibleColumns.map(column => (
-                <TableHead
-                  key={column.id}
-                  className={cn(
-                    column.sortable &&
-                      enableSorting &&
-                      'cursor-pointer select-none hover:bg-accent',
-                    'relative'
-                  )}
-                  onClick={() => handleSort(column.id)}
-                  style={{
-                    width: column.width,
-                    minWidth: column.minWidth,
-                    maxWidth: column.maxWidth,
-                  }}
-                >
-                  <div className='flex items-center space-x-2'>
-                    <span>{column.header}</span>
-                    {getSortIcon(column.id)}
-                  </div>
-                </TableHead>
-              ))}
+              {visibleColumns.map(column => {
+                const sortDirection = sortState.column === column.id ? sortState.direction : null
+                const cellA11yProps = getTableCellA11yProps(
+                  !!(column.sortable && enableSorting), 
+                  true, 
+                  sortDirection
+                )
+                
+                return (
+                  <TableHead
+                    key={column.id}
+                    className={cn(
+                      column.sortable &&
+                        enableSorting &&
+                        'cursor-pointer select-none hover:bg-accent table-accessible',
+                      'relative'
+                    )}
+                    onClick={() => handleSort(column.id)}
+                    onKeyDown={(e) => handleKeyboardNavigation(e, () => handleSort(column.id))}
+                    style={{
+                      width: column.width,
+                      minWidth: column.minWidth,
+                      maxWidth: column.maxWidth,
+                    }}
+                    aria-label={column.sortable && enableSorting 
+                      ? getSortAriaLabel(column.header, sortDirection)
+                      : column.header
+                    }
+                    {...cellA11yProps}
+                  >
+                    <div className='flex items-center space-x-2'>
+                      <span>{column.header}</span>
+                      {getSortIcon(column.id)}
+                    </div>
+                  </TableHead>
+                )
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -293,28 +337,34 @@ export function DataTable<T>({
                 </TableCell>
               </TableRow>
             ) : (
-              sortedData.map((row, index) => (
-                <TableRow
-                  key={index}
-                  className={cn(
-                    onRowClick && 'cursor-pointer hover:bg-muted/50',
-                    isRowSelected(row) && 'bg-muted/50'
-                  )}
-                  onClick={() => onRowClick?.(row)}
-                >
-                  {enableSelection && (
-                    <TableCell className='w-12'>
-                      <input
-                        type='checkbox'
-                        checked={isRowSelected(row)}
-                        onChange={e => {
-                          e.stopPropagation()
-                          toggleRowSelection(row)
-                        }}
-                        className='rounded'
-                      />
-                    </TableCell>
-                  )}
+              sortedData.map((row, index) => {
+                return (
+                  <TableRow
+                    key={index}
+                    className={cn(
+                      onRowClick && 'cursor-pointer hover:bg-muted/50 table-accessible',
+                      isRowSelected(row) && 'bg-muted/50'
+                    )}
+                    onClick={() => onRowClick?.(row)}
+                    onKeyDown={(e) => handleKeyboardNavigation(e, () => onRowClick?.(row))}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    role={onRowClick ? 'button' : undefined}
+                    aria-label={onRowClick ? `View details for row ${index + 1}` : undefined}
+                  >
+                    {enableSelection && (
+                      <TableCell className='w-12'>
+                        <input
+                          type='checkbox'
+                          checked={isRowSelected(row)}
+                          onChange={e => {
+                            e.stopPropagation()
+                            toggleRowSelection(row)
+                          }}
+                          className='rounded'
+                          aria-label={`${isRowSelected(row) ? 'Deselect' : 'Select'} row ${index + 1}`}
+                        />
+                      </TableCell>
+                    )}
                   {visibleColumns.map(column => (
                     <TableCell key={column.id}>
                       {column.cell
@@ -327,7 +377,8 @@ export function DataTable<T>({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+              )
+              })
             )}
           </TableBody>
         </Table>

@@ -1,0 +1,306 @@
+/**
+ * Accessibility-focused CSS for TanCMS
+ * Provides enhanced focus indicators, high contrast support, and reduced motion preferences
+ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1000;
+  font-weight: 600;
+  border: 2px solid transparent;
+}
+
+.skip-link:focus {
+  top: 6px;
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Enhanced focus indicators */
+.focus-enhanced:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* High contrast focus for interactive elements */
+.interactive-focus:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
+}
+
+/* Button accessibility enhancements */
+.btn-accessible {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-accessible:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px hsl(var(--foreground) / 0.1);
+}
+
+.btn-accessible:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px hsl(var(--foreground) / 0.1);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .btn-accessible,
+  .interactive-focus,
+  .focus-enhanced,
+  * {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .interactive-focus:focus-visible {
+    outline: 3px solid;
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+  
+  .btn-accessible:focus-visible {
+    outline: 3px solid;
+    outline-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+  
+  /* Enhanced borders for high contrast */
+  .table-accessible th,
+  .table-accessible td {
+    border: 1px solid;
+  }
+  
+  .form-accessible input,
+  .form-accessible textarea,
+  .form-accessible select {
+    border: 2px solid;
+  }
+}
+
+/* Form accessibility enhancements */
+.form-accessible .field-group {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.form-accessible .field-error {
+  color: hsl(var(--destructive));
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-accessible .field-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-accessible input:invalid:not(:focus) {
+  border-color: hsl(var(--destructive));
+  box-shadow: 0 0 0 1px hsl(var(--destructive));
+}
+
+/* Table accessibility enhancements */
+.table-accessible {
+  border-collapse: collapse;
+}
+
+.table-accessible th {
+  text-align: left;
+  font-weight: 600;
+  background: hsl(var(--muted));
+}
+
+.table-accessible th[aria-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.table-accessible th[aria-sort]:hover {
+  background: hsl(var(--muted) / 0.8);
+}
+
+.table-accessible th[aria-sort]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -2px;
+}
+
+.table-accessible tbody tr:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+.table-accessible tbody tr:focus-within {
+  background: hsl(var(--muted) / 0.7);
+  outline: 1px solid hsl(var(--ring));
+}
+
+/* Navigation accessibility */
+.nav-accessible [role="menuitem"]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -2px;
+  background: hsl(var(--accent));
+}
+
+.nav-accessible [role="menuitem"][aria-current="page"] {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 600;
+}
+
+/* Status announcements */
+.status-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Loading state accessibility */
+.loading-accessible {
+  position: relative;
+}
+
+.loading-accessible::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid hsl(var(--muted));
+  border-top: 2px solid hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-accessible::after {
+    animation: none;
+    border: 2px solid hsl(var(--primary));
+  }
+}
+
+/* Focus management for modals */
+.modal-accessible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-accessible .modal-content {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-accessible .modal-content:focus {
+  outline: none;
+}
+
+/* Checkbox and radio accessibility */
+.checkbox-accessible,
+.radio-accessible {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-accessible input,
+.radio-accessible input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.checkbox-accessible .checkbox-indicator,
+.radio-accessible .radio-indicator {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid hsl(var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.checkbox-accessible .checkbox-indicator {
+  border-radius: 2px;
+}
+
+.radio-accessible .radio-indicator {
+  border-radius: 50%;
+}
+
+.checkbox-accessible input:checked + .checkbox-indicator,
+.radio-accessible input:checked + .radio-indicator {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.checkbox-accessible input:focus-visible + .checkbox-indicator,
+.radio-accessible input:focus-visible + .radio-indicator {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox-accessible .checkbox-indicator,
+  .radio-accessible .radio-indicator {
+    transition: none;
+  }
+}
