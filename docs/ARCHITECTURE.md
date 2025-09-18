@@ -132,48 +132,48 @@ graph LR
 ```mermaid
 erDiagram
     User {
-        id PK
-        email string
-        name string
-        role string
-        password string
-        createdAt datetime
-        updatedAt datetime
+        string id PK
+        string email
+        string name
+        string role
+        string password
+        datetime createdAt
+        datetime updatedAt
     }
     
     Post {
-        id PK
-        title string
-        content text
-        published boolean
-        authorId FK
-        createdAt datetime
-        updatedAt datetime
+        string id PK
+        string title
+        text content
+        boolean published
+        string authorId FK
+        datetime createdAt
+        datetime updatedAt
     }
     
     Tag {
-        id PK
-        name string
+        string id PK
+        string name
     }
     
     Media {
-        id PK
-        url string
-        altText string
-        createdAt datetime
-        updatedAt datetime
+        string id PK
+        string url
+        string altText
+        datetime createdAt
+        datetime updatedAt
     }
     
     Session {
-        id PK
-        userId FK
-        expiresAt datetime
-        createdAt datetime
+        string id PK
+        string userId FK
+        datetime expiresAt
+        datetime createdAt
     }
     
     PostTag {
-        postId FK
-        tagId FK
+        string postId FK
+        string tagId FK
     }
     
     User ||--o{ Post : "authors"
