@@ -148,6 +148,11 @@ function AdminLayoutContent({
 
   return (
     <div className='min-h-screen bg-background'>
+      {/* Skip to main content link */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+      
       {/* Admin Header */}
       <header className='border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50'>
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
@@ -217,7 +222,7 @@ function AdminLayoutContent({
           aria-label='Main navigation'
         >
           <div className='p-6'>
-            <ul className='space-y-2' role='menubar'>
+            <ul className='space-y-2 nav-accessible' role='menubar'>
               <li role='none'>
                 <a
                   href='#/admin'
@@ -345,7 +350,9 @@ function AdminLayoutContent({
         </nav>
 
         {/* Main Content */}
-        <main className='flex-1 p-4 md:p-8 max-w-full'>{children}</main>
+        <main id="main-content" className='flex-1 p-4 md:p-8 max-w-full' tabIndex={-1}>
+          {children}
+        </main>
       </div>
     </div>
   )
