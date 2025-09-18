@@ -126,31 +126,47 @@ The repository already had a solid foundation:
 
 ## Database Schema Overview
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│    User     │    │    Post     │    │    Tag      │
-├─────────────┤    ├─────────────┤    ├─────────────┤
-│ id (PK)     │◄──┤│ authorId    │    │ id (PK)     │
-│ email       │    │ title       │    │ name        │
-│ password    │    │ slug        │◄──┤│             │
-│ name        │    │ excerpt     │    └─────────────┘
-│ role        │    │ content     │           │
-│ createdAt   │    │ status      │           │
-│ updatedAt   │    │ mediaId     │           │
-└─────────────┘    │ createdAt   │           │
-                   │ updatedAt   │           │
-                   └─────────────┘           │
-                          │                 │
-                          │                 │
-                   ┌─────────────┐         │
-                   │   Media     │         │
-                   ├─────────────┤         │
-                   │ id (PK)     │◄────────┘
-                   │ url         │
-                   │ altText     │
-                   │ createdAt   │
-                   │ updatedAt   │
-                   └─────────────┘
+```mermaid
+erDiagram
+    User {
+        id PK
+        email string
+        password string
+        name string
+        role string
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    Post {
+        id PK
+        authorId FK
+        title string
+        slug string
+        excerpt text
+        content text
+        status string
+        mediaId FK
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    Tag {
+        id PK
+        name string
+    }
+    
+    Media {
+        id PK
+        url string
+        altText string
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    User ||--o{ Post : "authors"
+    Post }o--|| Media : "has_featured_image"
+    Post }o--o{ Tag : "tagged_with"
 ```
 
 ## Key Features

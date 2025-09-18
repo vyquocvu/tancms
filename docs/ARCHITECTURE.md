@@ -8,24 +8,32 @@ decisions, and technical implementation.
 TanCMS follows a modern, full-stack React architecture with server-side
 rendering:
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Server        │    │   Database      │
-│   (React/TSX)   │◄──►│   (TanStack     │◄──►│   (PostgreSQL)  │
-│                 │    │    Start)       │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   UI Components │    │   Server        │    │   Prisma ORM    │
-│   (Tailwind)    │    │   Functions     │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │
-         ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐
-│   TanStack      │    │   File Storage  │
-│   Query         │    │   (S3)          │
-└─────────────────┘    └─────────────────┘
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        A[Frontend<br/>React/TSX] 
+        D[UI Components<br/>Tailwind]
+        G[TanStack Query]
+    end
+    
+    subgraph "Server Layer"
+        B[Server<br/>TanStack Start]
+        E[Server Functions]
+        H[File Storage<br/>S3]
+    end
+    
+    subgraph "Data Layer"
+        C[Database<br/>PostgreSQL]
+        F[Prisma ORM]
+    end
+    
+    A <--> B
+    B <--> C
+    A --> D
+    B --> E
+    C --> F
+    D --> G
+    E --> H
 ```
 
 ## 🛠 Technology Stack
@@ -99,60 +107,80 @@ tancms/
 
 ### Authentication Flow
 
-```
-User Login → Server Action → Database Verification → Session Creation → Cookie Set
+```mermaid
+graph LR
+    A[User Login] --> B[Server Action]
+    B --> C[Database Verification]
+    C --> D[Session Creation]
+    D --> E[Cookie Set]
 ```
 
 ### Content Management Flow
 
-```
-Admin Creates Post → Validation (Zod) → Database Save (Prisma) → Cache Invalidation → UI Update
+```mermaid
+graph LR
+    A[Admin Creates Post] --> B[Validation - Zod]
+    B --> C[Database Save - Prisma]
+    C --> D[Cache Invalidation]
+    D --> E[UI Update]
 ```
 
 ## 🗄 Database Design
 
 ### Entity Relationship Diagram
 
-```
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│    User     │    │    Post     │    │    Tag      │
-├─────────────┤    ├─────────────┤    ├─────────────┤
-│ id (PK)     │◄──►│ id (PK)     │◄──►│ id (PK)     │
-│ email       │    │ title       │    │ name        │
-│ name        │    │ content     │    └─────────────┘
-│ role        │    │ published   │           ▲
-│ password    │    │ authorId(FK)│           │
-│ createdAt   │    │ createdAt   │           │
-│ updatedAt   │    │ updatedAt   │           │
-└─────────────┘    └─────────────┘           │
-        │                  │                 │
-        │                  ▼                 │
-        │          ┌─────────────┐           │
-        │          │   Media     │           │
-        │          ├─────────────┤           │
-        │          │ id (PK)     │           │
-        │          │ url         │           │
-        │          │ altText     │           │
-        │          │ createdAt   │           │
-        │          │ updatedAt   │           │
-        │          └─────────────┘           │
-        │                                    │
-        ▼                                    │
-┌─────────────┐                             │
-│   Session   │                             │
-├─────────────┤                             │
-│ id (PK)     │                             │
-│ userId (FK) │                             │
-│ expiresAt   │                             │
-│ createdAt   │                             │
-└─────────────┘                             │
-                                            │
-                    ┌─────────────┐         │
-                    │  PostTag    │◄────────┘
-                    ├─────────────┤
-                    │ postId (FK) │
-                    │ tagId (FK)  │
-                    └─────────────┘
+```mermaid
+erDiagram
+    User {
+        id PK
+        email string
+        name string
+        role string
+        password string
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    Post {
+        id PK
+        title string
+        content text
+        published boolean
+        authorId FK
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    Tag {
+        id PK
+        name string
+    }
+    
+    Media {
+        id PK
+        url string
+        altText string
+        createdAt datetime
+        updatedAt datetime
+    }
+    
+    Session {
+        id PK
+        userId FK
+        expiresAt datetime
+        createdAt datetime
+    }
+    
+    PostTag {
+        postId FK
+        tagId FK
+    }
+    
+    User ||--o{ Post : "authors"
+    User ||--o{ Session : "has"
+    Post }o--o{ Tag : "tagged_with"
+    Post ||--o{ PostTag : "has"
+    Tag ||--o{ PostTag : "belongs_to"
 ```
 
 ### Database Principles
@@ -239,22 +267,35 @@ Admin Creates Post → Validation (Zod) → Database Save (Prisma) → Cache Inv
 
 ### CI/CD Pipeline
 
-```
-Code Push → Lint/Type Check → Tests → Build → Deploy → Health Check
+```mermaid
+graph LR
+    A[Code Push] --> B[Lint/Type Check]
+    B --> C[Tests]
+    C --> D[Build]
+    D --> E[Deploy]
+    E --> F[Health Check]
 ```
 
 ## 🌍 Deployment Architecture
 
 ### Vercel (Recommended)
 
-```
-GitHub Repo → Vercel Build → Edge Functions → Global CDN → Users
+```mermaid
+graph LR
+    A[GitHub Repo] --> B[Vercel Build]
+    B --> C[Edge Functions]
+    C --> D[Global CDN]
+    D --> E[Users]
 ```
 
 ### Docker Deployment
 
-```
-Source Code → Docker Build → Container Registry → Orchestration → Production
+```mermaid
+graph LR
+    A[Source Code] --> B[Docker Build]
+    B --> C[Container Registry]
+    C --> D[Orchestration]
+    D --> E[Production]
 ```
 
 ### Environment Isolation
