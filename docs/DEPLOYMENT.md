@@ -638,9 +638,16 @@ export async function GET() {
 
 For deployment issues:
 
-1. Check the [troubleshooting guide](#troubleshooting)
+1. Check our [comprehensive troubleshooting guide](./TROUBLESHOOTING.md)
 2. Search [GitHub Issues](https://github.com/vyquocvu/tancms/issues)
 3. Create a new issue with deployment details
-4. Join our [Discord community](#) (Coming Soon)
+4. Review our [installation guide](./INSTALLATION.md) for platform-specific setup
+
+### Additional Resources
+
+- **[Environment Configuration](./ENVIRONMENT_CONFIGURATION.md)** - Detailed environment setup
+- **[Database Guide](./DATABASE.md)** - Database configuration options
+- **[API Documentation](./API.md)** - API reference for integrations
+- **[Architecture Overview](./ARCHITECTURE.md)** - System design and components
 
 Happy deploying! 🚀

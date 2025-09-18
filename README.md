@@ -37,9 +37,11 @@ npm install
 
 ### 2. Environment Setup
 
-TanCMS provides comprehensive environment configuration management for different deployment scenarios.
+TanCMS provides comprehensive environment configuration management for different
+deployment scenarios.
 
 **Quick Setup (Recommended):**
+
 ```bash
 # Initialize development environment
 npm run env:init development
@@ -51,8 +53,7 @@ npm run env:validate
 npm run dev:fix-env
 ```
 
-**Manual Setup:**
-Create a `.env` file in the root directory:
+**Manual Setup:** Create a `.env` file in the root directory:
 
 ```bash
 # Database
@@ -73,10 +74,11 @@ S3_BUCKET="your-bucket-name"
 ```
 
 **Environment Management Commands:**
+
 ```bash
 # Available commands
 npm run env:validate          # Validate current configuration
-npm run env:templates         # Show available environment templates  
+npm run env:templates         # Show available environment templates
 npm run env:init <env>        # Initialize environment (development/staging/production/test)
 npm run env:compare <e1> <e2> # Compare two environments
 
@@ -85,7 +87,8 @@ npm run check-env             # Basic environment check
 npm run dev:fix-env          # Auto-fix configuration issues
 ```
 
-For detailed configuration options, see [Environment Configuration Guide](./docs/ENVIRONMENT_CONFIGURATION.md).
+For detailed configuration options, see
+[Environment Configuration Guide](./docs/ENVIRONMENT_CONFIGURATION.md).
 
 ### 3. Database Setup
 
@@ -112,11 +115,19 @@ Visit `http://localhost:3000` to see your CMS in action!
 
 ### Getting Started
 
+- **[Installation Guide](./docs/INSTALLATION.md)** - Comprehensive setup
+  instructions for all environments
 - **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
-- **[Demo Workflow](./docs/DEMO_WORKFLOW.md)** - Interactive demonstrations and automated workflows
-- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Complete development setup and workflow
-- **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and usage
-- **[Troubleshooting](./docs/DEVELOPER_GUIDE.md#-troubleshooting)** - Common issues and solutions
+- **[User Guide](./docs/USER_GUIDE.md)** - Complete guide for content creators
+  and editors
+- **[Demo Workflow](./docs/DEMO_WORKFLOW.md)** - Interactive demonstrations and
+  automated workflows
+- **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Complete development setup
+  and workflow
+- **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and
+  usage
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** - Comprehensive
+  troubleshooting guide
 
 ### Technical Documentation
 
