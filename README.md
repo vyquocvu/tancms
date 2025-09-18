@@ -113,6 +113,7 @@ Visit `http://localhost:3000` to see your CMS in action!
 ### Getting Started
 
 - **[Quick Start Guide](./QUICKSTART.md)** - Get running in 5 minutes
+- **[Demo Workflow](./docs/DEMO_WORKFLOW.md)** - Interactive demonstrations and automated workflows
 - **[Developer Guide](./docs/DEVELOPER_GUIDE.md)** - Complete development setup and workflow
 - **[Database Setup](./docs/DATABASE.md)** - SQLite database configuration and usage
 - **[Troubleshooting](./docs/DEVELOPER_GUIDE.md#-troubleshooting)** - Common issues and solutions
@@ -249,6 +250,14 @@ npm run db:migrate  # Run database migrations
 npm run db:seed     # Seed with sample data
 npm run db:studio   # Open database browser
 npm run db:reset    # Reset database completely
+```
+
+#### Demo Workflow
+
+```bash
+npm run demo:workflow         # Run complete demo workflow
+npm run demo:workflow:verbose # Run with detailed output
+npm run demo:staging          # Run for staging environment
 ```
 
 ### Using Make (Alternative)

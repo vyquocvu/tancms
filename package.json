@@ -31,7 +31,10 @@
     "env:validate": "node scripts/env-manager.js validate",
     "env:templates": "node scripts/env-manager.js templates",
     "env:init": "node scripts/env-manager.js init",
-    "env:compare": "node scripts/env-manager.js compare"
+    "env:compare": "node scripts/env-manager.js compare",
+    "demo:workflow": "node scripts/demo-workflow.js",
+    "demo:workflow:verbose": "node scripts/demo-workflow.js --verbose",
+    "demo:staging": "node scripts/demo-workflow.js --environment=staging"
   },
   "prisma": {
     "seed": "tsx scripts/seed.ts"
