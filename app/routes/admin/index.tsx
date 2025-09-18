@@ -123,16 +123,28 @@ function HealthSummaryCard() {
     return null
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeProps = (status: string) => {
     switch (status) {
       case 'healthy':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return {
+          variant: 'outline' as const,
+          className: 'border-green-500 text-green-700 bg-green-50'
+        }
       case 'degraded':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        return {
+          variant: 'outline' as const,
+          className: 'border-yellow-500 text-yellow-700 bg-yellow-50'
+        }
       case 'unhealthy':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return {
+          variant: 'destructive' as const,
+          className: ''
+        }
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return {
+          variant: 'secondary' as const,
+          className: ''
+        }
     }
   }
 
@@ -167,7 +179,7 @@ function HealthSummaryCard() {
             <Activity className="h-5 w-5" />
             System Health
           </CardTitle>
-          <Badge className={getStatusColor(healthData.status)}>
+          <Badge {...getStatusBadgeProps(healthData.status)}>
             {getStatusIcon(healthData.status)}
             <span className="ml-1 capitalize">{healthData.status}</span>
           </Badge>

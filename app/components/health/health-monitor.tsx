@@ -65,19 +65,31 @@ export function HealthMonitor() {
     return () => clearInterval(interval)
   }, [autoRefresh])
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeProps = (status: string) => {
     switch (status) {
       case 'healthy':
       case 'pass':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return {
+          variant: 'outline' as const,
+          className: 'border-green-500 text-green-700 bg-green-50'
+        }
       case 'degraded':
       case 'warn':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        return {
+          variant: 'outline' as const,
+          className: 'border-yellow-500 text-yellow-700 bg-yellow-50'
+        }
       case 'unhealthy':
       case 'fail':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return {
+          variant: 'destructive' as const,
+          className: ''
+        }
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return {
+          variant: 'secondary' as const,
+          className: ''
+        }
     }
   }
 
@@ -131,7 +143,7 @@ export function HealthMonitor() {
   if (loading && !healthData) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-2xl font-bold tracking-tight">System Health</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -173,11 +185,11 @@ export function HealthMonitor() {
   return (
     <div className="space-y-6">
       {/* Header with overall status */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">System Health</h2>
-          <div className="flex items-center gap-4 mt-2">
-            <Badge className={getStatusColor(healthData.status)}>
+          <div className="flex flex-wrap items-center gap-4 mt-2">
+            <Badge {...getStatusBadgeProps(healthData.status)}>
               {getStatusIcon(healthData.status)}
               <span className="ml-1 capitalize">{healthData.status}</span>
             </Badge>
@@ -191,7 +203,7 @@ export function HealthMonitor() {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -273,7 +285,7 @@ export function HealthMonitor() {
                   {getCheckIcon(checkName)}
                   {checkName} Check
                 </CardTitle>
-                <Badge className={getStatusColor(check.status)}>
+                <Badge {...getStatusBadgeProps(check.status)}>
                   {getStatusIcon(check.status)}
                   <span className="ml-1 capitalize">{check.status}</span>
                 </Badge>
