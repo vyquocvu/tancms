@@ -413,3 +413,514 @@ query GetMedia($type: MediaType) {
   }
 }
 ```
+
+## Error Handling
+
+All API endpoints return standardized error responses:
+
+```typescript
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": ["Title is required", "Content must be at least 10 characters"]
+  }
+}
+```
+
+### Error Codes Reference
+
+| Code | Description | HTTP Status |
+|------|-------------|-------------|
+| `VALIDATION_ERROR` | Input validation failed | 400 |
+| `AUTHENTICATION_REQUIRED` | User not authenticated | 401 |
+| `INSUFFICIENT_PERMISSIONS` | User lacks required permissions | 403 |
+| `RESOURCE_NOT_FOUND` | Requested resource doesn't exist | 404 |
+| `DUPLICATE_ENTRY` | Resource already exists | 409 |
+| `RATE_LIMIT_EXCEEDED` | Too many requests | 429 |
+| `INTERNAL_ERROR` | Server error | 500 |
+
+### Example Error Responses
+
+#### Validation Error
+```typescript
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Post validation failed",
+    "details": [
+      "Title must be between 1 and 200 characters",
+      "Content is required",
+      "Category must be a valid category ID"
+    ]
+  }
+}
+```
+
+#### Authentication Error
+```typescript
+{
+  "success": false,
+  "error": {
+    "code": "AUTHENTICATION_REQUIRED",
+    "message": "Authentication required to access this resource"
+  }
+}
+```
+
+#### Permission Error
+```typescript
+{
+  "success": false,
+  "error": {
+    "code": "INSUFFICIENT_PERMISSIONS",
+    "message": "Admin role required to perform this action"
+  }
+}
+```
+
+## Code Examples & SDK Usage
+
+### JavaScript/TypeScript Client
+
+#### Basic Setup
+```typescript
+import { TanCMSClient } from '@tancms/client'
+
+const client = new TanCMSClient({
+  baseURL: 'https://your-tancms-site.com',
+  apiKey: 'your-api-key' // For server-to-server communication
+})
+
+// Or for browser-based authentication
+const client = new TanCMSClient({
+  baseURL: 'https://your-tancms-site.com',
+  credentials: 'include' // Uses session cookies
+})
+```
+
+#### Complete Post Management Example
+```typescript
+// Create a new post
+const createPost = async () => {
+  try {
+    const newPost = await client.posts.create({
+      title: "Getting Started with TanCMS",
+      content: "TanCMS is a modern content management system...",
+      excerpt: "Learn how to build amazing websites with TanCMS",
+      status: "published",
+      category: "tutorials",
+      tags: ["cms", "javascript", "react"],
+      meta: {
+        seoTitle: "TanCMS Tutorial - Build Better Websites",
+        seoDescription: "Complete guide to getting started with TanCMS",
+        featuredImage: "/uploads/tancms-hero.jpg"
+      }
+    })
+    
+    console.log('Post created:', newPost.data)
+    return newPost.data
+  } catch (error) {
+    console.error('Failed to create post:', error.message)
+    if (error.details) {
+      error.details.forEach(detail => console.error('- ' + detail))
+    }
+  }
+}
+
+// Update an existing post
+const updatePost = async (postId: number) => {
+  try {
+    const updatedPost = await client.posts.update(postId, {
+      title: "Updated: Getting Started with TanCMS",
+      content: "This is the updated content...",
+      status: "published"
+    })
+    
+    console.log('Post updated:', updatedPost.data)
+  } catch (error) {
+    if (error.code === 'RESOURCE_NOT_FOUND') {
+      console.error('Post not found')
+    } else {
+      console.error('Update failed:', error.message)
+    }
+  }
+}
+
+// Get posts with filtering and pagination
+const getPosts = async () => {
+  try {
+    const posts = await client.posts.list({
+      status: 'published',
+      category: 'tutorials',
+      limit: 10,
+      offset: 0,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+      search: 'TanCMS'
+    })
+    
+    console.log(`Found ${posts.data.length} posts`)
+    console.log(`Total: ${posts.total}, Page: ${posts.page}`)
+    
+    posts.data.forEach(post => {
+      console.log(`- ${post.title} (${post.status})`)
+    })
+  } catch (error) {
+    console.error('Failed to fetch posts:', error.message)
+  }
+}
+```
+
+### React Hooks Integration
+
+```typescript
+import { usePosts, usePost, useCreatePost } from '@tancms/react'
+
+// List posts with real-time updates
+function PostsList() {
+  const { data: posts, loading, error } = usePosts({
+    status: 'published',
+    limit: 10
+  })
+
+  if (loading) return <div>Loading posts...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      {posts?.data.map(post => (
+        <article key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.excerpt}</p>
+          <time>{new Date(post.createdAt).toLocaleDateString()}</time>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+// Create post form with validation
+function CreatePostForm() {
+  const createPost = useCreatePost()
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    status: 'draft'
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const result = await createPost.mutate(formData)
+      console.log('Post created:', result.data)
+      // Reset form or redirect
+    } catch (error) {
+      console.error('Creation failed:', error.message)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Post title"
+        value={formData.title}
+        onChange={e => setFormData({...formData, title: e.target.value})}
+        required
+      />
+      <textarea
+        placeholder="Post content"
+        value={formData.content}
+        onChange={e => setFormData({...formData, content: e.target.value})}
+        required
+      />
+      <select
+        value={formData.status}
+        onChange={e => setFormData({...formData, status: e.target.value})}
+      >
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+      </select>
+      <button type="submit" disabled={createPost.loading}>
+        {createPost.loading ? 'Creating...' : 'Create Post'}
+      </button>
+      
+      {createPost.error && (
+        <div className="error">
+          {createPost.error.message}
+          {createPost.error.details && (
+            <ul>
+              {createPost.error.details.map(detail => (
+                <li key={detail}>{detail}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </form>
+  )
+}
+```
+
+### Python Client Example
+
+```python
+import requests
+from typing import Dict, List, Optional
+
+class TanCMSClient:
+    def __init__(self, base_url: str, api_key: str = None):
+        self.base_url = base_url.rstrip('/')
+        self.session = requests.Session()
+        if api_key:
+            self.session.headers.update({'Authorization': f'Bearer {api_key}'})
+    
+    def create_post(self, post_data: Dict) -> Dict:
+        """Create a new post"""
+        response = self.session.post(
+            f'{self.base_url}/api/posts',
+            json=post_data
+        )
+        response.raise_for_status()
+        return response.json()
+    
+    def get_posts(self, **params) -> Dict:
+        """Get posts with optional filtering"""
+        response = self.session.get(
+            f'{self.base_url}/api/posts',
+            params=params
+        )
+        response.raise_for_status()
+        return response.json()
+    
+    def upload_media(self, file_path: str, alt_text: str = '') -> Dict:
+        """Upload a media file"""
+        with open(file_path, 'rb') as file:
+            files = {'file': file}
+            data = {'altText': alt_text}
+            response = self.session.post(
+                f'{self.base_url}/api/media/upload',
+                files=files,
+                data=data
+            )
+        response.raise_for_status()
+        return response.json()
+
+# Usage example
+client = TanCMSClient('https://your-site.com', 'your-api-key')
+
+# Create a blog post
+new_post = client.create_post({
+    'title': 'My Python Blog Post',
+    'content': 'This post was created using Python!',
+    'status': 'published',
+    'tags': ['python', 'api', 'automation']
+})
+
+print(f"Created post: {new_post['data']['title']}")
+
+# Upload an image
+media = client.upload_media('./hero-image.jpg', 'Hero image for blog post')
+print(f"Uploaded media: {media['data']['url']}")
+```
+
+### PHP Client Example
+
+```php
+<?php
+
+class TanCMSClient {
+    private $baseUrl;
+    private $apiKey;
+
+    public function __construct($baseUrl, $apiKey = null) {
+        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->apiKey = $apiKey;
+    }
+
+    private function makeRequest($method, $endpoint, $data = null) {
+        $url = $this->baseUrl . $endpoint;
+        $headers = ['Content-Type: application/json'];
+        
+        if ($this->apiKey) {
+            $headers[] = 'Authorization: Bearer ' . $this->apiKey;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_CUSTOMREQUEST => $method,
+        ]);
+
+        if ($data && in_array($method, ['POST', 'PUT', 'PATCH'])) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $decoded = json_decode($response, true);
+        
+        if ($httpCode >= 400) {
+            throw new Exception($decoded['error']['message'] ?? 'API Error');
+        }
+
+        return $decoded;
+    }
+
+    public function createPost($postData) {
+        return $this->makeRequest('POST', '/api/posts', $postData);
+    }
+
+    public function getPosts($params = []) {
+        $query = http_build_query($params);
+        $endpoint = '/api/posts' . ($query ? '?' . $query : '');
+        return $this->makeRequest('GET', $endpoint);
+    }
+
+    public function updatePost($postId, $postData) {
+        return $this->makeRequest('PUT', "/api/posts/{$postId}", $postData);
+    }
+}
+
+// Usage
+$client = new TanCMSClient('https://your-site.com', 'your-api-key');
+
+try {
+    // Create a post
+    $newPost = $client->createPost([
+        'title' => 'My PHP Blog Post',
+        'content' => 'This post was created using PHP!',
+        'status' => 'published'
+    ]);
+    
+    echo "Created post: " . $newPost['data']['title'] . "\n";
+    
+    // Get published posts
+    $posts = $client->getPosts(['status' => 'published', 'limit' => 5]);
+    echo "Found " . count($posts['data']) . " published posts\n";
+    
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+?>
+```
+
+## Webhooks
+
+TanCMS supports webhooks for real-time notifications of content changes.
+
+### Webhook Events
+
+| Event | Description | Payload |
+|-------|-------------|---------|
+| `post.created` | New post created | Full post object |
+| `post.updated` | Post modified | Updated post object |
+| `post.deleted` | Post removed | Post ID and metadata |
+| `post.published` | Post status changed to published | Full post object |
+| `media.uploaded` | New media file uploaded | Media object |
+| `user.created` | New user registered | User object (no sensitive data) |
+
+### Webhook Setup
+
+```typescript
+// Configure webhook endpoint
+const webhook = await client.webhooks.create({
+  url: 'https://your-app.com/webhooks/tancms',
+  events: ['post.created', 'post.updated', 'post.published'],
+  secret: 'your-webhook-secret' // For signature verification
+})
+
+// Verify webhook signature (Express.js example)
+app.post('/webhooks/tancms', (req, res) => {
+  const signature = req.headers['x-tancms-signature']
+  const payload = JSON.stringify(req.body)
+  const expectedSignature = crypto
+    .createHmac('sha256', process.env.WEBHOOK_SECRET)
+    .update(payload)
+    .digest('hex')
+
+  if (signature !== `sha256=${expectedSignature}`) {
+    return res.status(401).send('Invalid signature')
+  }
+
+  const { event, data } = req.body
+  
+  switch (event) {
+    case 'post.created':
+      console.log('New post created:', data.title)
+      // Trigger your application logic
+      break
+    case 'post.published':
+      console.log('Post published:', data.title)
+      // Send notifications, update cache, etc.
+      break
+  }
+
+  res.status(200).send('OK')
+})
+```
+
+## Best Practices
+
+### Performance Optimization
+
+1. **Use Pagination**: Always specify `limit` and `offset` for large datasets
+2. **Field Selection**: Request only needed fields to reduce payload size
+3. **Caching**: Implement client-side caching for frequently accessed data
+4. **Compression**: Enable gzip compression for API responses
+
+### Security Considerations
+
+1. **API Keys**: Store API keys securely, never in client-side code
+2. **HTTPS**: Always use HTTPS for API communication
+3. **Rate Limiting**: Implement client-side rate limiting to respect API limits
+4. **Validation**: Validate all input data before sending to API
+
+### Error Handling Best Practices
+
+```typescript
+const handleApiCall = async (apiFunction) => {
+  try {
+    const result = await apiFunction()
+    return { success: true, data: result.data }
+  } catch (error) {
+    // Log error for debugging
+    console.error('API Error:', error)
+    
+    // Handle different error types
+    switch (error.code) {
+      case 'VALIDATION_ERROR':
+        return { 
+          success: false, 
+          message: 'Please check your input data',
+          details: error.details 
+        }
+      case 'AUTHENTICATION_REQUIRED':
+        // Redirect to login
+        window.location.href = '/login'
+        break
+      case 'INSUFFICIENT_PERMISSIONS':
+        return { 
+          success: false, 
+          message: 'You do not have permission to perform this action' 
+        }
+      default:
+        return { 
+          success: false, 
+          message: 'An unexpected error occurred. Please try again.' 
+        }
+    }
+  }
+}
+```
+
+---
+
+For more information, see our [Developer Guide](./DEVELOPER_GUIDE.md) and [Authentication Documentation](./AUTHENTICATION.md).
