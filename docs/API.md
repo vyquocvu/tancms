@@ -6,26 +6,101 @@ safety.
 
 ## Authentication
 
-All admin API endpoints require authentication. Users must be logged in with
-appropriate role permissions.
+TanCMS supports multiple authentication methods for different use cases:
 
-### Session Management
+### Session-Based Authentication (Web Browsers)
 
-TanCMS uses session-based authentication with secure cookies.
+For web applications, TanCMS uses session-based authentication with secure cookies.
 
 ```typescript
 // Login
-POST /api/auth/login
+POST /api/auth?action=login
 {
   "email": "user@example.com",
   "password": "password"
 }
 
+Response:
+{
+  "user": {
+    "id": "user-id",
+    "email": "user@example.com", 
+    "name": "User Name",
+    "role": "EDITOR"
+  },
+  "tokens": {
+    "accessToken": "jwt-token-here",
+    "refreshToken": "refresh-token-here",
+    "expiresIn": "7d"
+  }
+}
+
 // Logout
-POST /api/auth/logout
+POST /api/auth?action=logout
 
 // Get current user
-GET /api/auth/me
+GET /api/auth?action=me
+```
+
+### JWT Token Authentication (API Clients)
+
+For API clients and mobile applications, use JWT tokens for stateless authentication.
+
+```typescript
+// Include JWT token in Authorization header
+Authorization: Bearer <your-jwt-token>
+
+// Refresh expired access token
+POST /api/auth?action=refresh
+Authorization: Bearer <your-refresh-token>
+
+Response:
+{
+  "accessToken": "new-jwt-token",
+  "user": {
+    "id": "user-id",
+    "email": "user@example.com",
+    "role": "EDITOR"
+  }
+}
+```
+
+### API Key Authentication (Server-to-Server)
+
+For server-to-server communication, use API keys.
+
+```typescript
+// Include API key as query parameter
+GET /api/endpoint?api_key=your-api-key
+
+// Or include in header
+X-API-Key: your-api-key
+```
+
+### Authentication Middleware
+
+Protect your API routes using the provided middleware:
+
+```typescript
+import { createAPIFileRoute } from '@tanstack/start/api'
+import { withAuth, withRole } from '~/server/auth-helpers'
+
+export const Route = createAPIFileRoute('/api/protected')({
+  // Requires any authenticated user
+  GET: withAuth(async ({ user }) => {
+    return new Response(JSON.stringify({
+      message: 'Hello ' + user.name,
+      role: user.role
+    }))
+  }),
+
+  // Requires EDITOR role or higher
+  POST: withRole('EDITOR', async ({ request, user }) => {
+    const body = await request.json()
+    // Process authenticated request
+    return new Response(JSON.stringify({ success: true }))
+  })
+})
 ```
 
 ## Tags API
@@ -489,16 +564,57 @@ All API endpoints return standardized error responses:
 ```typescript
 import { TanCMSClient } from '@tancms/client'
 
+// For browser-based authentication (uses session cookies)
 const client = new TanCMSClient({
   baseURL: 'https://your-tancms-site.com',
-  apiKey: 'your-api-key' // For server-to-server communication
+  credentials: 'include'
 })
 
-// Or for browser-based authentication
+// For API clients (uses JWT tokens)
 const client = new TanCMSClient({
   baseURL: 'https://your-tancms-site.com',
-  credentials: 'include' // Uses session cookies
+  headers: {
+    'Authorization': 'Bearer your-jwt-token'
+  }
 })
+
+// For server-to-server communication (uses API keys)
+const client = new TanCMSClient({
+  baseURL: 'https://your-tancms-site.com',
+  apiKey: 'your-api-key'
+})
+```
+
+#### Authentication Examples
+```typescript
+// Login and get tokens
+const authResponse = await fetch('/api/auth?action=login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'user@example.com',
+    password: 'password'
+  })
+})
+
+const { user, tokens } = await authResponse.json()
+
+// Use access token for API requests
+const apiResponse = await fetch('/api/protected', {
+  headers: {
+    'Authorization': `Bearer ${tokens.accessToken}`
+  }
+})
+
+// Refresh token when access token expires
+const refreshResponse = await fetch('/api/auth?action=refresh', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${tokens.refreshToken}`
+  }
+})
+
+const { accessToken } = await refreshResponse.json()
 ```
 
 #### Complete Post Management Example
