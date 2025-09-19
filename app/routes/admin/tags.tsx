@@ -27,8 +27,8 @@ function TagCard({
 }) {
   return (
     <Card className='hover:shadow-md transition-shadow'>
-      <CardContent className='p-6'>
-        <div className='flex items-center justify-between'>
+      <CardContent className='p-4 sm:p-6'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0'>
           <div className='flex items-center gap-3'>
             <div className='p-2 bg-primary/10 rounded-md'>
               <TagIcon className='h-4 w-4 text-primary' />
@@ -38,24 +38,26 @@ function TagCard({
               <p className='text-xs text-muted-foreground'>Created {tag.createdAt}</p>
             </div>
           </div>
-          <div className='flex space-x-2'>
+          <div className='flex space-x-2 justify-end'>
             <Button
               variant='ghost'
               size='sm'
               onClick={() => onEdit(tag)}
               aria-label={`Edit tag ${tag.name}`}
-              className='hover:bg-muted'
+              className='hover:bg-muted min-h-[44px] sm:min-h-[auto]'
             >
               <Edit className='h-4 w-4' />
+              <span className='ml-2 sm:hidden'>Edit</span>
             </Button>
             <Button
               variant='ghost'
               size='sm'
               onClick={() => onDelete(tag)}
               aria-label={`Delete tag ${tag.name}`}
-              className='hover:bg-destructive/10 hover:text-destructive'
+              className='hover:bg-destructive/10 hover:text-destructive min-h-[44px] sm:min-h-[auto]'
             >
               <Trash2 className='h-4 w-4' />
+              <span className='ml-2 sm:hidden'>Delete</span>
             </Button>
           </div>
         </div>

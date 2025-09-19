@@ -9,6 +9,18 @@ export default {
         '2xl': '1400px',
       },
     },
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+      // Touch device detection
+      'touch': { 'raw': '(hover: none) and (pointer: coarse)' },
+      // High density displays
+      'retina': { 'raw': '(-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi)' },
+    },
     extend: {
       colors: {
         border: 'hsl(var(--border))',
@@ -49,6 +61,21 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      spacing: {
+        'touch': '44px', // Minimum touch target size
+        'touch-sm': '40px',
+        'touch-lg': '48px',
+      },
+      minHeight: {
+        'touch': '44px',
+        'touch-sm': '40px',
+        'touch-lg': '48px',
+      },
+      minWidth: {
+        'touch': '44px',
+        'touch-sm': '40px',
+        'touch-lg': '48px',
       },
     },
   },

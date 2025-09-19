@@ -304,3 +304,48 @@
     transition: none;
   }
 }
+
+/* Mobile accessibility enhancements */
+@media (max-width: 768px) {
+  /* Larger touch targets for mobile */
+  .btn-accessible,
+  .nav-accessible [role="menuitem"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Enhanced focus indicators for mobile */
+  .btn-accessible:focus-visible,
+  .nav-accessible [role="menuitem"]:focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+  
+  /* Larger form elements for mobile */
+  .form-accessible input,
+  .form-accessible textarea,
+  .form-accessible select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Mobile-friendly modal */
+  .modal-accessible .modal-content {
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+  
+  /* Better spacing for mobile checkboxes/radios */
+  .checkbox-accessible,
+  .radio-accessible {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+  
+  .checkbox-accessible .checkbox-indicator,
+  .radio-accessible .radio-indicator {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}

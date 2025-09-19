@@ -42,6 +42,10 @@ export interface DataTableProps<T> {
   onSelectionChange?: (selectedRows: T[]) => void
   enableSelection?: boolean
   getRowId?: (row: T) => string
+  // Mobile responsiveness
+  mobileBreakpoint?: 'sm' | 'md' | 'lg'
+  enableMobileCards?: boolean
+  mobileCardRender?: (row: T, index: number) => React.ReactNode
 }
 
 type SortDirection = 'asc' | 'desc' | null
@@ -66,6 +70,9 @@ export function DataTable<T>({
   onSelectionChange,
   enableSelection = false,
   getRowId = (row: T) => String(data.indexOf(row)),
+  mobileBreakpoint = 'md',
+  enableMobileCards = true,
+  mobileCardRender,
 }: DataTableProps<T>) {
   const [sortState, setSortState] = useState<SortState>({
     column: null,
@@ -204,7 +211,7 @@ export function DataTable<T>({
     <div className={cn('space-y-4', className)}>
       {/* Search and Column Settings */}
       {(enableSearch || enableColumnToggle) && (
-        <div className='flex items-center justify-between'>
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'>
           {enableSearch && (
             <div className='relative flex-1 max-w-sm'>
               <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4' aria-hidden="true" />
@@ -212,7 +219,7 @@ export function DataTable<T>({
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={e => onSearchChange?.(e.target.value)}
-                className='pl-10'
+                className='pl-10 h-11 sm:h-10'
                 aria-label={`Search ${data.length} items`}
                 description={`Use this field to search through ${data.length} table items`}
               />
@@ -228,6 +235,7 @@ export function DataTable<T>({
                 aria-expanded={showColumnSettings}
                 aria-haspopup="menu"
                 aria-label="Configure visible columns"
+                className='w-full sm:w-auto h-11 sm:h-10'
               >
                 <Settings className='h-4 w-4 mr-2' aria-hidden="true" />
                 Columns
@@ -240,7 +248,7 @@ export function DataTable<T>({
                     {columns.map(column => (
                       <div
                         key={column.id}
-                        className='flex items-center space-x-2 px-2 py-1 rounded hover:bg-accent cursor-pointer'
+                        className='flex items-center space-x-2 px-2 py-1 rounded hover:bg-accent cursor-pointer min-h-[44px] sm:min-h-auto'
                         onClick={() => toggleColumnVisibility(column.id)}
                       >
                         {columnVisibility[column.id] ? (
@@ -259,129 +267,220 @@ export function DataTable<T>({
         </div>
       )}
 
-      {/* Data Table */}
-      <div className='rounded-md border'>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {enableSelection && (
-                <TableHead className='w-12'>
-                  <input
-                    type='checkbox'
-                    checked={isAllSelected}
-                    ref={el => {
-                      if (el) el.indeterminate = isIndeterminate
-                    }}
-                    onChange={toggleSelectAll}
-                    className='rounded'
-                    aria-label={isAllSelected ? 'Deselect all rows' : 'Select all rows'}
-                    aria-describedby={`select-all-description`}
-                  />
-                  <span id="select-all-description" className="sr-only">
-                    {isAllSelected 
-                      ? `All ${data.length} rows selected`
-                      : isIndeterminate 
-                        ? `${selectedRows?.length} of ${data.length} rows selected`
-                        : 'No rows selected'
-                    }
-                  </span>
-                </TableHead>
-              )}
-              {visibleColumns.map(column => {
-                const sortDirection = sortState.column === column.id ? sortState.direction : null
-                const cellA11yProps = getTableCellA11yProps(
-                  !!(column.sortable && enableSorting), 
-                  true, 
-                  sortDirection
-                )
-                
+      {/* Mobile Card View */}
+      {enableMobileCards && (
+        <div className={cn(
+          'grid gap-4',
+          mobileBreakpoint === 'sm' ? 'sm:hidden' : 
+          mobileBreakpoint === 'md' ? 'md:hidden' : 'lg:hidden'
+        )}>
+          {sortedData.length === 0 ? (
+            <div className='text-center py-8 text-muted-foreground'>
+              No data available
+            </div>
+          ) : (
+            sortedData.map((row, index) => {
+              if (mobileCardRender) {
                 return (
-                  <TableHead
-                    key={column.id}
-                    className={cn(
-                      column.sortable &&
-                        enableSorting &&
-                        'cursor-pointer select-none hover:bg-accent table-accessible',
-                      'relative'
-                    )}
-                    onClick={() => handleSort(column.id)}
-                    onKeyDown={(e) => handleKeyboardNavigation(e, () => handleSort(column.id))}
-                    style={{
-                      width: column.width,
-                      minWidth: column.minWidth,
-                      maxWidth: column.maxWidth,
-                    }}
-                    aria-label={column.sortable && enableSorting 
-                      ? getSortAriaLabel(column.header, sortDirection)
-                      : column.header
-                    }
-                    {...cellA11yProps}
-                  >
-                    <div className='flex items-center space-x-2'>
-                      <span>{column.header}</span>
-                      {getSortIcon(column.id)}
-                    </div>
-                  </TableHead>
+                  <div key={index} className='w-full'>
+                    {mobileCardRender(row, index)}
+                  </div>
                 )
-              })}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedData.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={visibleColumns.length + (enableSelection ? 1 : 0)}
-                  className='h-24 text-center text-muted-foreground'
+              }
+
+              // Default mobile card layout
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'bg-card border rounded-lg p-4 space-y-3',
+                    onRowClick && 'cursor-pointer hover:bg-muted/50 transition-colors',
+                    isRowSelected(row) && 'bg-muted/50 border-primary'
+                  )}
+                  onClick={() => onRowClick?.(row)}
                 >
-                  No data available
-                </TableCell>
-              </TableRow>
-            ) : (
-              sortedData.map((row, index) => {
-                return (
-                  <TableRow
-                    key={index}
-                    className={cn(
-                      onRowClick && 'cursor-pointer hover:bg-muted/50 table-accessible',
-                      isRowSelected(row) && 'bg-muted/50'
-                    )}
-                    onClick={() => onRowClick?.(row)}
-                    onKeyDown={(e) => handleKeyboardNavigation(e, () => onRowClick?.(row))}
-                    tabIndex={onRowClick ? 0 : undefined}
-                    role={onRowClick ? 'button' : undefined}
-                    aria-label={onRowClick ? `View details for row ${index + 1}` : undefined}
-                  >
-                    {enableSelection && (
-                      <TableCell className='w-12'>
-                        <input
-                          type='checkbox'
-                          checked={isRowSelected(row)}
-                          onChange={e => {
-                            e.stopPropagation()
-                            toggleRowSelection(row)
-                          }}
-                          className='rounded'
-                          aria-label={`${isRowSelected(row) ? 'Deselect' : 'Select'} row ${index + 1}`}
-                        />
-                      </TableCell>
-                    )}
-                  {visibleColumns.map(column => (
-                    <TableCell key={column.id}>
-                      {column.cell
-                        ? column.cell(row)
-                        : column.accessorFn
-                          ? column.accessorFn(row)
-                          : column.accessorKey
-                            ? String(row[column.accessorKey] ?? '')
-                            : ''}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                  {enableSelection && (
+                    <div className='flex items-center space-x-2 pb-2 border-b'>
+                      <input
+                        type='checkbox'
+                        checked={isRowSelected(row)}
+                        onChange={e => {
+                          e.stopPropagation()
+                          toggleRowSelection(row)
+                        }}
+                        className='rounded w-4 h-4'
+                        aria-label={`${isRowSelected(row) ? 'Deselect' : 'Select'} item ${index + 1}`}
+                      />
+                      <span className='text-sm text-muted-foreground'>Select item</span>
+                    </div>
+                  )}
+                  
+                  {visibleColumns.map((column, colIndex) => {
+                    const value = column.cell
+                      ? column.cell(row)
+                      : column.accessorFn
+                        ? column.accessorFn(row)
+                        : column.accessorKey
+                          ? String(row[column.accessorKey] ?? '')
+                          : ''
+
+                    if (!value && value !== 0) return null
+
+                    return (
+                      <div key={column.id} className={cn(
+                        'flex flex-col space-y-1',
+                        colIndex === 0 && 'pb-2'
+                      )}>
+                        <div className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
+                          {column.header}
+                        </div>
+                        <div className={cn(
+                          'text-sm',
+                          colIndex === 0 && 'font-medium text-foreground text-base'
+                        )}>
+                          {value}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               )
-              })
-            )}
-          </TableBody>
-        </Table>
+            })
+          )}
+        </div>
+      )}
+
+      {/* Desktop Table View */}
+      <div className={cn(
+        'rounded-md border',
+        enableMobileCards && (
+          mobileBreakpoint === 'sm' ? 'hidden sm:block' : 
+          mobileBreakpoint === 'md' ? 'hidden md:block' : 'hidden lg:block'
+        )
+      )}>
+        <div className='overflow-x-auto'>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {enableSelection && (
+                  <TableHead className='w-12'>
+                    <input
+                      type='checkbox'
+                      checked={isAllSelected}
+                      ref={el => {
+                        if (el) el.indeterminate = isIndeterminate
+                      }}
+                      onChange={toggleSelectAll}
+                      className='rounded'
+                      aria-label={isAllSelected ? 'Deselect all rows' : 'Select all rows'}
+                      aria-describedby={`select-all-description`}
+                    />
+                    <span id="select-all-description" className="sr-only">
+                      {isAllSelected 
+                        ? `All ${data.length} rows selected`
+                        : isIndeterminate 
+                          ? `${selectedRows?.length} of ${data.length} rows selected`
+                          : 'No rows selected'
+                      }
+                    </span>
+                  </TableHead>
+                )}
+                {visibleColumns.map(column => {
+                  const sortDirection = sortState.column === column.id ? sortState.direction : null
+                  const cellA11yProps = getTableCellA11yProps(
+                    !!(column.sortable && enableSorting), 
+                    true, 
+                    sortDirection
+                  )
+                  
+                  return (
+                    <TableHead
+                      key={column.id}
+                      className={cn(
+                        column.sortable &&
+                          enableSorting &&
+                          'cursor-pointer select-none hover:bg-accent table-accessible',
+                        'relative'
+                      )}
+                      onClick={() => handleSort(column.id)}
+                      onKeyDown={(e) => handleKeyboardNavigation(e, () => handleSort(column.id))}
+                      style={{
+                        width: column.width,
+                        minWidth: column.minWidth,
+                        maxWidth: column.maxWidth,
+                      }}
+                      aria-label={column.sortable && enableSorting 
+                        ? getSortAriaLabel(column.header, sortDirection)
+                        : column.header
+                      }
+                      {...cellA11yProps}
+                    >
+                      <div className='flex items-center space-x-2'>
+                        <span>{column.header}</span>
+                        {getSortIcon(column.id)}
+                      </div>
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedData.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={visibleColumns.length + (enableSelection ? 1 : 0)}
+                    className='h-24 text-center text-muted-foreground'
+                  >
+                    No data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                sortedData.map((row, index) => {
+                  return (
+                    <TableRow
+                      key={index}
+                      className={cn(
+                        onRowClick && 'cursor-pointer hover:bg-muted/50 table-accessible',
+                        isRowSelected(row) && 'bg-muted/50'
+                      )}
+                      onClick={() => onRowClick?.(row)}
+                      onKeyDown={(e) => handleKeyboardNavigation(e, () => onRowClick?.(row))}
+                      tabIndex={onRowClick ? 0 : undefined}
+                      role={onRowClick ? 'button' : undefined}
+                      aria-label={onRowClick ? `View details for row ${index + 1}` : undefined}
+                    >
+                      {enableSelection && (
+                        <TableCell className='w-12'>
+                          <input
+                            type='checkbox'
+                            checked={isRowSelected(row)}
+                            onChange={e => {
+                              e.stopPropagation()
+                              toggleRowSelection(row)
+                            }}
+                            className='rounded'
+                            aria-label={`${isRowSelected(row) ? 'Deselect' : 'Select'} row ${index + 1}`}
+                          />
+                        </TableCell>
+                      )}
+                    {visibleColumns.map(column => (
+                      <TableCell key={column.id}>
+                        {column.cell
+                          ? column.cell(row)
+                          : column.accessorFn
+                            ? column.accessorFn(row)
+                            : column.accessorKey
+                              ? String(row[column.accessorKey] ?? '')
+                              : ''}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Click outside to close column settings */}
