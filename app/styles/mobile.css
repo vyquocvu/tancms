@@ -1,0 +1,115 @@
+/* Mobile-specific styles for TanCMS */
+
+/* Ensure minimum touch target sizes on mobile */
+@media (max-width: 768px) {
+  /* Touch-friendly interactive elements */
+  button, 
+  [role="button"], 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"], 
+  a[href] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Form inputs on mobile */
+  input[type="text"],
+  input[type="email"], 
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Mobile-specific table improvements */
+  .mobile-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Card layout improvements */
+  .mobile-card {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  /* Navigation improvements */
+  .mobile-nav-item {
+    padding: 12px 16px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Improved spacing for mobile */
+  .mobile-spacing > * + * {
+    margin-top: 16px;
+  }
+
+  /* Better mobile typography */
+  .mobile-text-large {
+    font-size: 18px;
+    line-height: 1.4;
+  }
+
+  .mobile-text-base {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Mobile-friendly modals */
+  .mobile-modal {
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+    border-radius: 12px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet-specific touch targets */
+  button,
+  [role="button"] {
+    min-height: 40px;
+  }
+}
+
+/* High-density displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Crisp borders and shadows */
+  .mobile-card {
+    box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce vertical padding in landscape */
+  .mobile-nav-item {
+    padding: 8px 16px;
+    min-height: 40px;
+  }
+  
+  /* Compact header in landscape */
+  .mobile-header {
+    min-height: 56px;
+  }
+}
+
+/* Focus improvements for mobile accessibility */
+@media (max-width: 768px) {
+  button:focus,
+  [role="button"]:focus,
+  a:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}

@@ -215,18 +215,18 @@ function AdminLayoutContent({
         <nav
           id='mobile-sidebar'
           className={cn(
-            'w-64 border-r bg-card h-screen sticky top-0 overflow-y-auto transition-transform duration-200 ease-in-out z-50',
+            'w-72 sm:w-64 border-r bg-card h-screen sticky top-0 overflow-y-auto transition-transform duration-200 ease-in-out z-50',
             'md:translate-x-0',
             isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           )}
           aria-label='Main navigation'
         >
-          <div className='p-6'>
-            <ul className='space-y-2 nav-accessible' role='menubar'>
+          <div className='p-4 sm:p-6'>
+            <ul className='space-y-1 sm:space-y-2 nav-accessible' role='menubar'>
               <li role='none'>
                 <a
                   href='#/admin'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -237,7 +237,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/content-types'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -248,7 +248,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/api-manager'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -259,7 +259,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/analytics'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -270,7 +270,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/health'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -282,10 +282,10 @@ function AdminLayoutContent({
               {/* Dynamic Content Types Section */}
               {!loading && contentTypes.length > 0 && (
                 <li className='mt-6' role='none'>
-                  <div className='px-4 py-2'>
+                  <div className='px-3 py-3 sm:px-4 sm:py-2'>
                     <button
                       onClick={() => setIsContentTypesExpanded(!isContentTypesExpanded)}
-                      className='flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md transition-colors'
+                      className='flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md transition-colors min-h-[48px] sm:min-h-[auto]'
                       aria-expanded={isContentTypesExpanded}
                       aria-controls='content-types-submenu'
                       aria-label='Toggle content types menu'
@@ -301,7 +301,7 @@ function AdminLayoutContent({
                   {isContentTypesExpanded && (
                     <ul
                       id='content-types-submenu'
-                      className='ml-4 mt-2 space-y-1'
+                      className='ml-2 sm:ml-4 mt-1 sm:mt-2 space-y-1'
                       role='menu'
                       aria-label='Content types'
                     >
@@ -309,7 +309,7 @@ function AdminLayoutContent({
                         <li key={contentType.id} role='none'>
                           <a
                             href={`#/admin/content-types/${contentType.slug}`}
-                            className='flex items-center px-4 py-2 text-sm text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                            className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                             role='menuitem'
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
@@ -326,7 +326,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/tags'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -337,7 +337,7 @@ function AdminLayoutContent({
               <li role='none'>
                 <a
                   href='#/admin/media'
-                  className='flex items-center px-4 py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors'
+                  className='flex items-center px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium text-foreground rounded-md hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors min-h-[48px] sm:min-h-[auto]'
                   role='menuitem'
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -350,7 +350,7 @@ function AdminLayoutContent({
         </nav>
 
         {/* Main Content */}
-        <main id="main-content" className='flex-1 p-4 md:p-8 max-w-full' tabIndex={-1}>
+        <main id="main-content" className='flex-1 p-4 sm:p-6 md:p-8 max-w-full' tabIndex={-1}>
           {children}
         </main>
       </div>
