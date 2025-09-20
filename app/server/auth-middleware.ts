@@ -1,15 +1,58 @@
-import { getSessionUser } from './auth'
+import { getSessionUser, getUserById } from './auth'
+import { verifyToken, extractTokenFromHeader } from './jwt-auth'
 import type { AuthUser } from './auth'
 
 /**
- * Middleware to check if user is authenticated via session
+ * Middleware to check if user is authenticated via session or JWT
  */
 export async function requireAuth(
   request: Request
 ): Promise<{ user: AuthUser } | { error: string; status: number }> {
+  // Try JWT authentication first
+  const jwtResult = await tryJWTAuth(request)
+  if (jwtResult.success) {
+    return { user: jwtResult.user! }
+  }
+
+  // Fall back to session authentication
+  const sessionResult = await trySessionAuth(request)
+  if (sessionResult.success) {
+    return { user: sessionResult.user! }
+  }
+
+  return { error: 'Authentication required', status: 401 }
+}
+
+/**
+ * Try JWT authentication
+ */
+async function tryJWTAuth(request: Request): Promise<{ success: boolean; user?: AuthUser }> {
+  const token = extractTokenFromHeader(request)
+  if (!token) {
+    return { success: false }
+  }
+
+  const payload = verifyToken(token)
+  if (!payload) {
+    return { success: false }
+  }
+
+  // Get fresh user data from database
+  const user = await getUserById(payload.userId)
+  if (!user) {
+    return { success: false }
+  }
+
+  return { success: true, user }
+}
+
+/**
+ * Try session authentication
+ */
+async function trySessionAuth(request: Request): Promise<{ success: boolean; user?: AuthUser }> {
   const cookieHeader = request.headers.get('cookie')
   if (!cookieHeader) {
-    return { error: 'Authentication required', status: 401 }
+    return { success: false }
   }
 
   const cookies = cookieHeader.split(';').reduce(
@@ -23,15 +66,15 @@ export async function requireAuth(
 
   const sessionId = cookies['session']
   if (!sessionId) {
-    return { error: 'Authentication required', status: 401 }
+    return { success: false }
   }
 
   const user = await getSessionUser(sessionId)
   if (!user) {
-    return { error: 'Invalid or expired session', status: 401 }
+    return { success: false }
   }
 
-  return { user }
+  return { success: true, user }
 }
 
 /**

@@ -4,11 +4,18 @@ import {
   deleteSession,
   getSessionUser,
   createUser,
+  getUserById,
 } from '~/server/auth'
 import { authenticateUserSecure, securityAudit } from '~/server/security-auth'
 import { validatePasswordStrength } from '~/server/security-auth'
 import { sanitizeApiInput } from '~/lib/security/sanitization'
 import { applySecurityHeaders } from '~/server/security-headers'
+import { 
+  createAuthResponse, 
+  verifyToken, 
+  extractTokenFromHeader,
+  generateAccessToken,
+} from '~/server/jwt-auth'
 import { z } from 'zod'
 
 // Validation schemas
@@ -117,25 +124,15 @@ export const Route = createAPIFileRoute('/api/auth')({
           })
 
           const sessionId = await createSession(authResult.user.id)
+          const { response, headers } = createAuthResponse(authResult.user, sessionId)
 
-          const response = new Response(
-            JSON.stringify({
-              user: {
-                id: authResult.user.id,
-                email: authResult.user.email,
-                name: authResult.user.name,
-                role: authResult.user.role,
-              },
-            }),
+          return applySecurityHeaders(new Response(
+            JSON.stringify(response),
             {
               status: 200,
-              headers: {
-                'Content-Type': 'application/json',
-                'Set-Cookie': createSessionCookie(sessionId),
-              },
+              headers,
             }
-          )
-          return applySecurityHeaders(response)
+          ))
         }
 
         case 'register': {
@@ -163,22 +160,13 @@ export const Route = createAPIFileRoute('/api/auth')({
             const role = process.env.NODE_ENV === 'development' ? 'ADMIN' : 'VIEWER'
             const user = await createUser(email, password, name, role)
             const sessionId = await createSession(user.id)
+            const { response, headers } = createAuthResponse(user, sessionId)
 
             return new Response(
-              JSON.stringify({
-                user: {
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  role: user.role,
-                },
-              }),
+              JSON.stringify(response),
               {
                 status: 201,
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Set-Cookie': createSessionCookie(sessionId),
-                },
+                headers,
               }
             )
           } catch (error: unknown) {
@@ -224,6 +212,68 @@ export const Route = createAPIFileRoute('/api/auth')({
                 'Content-Type': 'application/json',
                 'Set-Cookie': 'session=; Max-Age=0; Path=/; HttpOnly',
               },
+            }
+          )
+        }
+
+        case 'refresh': {
+          const token = extractTokenFromHeader(request)
+          
+          if (!token) {
+            return new Response(
+              JSON.stringify({
+                error: 'Refresh token required',
+              }),
+              {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+          }
+
+          const payload = verifyToken(token)
+          if (!payload) {
+            return new Response(
+              JSON.stringify({
+                error: 'Invalid or expired refresh token',
+              }),
+              {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+          }
+
+          // Get fresh user data
+          const user = await getUserById(payload.userId)
+          if (!user) {
+            return new Response(
+              JSON.stringify({
+                error: 'User not found',
+              }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              }
+            )
+          }
+
+          // Generate new access token
+          const newAccessToken = generateAccessToken(user)
+
+          return new Response(
+            JSON.stringify({
+              accessToken: newAccessToken,
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+              },
+            }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
             }
           )
         }
