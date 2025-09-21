@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest'
-import { api } from '../app/routes/api'
+import { api } from '../app/lib/api-manager'
 import { mockApi } from '../app/lib/mock-api'
 
 describe('Dynamic Content Type API', () => {
