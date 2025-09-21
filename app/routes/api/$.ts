@@ -12,6 +12,22 @@ import {
 } from '~/server/security-headers'
 import { sanitizeApiInput } from '~/lib/security/sanitization'
 import { createComprehensiveCSRFProtection } from '~/lib/security/csrf'
+import { GET as authRouteGET, POST as authRoutePOST } from './auth'
+
+type CatchAllRouteParams = {
+  _splat?: string
+}
+
+const AUTH_ROUTE_SEGMENT = 'auth'
+
+function isAuthRoute(params: CatchAllRouteParams): boolean {
+  if (!params?._splat) {
+    return false
+  }
+
+  const [firstSegment] = params._splat.split('/')
+  return firstSegment === AUTH_ROUTE_SEGMENT
+}
 
 /**
  * Initialize API manager with configuration from environment
@@ -125,7 +141,11 @@ async function processRequestBody(request: Request): Promise<unknown> {
 // Initialize API manager
 initializeApiManager()
 
-export async function GET({ request, params }: { request: Request; params: { _splat: string } }) {
+export async function GET({ request, params }: { request: Request; params: CatchAllRouteParams }) {
+    if (isAuthRoute(params)) {
+      return authRouteGET(request)
+    }
+
     // Apply security middleware
     const securityResponse = applySecurityMiddleware(request)
     if (securityResponse) {
@@ -164,7 +184,11 @@ export async function GET({ request, params }: { request: Request; params: { _sp
     }
 }
 
-export async function POST({ request, params }: { request: Request; params: { _splat: string } }) {
+export async function POST({ request, params }: { request: Request; params: CatchAllRouteParams }) {
+    if (isAuthRoute(params)) {
+      return authRoutePOST(request)
+    }
+
     // Apply security middleware
     const securityResponse = applySecurityMiddleware(request)
     if (securityResponse) {
