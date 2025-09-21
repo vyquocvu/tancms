@@ -10,8 +10,8 @@ import { authenticateUserSecure, securityAudit } from '~/server/security-auth'
 import { validatePasswordStrength } from '~/server/security-auth'
 import { sanitizeApiInput } from '~/lib/security/sanitization'
 import { applySecurityHeaders } from '~/server/security-headers'
+import { ApiResponseBuilder } from '~/lib/api-response'
 import { 
-  createAuthResponse, 
   verifyToken, 
   extractTokenFromHeader,
   generateAccessToken,
@@ -83,15 +83,14 @@ export const Route = createAPIFileRoute('/api/auth')({
               details: result.error.flatten(),
             })
 
-            const response = new Response(
-              JSON.stringify({
-                error: 'Validation failed',
-                details: result.error.flatten(),
-              }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: result.error.flatten().fieldErrors
+                  ? Object.values(result.error.flatten().fieldErrors).flat()
+                  : ['Invalid input data'],
+              })
             )
             return applySecurityHeaders(response)
           }
@@ -105,15 +104,14 @@ export const Route = createAPIFileRoute('/api/auth')({
               error: authResult.error,
             })
 
-            const response = new Response(
-              JSON.stringify({
-                error: authResult.error || 'Authentication failed',
-                ...(authResult.lockoutTime && { lockoutTime: authResult.lockoutTime }),
-              }),
-              {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'AUTHENTICATION_FAILED',
+                message: authResult.error || 'Authentication failed',
+                details: authResult.lockoutTime 
+                  ? [`Account locked. Please try again later.`]
+                  : ['Invalid email or password'],
+              })
             )
             return applySecurityHeaders(response)
           }
@@ -124,15 +122,32 @@ export const Route = createAPIFileRoute('/api/auth')({
           })
 
           const sessionId = await createSession(authResult.user.id)
-          const { response, headers } = createAuthResponse(authResult.user, sessionId)
+          const accessToken = generateAccessToken(authResult.user)
+          
+          const responseData = {
+            user: {
+              id: authResult.user.id,
+              email: authResult.user.email,
+              name: authResult.user.name,
+              role: authResult.user.role,
+            },
+            tokens: {
+              accessToken,
+              expiresIn: '1h',
+            },
+          }
 
-          return applySecurityHeaders(new Response(
-            JSON.stringify(response),
+          const response = ApiResponseBuilder.createHttpResponse(
+            ApiResponseBuilder.success({
+              message: 'Login successful',
+              data: responseData,
+            }),
             {
-              status: 200,
-              headers,
+              'Set-Cookie': `session=${sessionId}; Max-Age=${30 * 24 * 60 * 60}; Path=/; HttpOnly; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
             }
-          ))
+          )
+
+          return applySecurityHeaders(response)
         }
 
         case 'register': {
@@ -141,16 +156,16 @@ export const Route = createAPIFileRoute('/api/auth')({
           const result = registerSchema.safeParse(body)
 
           if (!result.success) {
-            return new Response(
-              JSON.stringify({
-                error: 'Validation failed',
-                details: result.error.flatten(),
-              }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'VALIDATION_ERROR',
+                message: 'Validation failed',
+                details: result.error.flatten().fieldErrors
+                  ? Object.values(result.error.flatten().fieldErrors).flat()
+                  : ['Invalid input data'],
+              })
             )
+            return applySecurityHeaders(response)
           }
 
           const { email, password, name } = result.data
@@ -160,38 +175,49 @@ export const Route = createAPIFileRoute('/api/auth')({
             const role = process.env.NODE_ENV === 'development' ? 'ADMIN' : 'VIEWER'
             const user = await createUser(email, password, name, role)
             const sessionId = await createSession(user.id)
-            const { response, headers } = createAuthResponse(user, sessionId)
+            const accessToken = generateAccessToken(user)
+            
+            const responseData = {
+              user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+              },
+              tokens: {
+                accessToken,
+                expiresIn: '1h',
+              },
+            }
 
-            return new Response(
-              JSON.stringify(response),
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.success({
+                message: 'Registration successful',
+                data: responseData,
+              }),
               {
-                status: 201,
-                headers,
+                'Set-Cookie': `session=${sessionId}; Max-Age=${30 * 24 * 60 * 60}; Path=/; HttpOnly; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`,
               }
             )
+
+            return applySecurityHeaders(response)
           } catch (error: unknown) {
             if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
               // Prisma unique constraint error
-              return new Response(
-                JSON.stringify({
-                  error: 'Email already exists',
-                }),
-                {
-                  status: 409,
-                  headers: { 'Content-Type': 'application/json' },
-                }
+              const response = ApiResponseBuilder.createHttpResponse(
+                ApiResponseBuilder.error({
+                  code: 'CONFLICT',
+                  message: 'Email already exists',
+                  details: ['An account with this email address already exists'],
+                })
               )
+              return applySecurityHeaders(response)
             }
 
-            return new Response(
-              JSON.stringify({
-                error: 'Registration failed',
-              }),
-              {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.internalError(error)
             )
+            return applySecurityHeaders(response)
           }
         }
 
@@ -202,104 +228,91 @@ export const Route = createAPIFileRoute('/api/auth')({
             await deleteSession(sessionId)
           }
 
-          return new Response(
-            JSON.stringify({
+          const response = ApiResponseBuilder.createHttpResponse(
+            ApiResponseBuilder.success({
               message: 'Logged out successfully',
             }),
             {
-              status: 200,
-              headers: {
-                'Content-Type': 'application/json',
-                'Set-Cookie': 'session=; Max-Age=0; Path=/; HttpOnly',
-              },
+              'Set-Cookie': 'session=; Max-Age=0; Path=/; HttpOnly',
             }
           )
+
+          return applySecurityHeaders(response)
         }
 
         case 'refresh': {
           const token = extractTokenFromHeader(request)
           
           if (!token) {
-            return new Response(
-              JSON.stringify({
-                error: 'Refresh token required',
-              }),
-              {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'AUTHENTICATION_REQUIRED',
+                message: 'Refresh token required',
+              })
             )
+            return applySecurityHeaders(response)
           }
 
           const payload = verifyToken(token)
           if (!payload) {
-            return new Response(
-              JSON.stringify({
-                error: 'Invalid or expired refresh token',
-              }),
-              {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'AUTHENTICATION_FAILED',
+                message: 'Invalid or expired refresh token',
+              })
             )
+            return applySecurityHeaders(response)
           }
 
           // Get fresh user data
           const user = await getUserById(payload.userId)
           if (!user) {
-            return new Response(
-              JSON.stringify({
-                error: 'User not found',
-              }),
-              {
-                status: 404,
-                headers: { 'Content-Type': 'application/json' },
-              }
+            const response = ApiResponseBuilder.createHttpResponse(
+              ApiResponseBuilder.error({
+                code: 'NOT_FOUND',
+                message: 'User not found',
+              })
             )
+            return applySecurityHeaders(response)
           }
 
           // Generate new access token
           const newAccessToken = generateAccessToken(user)
 
-          return new Response(
-            JSON.stringify({
-              accessToken: newAccessToken,
-              user: {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
+          const response = ApiResponseBuilder.createHttpResponse(
+            ApiResponseBuilder.success({
+              message: 'Token refreshed successfully',
+              data: {
+                accessToken: newAccessToken,
+                user: {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                },
               },
-            }),
-            {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' },
-            }
+            })
           )
+
+          return applySecurityHeaders(response)
         }
 
         default:
-          return new Response(
-            JSON.stringify({
-              error: 'Invalid action',
-            }),
-            {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            }
+          const response = ApiResponseBuilder.createHttpResponse(
+            ApiResponseBuilder.error({
+              code: 'BAD_REQUEST',
+              message: 'Invalid action',
+              details: ['Supported actions: login, register, logout, refresh'],
+            })
           )
+          return applySecurityHeaders(response)
       }
     } catch (error) {
       console.error('Auth API error:', error)
-      return new Response(
-        JSON.stringify({
-          error: 'Internal server error',
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
+      const response = ApiResponseBuilder.createHttpResponse(
+        ApiResponseBuilder.internalError(error)
       )
+      return applySecurityHeaders(response)
     }
   },
 
@@ -311,45 +324,43 @@ export const Route = createAPIFileRoute('/api/auth')({
       const sessionId = getSessionIdFromRequest(request)
 
       if (!sessionId) {
-        return new Response(
-          JSON.stringify({
-            user: null,
-          }),
-          {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          }
+        const response = ApiResponseBuilder.createHttpResponse(
+          ApiResponseBuilder.success({
+            message: 'No active session',
+            data: { user: null },
+          })
         )
+        return applySecurityHeaders(response)
       }
 
       const user = await getSessionUser(sessionId)
 
-      return new Response(
-        JSON.stringify({
-          user: user
-            ? {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role,
-              }
-            : null,
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+      const response = ApiResponseBuilder.createHttpResponse(
+        ApiResponseBuilder.success({
+          message: user ? 'User session found' : 'No user found for session',
+          data: {
+            user: user
+              ? {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                }
+              : null,
+          },
+        })
       )
+
+      return applySecurityHeaders(response)
     }
 
-    return new Response(
-      JSON.stringify({
-        error: 'Invalid action',
-      }),
-      {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      }
+    const response = ApiResponseBuilder.createHttpResponse(
+      ApiResponseBuilder.error({
+        code: 'BAD_REQUEST',
+        message: 'Invalid action',
+        details: ['Supported actions: me'],
+      })
     )
+    return applySecurityHeaders(response)
   },
 })

@@ -77,36 +77,3 @@ export function extractTokenFromHeader(request: Request): string | null {
   return parts[1]
 }
 
-/**
- * Create authentication response with both session and JWT
- */
-export function createAuthResponse(user: AuthUser, sessionId?: string) {
-  const accessToken = generateAccessToken(user)
-  const refreshToken = generateRefreshToken(user)
-
-  const response = {
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-    tokens: {
-      accessToken,
-      refreshToken,
-      expiresIn: JWT_EXPIRES_IN,
-    },
-  }
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-
-  // Add session cookie if sessionId is provided (for browser clients)
-  if (sessionId) {
-    const maxAge = 30 * 24 * 60 * 60 // 30 days in seconds
-    headers['Set-Cookie'] = `session=${sessionId}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`
-  }
-
-  return { response, headers }
-}
