@@ -1,4 +1,3 @@
-import { createAPIFileRoute } from '@tanstack/start/api'
 import {
   createSession,
   deleteSession,
@@ -60,19 +59,14 @@ function getSessionIdFromRequest(request: Request): string | null {
   return cookies['session'] || null
 }
 
-function createSessionCookie(sessionId: string): string {
-  const maxAge = 30 * 24 * 60 * 60 // 30 days in seconds
-  return `session=${sessionId}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`
-}
 
-export const Route = createAPIFileRoute('/api/auth')({
-  POST: async ({ request }) => {
-    const url = new URL(request.url)
-    const action = url.searchParams.get('action')
+export async function POST(request: Request) {
+  const url = new URL(request.url)
+  const action = url.searchParams.get('action')
 
-    try {
-      switch (action) {
-        case 'login': {
+  try {
+    switch (action) {
+      case 'login': {
           const rawBody = await request.json()
           const body = sanitizeApiInput(rawBody)
           const result = loginSchema.safeParse(body)
@@ -314,16 +308,16 @@ export const Route = createAPIFileRoute('/api/auth')({
       )
       return applySecurityHeaders(response)
     }
-  },
+}
 
-  GET: async ({ request }) => {
-    const url = new URL(request.url)
-    const action = url.searchParams.get('action')
+export async function GET(request: Request) {
+  const url = new URL(request.url)
+  const action = url.searchParams.get('action')
 
-    if (action === 'me') {
-      const sessionId = getSessionIdFromRequest(request)
+  if (action === 'me') {
+    const sessionId = getSessionIdFromRequest(request)
 
-      if (!sessionId) {
+    if (!sessionId) {
         const response = ApiResponseBuilder.createHttpResponse(
           ApiResponseBuilder.success({
             message: 'No active session',
@@ -354,13 +348,12 @@ export const Route = createAPIFileRoute('/api/auth')({
       return applySecurityHeaders(response)
     }
 
-    const response = ApiResponseBuilder.createHttpResponse(
-      ApiResponseBuilder.error({
-        code: 'BAD_REQUEST',
-        message: 'Invalid action',
-        details: ['Supported actions: me'],
-      })
-    )
-    return applySecurityHeaders(response)
-  },
-})
+  const response = ApiResponseBuilder.createHttpResponse(
+    ApiResponseBuilder.error({
+      code: 'BAD_REQUEST',
+      message: 'Invalid action',
+      details: ['Supported actions: me'],
+    })
+  )
+  return applySecurityHeaders(response)
+}

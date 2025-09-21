@@ -3,7 +3,6 @@
  * Handles all /api/* requests using the centralized API manager
  */
 
-import { createAPIFileRoute } from '@tanstack/start/api'
 import { apiManager, type ApiConfig } from '~/lib/api-manager'
 import { ApiResponseBuilder } from '~/lib/api-response'
 import { 
@@ -126,8 +125,7 @@ async function processRequestBody(request: Request): Promise<unknown> {
 // Initialize API manager
 initializeApiManager()
 
-export const Route = createAPIFileRoute('/api/$')({
-  GET: async ({ request, params }) => {
+export async function GET({ request, params }: { request: Request; params: { _splat: string } }) {
     // Apply security middleware
     const securityResponse = applySecurityMiddleware(request)
     if (securityResponse) {
@@ -164,9 +162,9 @@ export const Route = createAPIFileRoute('/api/$')({
       const httpResponse = ApiResponseBuilder.createHttpResponse(errorResponse)
       return applySecurityHeaders(httpResponse)
     }
-  },
+}
 
-  POST: async ({ request, params }) => {
+export async function POST({ request, params }: { request: Request; params: { _splat: string } }) {
     // Apply security middleware
     const securityResponse = applySecurityMiddleware(request)
     if (securityResponse) {
@@ -217,9 +215,9 @@ export const Route = createAPIFileRoute('/api/$')({
       const httpResponse = ApiResponseBuilder.createHttpResponse(errorResponse)
       return applySecurityHeaders(httpResponse)
     }
-  },
+}
 
-  PUT: async ({ request, params }) => {
+export async function PUT({ request, params }: { request: Request; params: { _splat: string } }) {
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
@@ -260,9 +258,9 @@ export const Route = createAPIFileRoute('/api/$')({
       const errorResponse = ApiResponseBuilder.internalError(apiError)
       return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
-  },
+}
 
-  DELETE: async ({ request, params }) => {
+export async function DELETE({ request, params }: { request: Request; params: { _splat: string } }) {
     const url = new URL(request.url)
     const path = `/api/${params._splat || ''}`
     const query: Record<string, string> = {}
@@ -289,9 +287,9 @@ export const Route = createAPIFileRoute('/api/$')({
       const errorResponse = ApiResponseBuilder.internalError(apiError)
       return ApiResponseBuilder.createHttpResponse(errorResponse)
     }
-  },
+}
 
-  OPTIONS: async () => {
+export async function OPTIONS() {
     // Handle CORS preflight requests
     return new Response(null, {
       status: 204,
@@ -302,5 +300,4 @@ export const Route = createAPIFileRoute('/api/$')({
         'Access-Control-Max-Age': '86400',
       },
     })
-  },
-})
+}

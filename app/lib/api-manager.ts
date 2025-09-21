@@ -3,9 +3,19 @@
  * Coordinates all API operations and provides middleware support
  */
 
-import { ApiRouter, type ApiRequest, type HttpMethod } from '~/routes/api'
-import { type ApiResponse } from '~/routes/api/content-api'
-import { ApiResponseBuilder } from '~/lib/api-response'
+import { ApiResponseBuilder, type StandardApiResponse } from '~/lib/api-response'
+
+// Use the correct ApiResponse type
+export type ApiResponse<T = unknown> = StandardApiResponse<T>
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+export type ApiRequest = {
+  method: HttpMethod
+  path: string
+  body?: unknown
+  query?: Record<string, string>
+}
 
 export type ApiMiddleware = {
   name: string
@@ -78,7 +88,7 @@ export class ApiManager {
         return await middleware.handler(request, next)
       } else {
         // All middlewares processed, route the request
-        return await ApiRouter.route(request)
+        return await this.routeRequest(request)
       }
     }
 
@@ -88,6 +98,45 @@ export class ApiManager {
       console.error('API Manager error:', error)
       return ApiResponseBuilder.internalError(error)
     }
+  }
+
+  /**
+   * Route API requests to appropriate handlers
+   * This is a simplified router since we're using TanStack Start's file-based routing
+   */
+  private async routeRequest(request: ApiRequest): Promise<ApiResponse> {
+    const { method, path } = request
+
+    // Handle API status endpoint
+    if (path === '/api/status') {
+      if (method === 'GET') {
+        return ApiResponseBuilder.success({
+          message: 'API is healthy and operational',
+          data: {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0',
+          },
+        })
+      } else {
+        return ApiResponseBuilder.error({
+          code: 'METHOD_NOT_ALLOWED',
+          message: `Method ${method} not allowed for ${path}`,
+          details: ['Only GET method is supported for this endpoint'],
+        })
+      }
+    }
+
+    // For other endpoints, return a helpful message about using TanStack Start routes
+    return ApiResponseBuilder.error({
+      code: 'NOT_FOUND',
+      message: 'API endpoint not found',
+      details: [
+        'This API Manager is primarily for internal testing.',
+        'Use TanStack Start file-based API routes for actual endpoints.',
+        `Requested: ${method} ${path}`
+      ],
+    })
   }
 
   /**
