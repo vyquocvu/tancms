@@ -35,6 +35,13 @@ export const CONFIG_SCHEMA = [
 
   // Database
   {
+    key: 'DATABASE_PROVIDER',
+    required: false,
+    type: 'string',
+    description: 'Database provider (sqlite, mysql, postgresql)',
+    exampleValue: 'sqlite',
+  },
+  {
     key: 'DATABASE_URL',
     required: true,
     type: 'string',
