@@ -5,6 +5,16 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Eye, EyeOff, Lock } from 'lucide-react'
+import type { StandardApiResponse } from '~/lib/api-response'
+
+type LoginResponseData = {
+  user: AuthUser
+  tokens?: unknown
+}
+
+const extractErrorMessage = (data: StandardApiResponse<unknown>, fallback: string): string => {
+  return data.error?.details?.[0] ?? data.error?.message ?? data.message ?? fallback
+}
 
 interface AuthUser {
   id: string
@@ -69,15 +79,16 @@ export default function LoginForm({ onSuccess, onRegisterClick }: LoginFormProps
         body: JSON.stringify({ email, password }),
       })
 
-      const data = await response.json()
+      const data: StandardApiResponse<LoginResponseData> = await response.json()
 
-      if (!response.ok) {
-        setErrors({ general: data.error || 'Login failed' })
+      if (!response.ok || !data.success) {
+        setErrors({ general: extractErrorMessage(data, 'Login failed') })
         return
       }
 
-      if (onSuccess) {
-        onSuccess(data.user)
+      const user = data.data?.user
+      if (user && onSuccess) {
+        onSuccess(user)
       }
     } catch {
       setErrors({ general: 'Network error. Please try again.' })
