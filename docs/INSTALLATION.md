@@ -205,20 +205,90 @@ DATABASE_URL="postgresql://[user]:[password]@[host]/[database]?sslmode=require"
 
 ### MySQL (Alternative)
 
+TanCMS now supports MySQL/MariaDB as a dynamic database provider. Choose MySQL for:
+- Shared hosting environments
+- Applications requiring MySQL-specific features
+- Teams familiar with MySQL ecosystem
+
+#### Local MySQL Setup
+
+**Ubuntu/Debian:**
 ```bash
-# Local MySQL setup
+# Install MySQL Server
+sudo apt update
 sudo apt install mysql-server
+
+# Secure installation
 sudo mysql_secure_installation
 
 # Create database
 mysql -u root -p
-CREATE DATABASE tancms;
+CREATE DATABASE tancms CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'tancms_user'@'localhost' IDENTIFIED BY 'secure_password';
 GRANT ALL PRIVILEGES ON tancms.* TO 'tancms_user'@'localhost';
 FLUSH PRIVILEGES;
+EXIT;
+```
 
-# Update .env
+**macOS (Homebrew):**
+```bash
+# Install MySQL
+brew install mysql
+brew services start mysql
+
+# Secure installation and setup
+mysql_secure_installation
+mysql -u root -p
+# Run the same database creation commands as above
+```
+
+**Update Environment:**
+```env
+# Update .env file
+DATABASE_PROVIDER="mysql"
 DATABASE_URL="mysql://tancms_user:secure_password@localhost:3306/tancms"
+
+# Optional connection settings
+DATABASE_POOL_SIZE="10"
+DATABASE_CONNECTION_TIMEOUT="30000"
+DATABASE_SSL="false"
+```
+
+#### Cloud MySQL Services
+
+**DigitalOcean Managed MySQL:**
+```env
+DATABASE_PROVIDER="mysql"
+DATABASE_URL="mysql://username:password@hostname:port/database?sslmode=require"
+DATABASE_SSL="true"
+```
+
+**AWS RDS MySQL:**
+```env
+DATABASE_PROVIDER="mysql"
+DATABASE_URL="mysql://username:password@rds-hostname.region.rds.amazonaws.com:3306/database"
+DATABASE_SSL="true"
+```
+
+**Google Cloud SQL:**
+```env
+DATABASE_PROVIDER="mysql"
+DATABASE_URL="mysql://username:password@ip-address:3306/database?sslmode=require"
+DATABASE_SSL="true"
+```
+
+#### Database Initialization
+
+After configuring MySQL:
+```bash
+# Generate Prisma client for MySQL
+npm run db:generate
+
+# Run migrations
+npm run db:migrate
+
+# Seed initial data
+npm run db:seed
 ```
 
 ## 🔐 Authentication Setup
