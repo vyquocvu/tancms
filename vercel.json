@@ -6,7 +6,11 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/index.html",
+      "missing": [
+        { "type": "file" },
+        { "type": "route" }
+      ]
     }
   ]
 }
