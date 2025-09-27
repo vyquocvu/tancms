@@ -161,6 +161,7 @@ dist/
 test-results/
 playwright-report/
 playwright/.cache/
+blob-report/
 
 # IDE
 .vscode/
