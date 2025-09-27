@@ -31,9 +31,22 @@ npm run test:e2e --headed
 
 # Generate HTML report
 npm run test:e2e --reporter=html
+
+# Record login tests with video capture
+npm run test:e2e:record
+
+# Record interactive login session (codegen)
+npm run record:login
 ```
 
 ## Test Structure
+
+### Recorded Login Tests (`recorded-login.spec.ts`)
+- Complete login workflow recording with screenshots
+- Password visibility toggle interaction recording
+- Form validation interaction recording  
+- Full user journey with trace recording
+- Automated video and screenshot capture on test execution
 
 ### Login Tests (`login.spec.ts`)
 - Comprehensive login form functionality testing
@@ -73,6 +86,48 @@ test.describe('Feature Name', () => {
     await expect(page.locator('selector')).toBeVisible()
   })
 })
+```
+
+## Recording and Debugging
+
+### Video and Screenshot Capture
+The configuration automatically captures:
+- **Videos**: Recorded for failed tests (`retain-on-failure`)
+- **Screenshots**: Taken automatically on test failures
+- **Traces**: Collected on first retry for debugging
+
+### Interactive Recording
+Use the codegen tool to record login interactions:
+
+```bash
+# Record login interactions interactively
+npm run record:login
+
+# Record specific URL
+npm run record:login http://localhost:4173/login
+```
+
+This opens a browser where you can perform login actions. The generated test code will be saved to `playwright/generated-login.spec.ts`.
+
+### Recorded Test Artifacts
+When running recorded login tests, the following artifacts are created:
+- `test-results/login-start.png` - Login page initial state
+- `test-results/login-invalid-filled.png` - Form with invalid credentials
+- `test-results/login-error.png` - Error state display
+- `test-results/login-valid-filled.png` - Form with valid credentials  
+- `test-results/login-loading.png` - Loading state during submission
+- `test-results/login-success.png` - Successful login redirect
+- `test-results/password-*.png` - Password visibility toggle states
+- `test-results/validation-*.png` - Form validation states
+- `test-results/login-user-journey-trace.zip` - Complete user journey trace
+
+### Viewing Recordings
+```bash
+# View HTML report with videos and traces
+npx playwright show-report
+
+# View specific trace file
+npx playwright show-trace test-results/login-user-journey-trace.zip
 ```
 
 ## Configuration

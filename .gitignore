@@ -163,6 +163,11 @@ playwright-report/
 playwright/.cache/
 blob-report/
 
+# Recorded test artifacts (keep structure but ignore content)
+test-results/*.png
+test-results/*.webm
+test-results/*.zip
+
 # IDE
 .vscode/
 .idea/
