@@ -5,6 +5,16 @@ import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Eye, EyeOff, UserPlus } from 'lucide-react'
+import type { StandardApiResponse } from '~/lib/api-response'
+
+type RegisterResponseData = {
+  user: AuthUser
+  tokens?: unknown
+}
+
+const extractErrorMessage = (data: StandardApiResponse<unknown>, fallback: string): string => {
+  return data.error?.details?.[0] ?? data.error?.message ?? data.message ?? fallback
+}
 
 interface AuthUser {
   id: string
@@ -86,33 +96,17 @@ export default function RegisterForm({ onSuccess, onLoginClick }: RegisterFormPr
         body: JSON.stringify({ email, name, password, confirmPassword }),
       })
 
-      const data = await response.json()
+      const data: StandardApiResponse<RegisterResponseData> = await response.json()
 
-      if (!response.ok) {
-        if (data.details) {
-          // Handle validation errors from server
-          const fieldErrors: FormErrors = {}
-          if (data.details.fieldErrors?.email) {
-            fieldErrors.email = data.details.fieldErrors.email[0]
-          }
-          if (data.details.fieldErrors?.password) {
-            fieldErrors.password = data.details.fieldErrors.password[0]
-          }
-          if (data.details.fieldErrors?.name) {
-            fieldErrors.name = data.details.fieldErrors.name[0]
-          }
-          if (data.details.fieldErrors?.confirmPassword) {
-            fieldErrors.confirmPassword = data.details.fieldErrors.confirmPassword[0]
-          }
-          setErrors(fieldErrors)
-        } else {
-          setErrors({ general: data.error || 'Registration failed' })
-        }
+      if (!response.ok || !data.success) {
+        const errorMessage = extractErrorMessage(data, 'Registration failed')
+        setErrors({ general: errorMessage })
         return
       }
 
-      if (onSuccess) {
-        onSuccess(data.user)
+      const user = data.data?.user
+      if (user && onSuccess) {
+        onSuccess(user)
       }
     } catch {
       setErrors({ general: 'Network error. Please try again.' })

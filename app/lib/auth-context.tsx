@@ -1,4 +1,18 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import type { StandardApiResponse } from '~/lib/api-response'
+
+type AuthResponseData = {
+  user: AuthUser | null
+  tokens?: unknown
+}
+
+const extractUserFromResponse = (data: StandardApiResponse<AuthResponseData>): AuthUser | null => {
+  return data?.data?.user ?? null
+}
+
+const extractErrorMessage = (data: StandardApiResponse<unknown>, fallback: string): string => {
+  return data.error?.details?.[0] ?? data.error?.message ?? data.message ?? fallback
+}
 
 export interface AuthUser {
   id: string
@@ -43,8 +57,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await fetch('/api/auth?action=me', {
         credentials: 'include',
       })
-      const data = await response.json()
-      setUser(data.user)
+      const data: StandardApiResponse<AuthResponseData> = await response.json()
+
+      if (data.success) {
+        setUser(extractUserFromResponse(data))
+      } else {
+        setUser(null)
+      }
     } catch (error) {
       console.error('Auth check failed:', error)
       setUser(null)
@@ -67,13 +86,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         credentials: 'include',
       })
 
-      const data = await response.json()
+      const data: StandardApiResponse<AuthResponseData> = await response.json()
 
-      if (!response.ok) {
-        return { success: false, error: data.error || 'Login failed' }
+      if (!response.ok || !data.success) {
+        return { success: false, error: extractErrorMessage(data, 'Login failed') }
       }
 
-      setUser(data.user)
+      const user = extractUserFromResponse(data)
+      setUser(user)
       return { success: true }
     } catch (error) {
       return { success: false, error: 'Network error. Please try again.' }
@@ -95,13 +115,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         credentials: 'include',
       })
 
-      const data = await response.json()
+      const data: StandardApiResponse<AuthResponseData> = await response.json()
 
-      if (!response.ok) {
-        return { success: false, error: data.error || 'Registration failed' }
+      if (!response.ok || !data.success) {
+        return { success: false, error: extractErrorMessage(data, 'Registration failed') }
       }
 
-      setUser(data.user)
+      const user = extractUserFromResponse(data)
+      setUser(user)
       return { success: true }
     } catch (error) {
       return { success: false, error: 'Network error. Please try again.' }
