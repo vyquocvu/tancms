@@ -35,6 +35,15 @@ npm run test:e2e --reporter=html
 
 ## Test Structure
 
+### Login Tests (`login.spec.ts`)
+- Comprehensive login form functionality testing
+- Form validation scenarios (empty fields, invalid email, short password)
+- Password visibility toggle functionality
+- Successful login workflow with mocked API responses
+- Error handling for failed login attempts and network errors
+- Form state management during loading states
+- Navigation and link functionality
+
 ### Admin Panel Tests (`admin.spec.ts`)
 - Tests admin routes accessibility
 - Validates public page functionality
