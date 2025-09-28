@@ -16,7 +16,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "test:e2e": "playwright test",
-    "test:e2e:record": "playwright test recorded-login.spec.ts --headed",
+    "test:e2e:record": "playwright test recorded-login.spec.ts",
     "record:login": "node scripts/record-login.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
@@ -54,6 +54,7 @@
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.542.0",
+    "puppeteer-core": "^24.22.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1"
