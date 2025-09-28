@@ -37,49 +37,16 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
         channel: 'chrome', // Use system Chrome
+        headless: true, // Run in headless mode for CI
       },
     },
-
-    {
-      name: 'firefox',
-      use: { 
-        ...devices['Desktop Firefox'],
-        channel: 'firefox', // Use system Firefox
-      },
-    },
-
-    // Webkit requires Playwright download, so we'll skip it for now
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev -- --port 4173',
     port: 4173,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true, // Allow reusing existing server
     timeout: 120 * 1000, // 2 minutes
   },
 })
